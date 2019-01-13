@@ -1,0 +1,66 @@
+import org.gradle.internal.os.OperatingSystem
+
+apply plugin: 'java'
+
+group 'com.cjburkey'
+version '0.0.1'
+sourceCompatibility = 1.8
+
+project.ext.commonsIoVersion = '2.6'
+project.ext.log4jVersion = '2.11.1'
+project.ext.fastUtilVersion = '8.2.2'
+project.ext.artemisVersion = '2.2.0'
+project.ext.lwjglVersion = "3.2.2-SNAPSHOT"
+project.ext.jomlVersion = "1.9.12"
+
+switch (OperatingSystem.current()) {
+    case OperatingSystem.WINDOWS:
+        project.ext.lwjglNatives = "natives-windows"
+        break
+    case OperatingSystem.LINUX:
+        project.ext.lwjglNatives = "natives-linux"
+        break
+    case OperatingSystem.MAC_OS:
+        project.ext.lwjglNatives = "natives-macos"
+        break
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+}
+
+dependencies {
+    implementation "commons-io:commons-io:$commonsIoVersion"
+    implementation "org.apache.logging.log4j:log4j-core:$log4jVersion"
+    implementation "it.unimi.dsi:fastutil:$fastUtilVersion"
+    implementation "net.onedaybeard.artemis:artemis-odb:$artemisVersion"
+    implementation "org.lwjgl:lwjgl:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-glfw:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-openal:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-stb:$lwjglVersion"
+    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-glfw:$lwjglVersion:$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-openal:$lwjglVersion:$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
+    runtimeOnly "org.lwjgl:lwjgl-stb:$lwjglVersion:$lwjglNatives"
+    implementation "org.joml:joml:${jomlVersion}"
+}
+
+compileJava {
+    options.warnings = true
+    options.deprecation = true
+    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing', '-proc:none']
+}
+
+compileTestJava {
+    options.warnings = true
+    options.deprecation = true
+    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing']
+}
+
+task runConquerer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.cjburkey.conquerer.Conquerer'
+}
