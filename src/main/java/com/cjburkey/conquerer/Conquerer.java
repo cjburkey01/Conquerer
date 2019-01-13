@@ -75,7 +75,8 @@ public final class Conquerer {
         Entity ent = world.getEntity(testObj);
         ent.getComponent(ShaderRender.class).shader = shader;
         ent.getComponent(MeshRender.class).mesh = mesh;
-        ent.getComponent(Pos.class).position.set(0.0f, 0.0f, -1.0f);
+        ent.getComponent(Pos.class).position.set(0.0f, 0.0f, -3.0f);
+        ent.getComponent(Scale.class).scale.set(150.0f);
         
         // Create starting main camera
         mainCamera = createObject(Pos.class, Rot.class, Camera.class);

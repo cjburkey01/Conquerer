@@ -6,7 +6,6 @@ import org.joml.Vector3f;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-@SuppressWarnings("WeakerAccess")
 public class Scale extends PooledComponent {
     
     public final Vector3f scale = new Vector3f();
@@ -16,7 +15,7 @@ public class Scale extends PooledComponent {
     }
     
     protected void reset() {
-        scale.set(1.0f, 1.0f, 1.0f);
+        scale.set(1.0f);
     }
     
 }

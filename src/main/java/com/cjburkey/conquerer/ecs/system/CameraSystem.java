@@ -33,7 +33,13 @@ public class CameraSystem extends IteratingSystem {
         Camera camera = mCamera.get(entityId);
         
         // Set up the matrices for the camera
-        camera.projectionMatrix.set(Transformation.getProjectionMatrix(camera.fovDegrees, w.getWidth(), w.getHeight(), camera.nearPlane, camera.farPlane));
+        if (camera.perspective) {
+            camera.projectionMatrix.set(Transformation.getProjectionMatrix(camera.fovDegrees, w.getWidth(), w.getHeight(), camera.nearPlane, camera.farPlane));
+        } else {
+            float wi = w.getWidth() / 2.0f;
+            float he = w.getHeight() / 2.0f;
+            camera.projectionMatrix.set(Transformation.getOrthographicMatrix(-wi, wi, -he, he, camera.nearPlane, camera.farPlane));
+        }
         camera.viewMatrix.set(Transformation.getViewMatrix(pos.position, rot.rotation));
     }
     

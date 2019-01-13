@@ -28,11 +28,17 @@ public final class Transformation {
     public static Matrix4fc getProjectionMatrix(float fovDeg, float aspect, float near, float far) {
         return projectionMatrix
                 .identity()
-                .perspective(fovDeg * DEG2RAD, aspect, near, far);
+                .setPerspective(fovDeg * DEG2RAD, aspect, near, far);
     }
     
     public static Matrix4fc getProjectionMatrix(float fovDeg, float screenWidth, float screenHeight, float near, float far) {
         return getProjectionMatrix(fovDeg, screenWidth / screenHeight, near, far);
+    }
+    
+    public static Matrix4fc getOrthographicMatrix(float left, float right, float bottom, float top, float near, float far) {
+        return projectionMatrix
+                .identity()
+                .setOrtho(left, right, bottom, top, near, far);
     }
     
     public static Matrix4fc getViewMatrix(Vector3fc cameraPosition, Quaternionfc cameraRotation) {
