@@ -9,6 +9,7 @@ import org.joml.Matrix4f;
 public class Camera extends Component {
     
     public boolean perspective = false;
+    public float orthographicSize = 10.0f;
     public float fovDegrees = 75.0f;
     public float nearPlane = 0.01f;
     public float farPlane = 20.0f;

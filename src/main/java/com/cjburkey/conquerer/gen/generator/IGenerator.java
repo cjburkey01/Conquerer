@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gen.generator;
 
-import com.cjburkey.conquerer.world.Territory;
+import com.artemis.Entity;
 import java.util.Set;
 
 /**
@@ -8,6 +8,6 @@ import java.util.Set;
  */
 public interface IGenerator {
     
-    Set<Territory> generateTerritories(int count, float minDistance);
+    Set<Entity> generateTerritories(int count, float minDistance);
     
 }

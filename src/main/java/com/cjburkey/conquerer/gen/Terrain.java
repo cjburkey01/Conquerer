@@ -1,7 +1,8 @@
 package com.cjburkey.conquerer.gen;
 
+import com.artemis.Entity;
+import com.cjburkey.conquerer.ecs.component.world.Location;
 import com.cjburkey.conquerer.gen.generator.IGenerator;
-import com.cjburkey.conquerer.world.Territory;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Collections;
 import java.util.Set;
@@ -15,7 +16,7 @@ import org.joml.Vector2fc;
 public class Terrain {
     
     public final IGenerator generator;
-    private final ObjectOpenHashSet<Territory> territories = new ObjectOpenHashSet<>();
+    private final ObjectOpenHashSet<Entity> territories = new ObjectOpenHashSet<>();
     private final Vector2f min = new Vector2f();
     private final Vector2f max = new Vector2f();
     private final Vector2f center = new Vector2f();
@@ -38,18 +39,19 @@ public class Terrain {
     public Terrain generate(int territoryCount, float minDistanceBetweenTerritories) {
         reset();
         this.territories.addAll(generator.generateTerritories(territoryCount, minDistanceBetweenTerritories));
-        for (Territory territory : territories) {
-            min.x = Math.min(min.x, territory.location.x());
-            min.y = Math.min(min.y, territory.location.y());
-            max.x = Math.max(max.x, territory.location.x());
-            max.y = Math.max(max.y, territory.location.y());
+        for (Entity territory : territories) {
+            Location loc = territory.getComponent(Location.class);
+            min.x = Math.min(min.x, loc.location.x());
+            min.y = Math.min(min.y, loc.location.y());
+            max.x = Math.max(max.x, loc.location.x());
+            max.y = Math.max(max.y, loc.location.y());
         }
         center.set((min.x + max.x) / 2.0f, (min.y + max.y) / 2.0f);
         size.set(max.x - min.x, max.y - min.y);
         return this;
     }
     
-    public Set<Territory> getTerritories() {
+    public Set<Entity> getTerritories() {
         return Collections.unmodifiableSet(territories);
     }
     

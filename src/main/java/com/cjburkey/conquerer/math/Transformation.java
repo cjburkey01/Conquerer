@@ -41,6 +41,11 @@ public final class Transformation {
                 .setOrtho(left, right, bottom, top, near, far);
     }
     
+    public static Matrix4fc getOrthographicMatrix(float screenWidth, float screenHeight, float size, float near, float far) {
+        float aspectX = screenWidth / screenHeight * size;
+        return getOrthographicMatrix(-aspectX, aspectX, -size, size, near, far);
+    }
+    
     public static Matrix4fc getViewMatrix(Vector3fc cameraPosition, Quaternionfc cameraRotation) {
         return viewMatrix
                 .identity()

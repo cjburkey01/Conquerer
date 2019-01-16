@@ -4,7 +4,6 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.cjburkey.conquerer.Conquerer;
-import com.cjburkey.conquerer.Log;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
@@ -12,8 +11,6 @@ import com.cjburkey.conquerer.ecs.component.transform.Pos;
 import com.cjburkey.conquerer.ecs.component.transform.Rot;
 import com.cjburkey.conquerer.ecs.component.transform.Scale;
 import com.cjburkey.conquerer.math.Transformation;
-import java.util.Objects;
-import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 
 /**
@@ -58,6 +55,7 @@ public class RenderSystem extends IteratingSystem {
         
         // Render the mesh
         shaderRender.shader.bind();
+        shaderRender.shader.setUniform("color", shaderRender.color);
         if (camera != null && shaderRender.shader.getTransformsProjection()) shaderRender.shader.setUniform("projectionMatrix", camera.projectionMatrix);
         if (camera != null && shaderRender.shader.getTransformsView()) shaderRender.shader.setUniform("viewMatrix", camera.viewMatrix);
         if (modelMatrix != null && shaderRender.shader.getTransformsModel()) shaderRender.shader.setUniform("modelMatrix", modelMatrix);

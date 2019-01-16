@@ -57,7 +57,7 @@ compileJava {
 compileTestJava {
     options.warnings = true
     options.deprecation = true
-    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing']
+    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing', '-proc:none']
 }
 
 task runConquerer(type: JavaExec) {

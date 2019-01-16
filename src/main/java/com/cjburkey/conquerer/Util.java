@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
+import org.joml.Random;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
@@ -19,6 +20,7 @@ import org.lwjgl.system.MemoryStack;
 
 import static com.cjburkey.conquerer.Log.*;
 import static java.nio.charset.StandardCharsets.*;
+import static org.lwjgl.system.MemoryStack.*;
 
 /**
  * Created by CJ Burkey on 2019/01/12
@@ -127,6 +129,89 @@ public final class Util {
                 lerp(start.y(), goal.y(), progress),
                 lerp(start.z(), goal.z(), progress),
                 lerp(start.w(), goal.w(), progress));
+    }
+    
+    // Stolen (translated) from Unity C# (shhh)
+    public static float dampSpringCrit(float target, float current, float[] velocity, float smoothTime, float deltaTime) {
+             smoothTime = Math.max(0.0001f, smoothTime);
+             float num = 2.0f / smoothTime;
+             float num2 = num * deltaTime;
+             float num3 = 1.0f / (1.0f + num2 + 0.48f * num2 * num2 + 0.235f * num2 * num2 * num2);
+             float num4 = current - target;
+             float num5 = target;
+             float num6 = 1000.0f * smoothTime;
+             num4 = Math.min(Math.max(num4, -num6), num6);
+             target = current - num4;
+             float num7 = (velocity[0] + num * num4) * deltaTime;
+             velocity[0] = (velocity[0] - num * num7) * num3;
+             float num8 = target + (num4 + num7) * num3;
+             if ((num5 - current) > 0.0f == (num8 > num5)) {
+                 num8 = num5;
+                 velocity[0] = (num8 - num5) / deltaTime;
+             }
+             return num8;
+    }
+    
+    public static float dampSpringCrit(float target, float current, FloatBuffer velocity, float smoothTime, float deltaTime) {
+            smoothTime = Math.max(0.0001f, smoothTime);
+             float num = 2.0f / smoothTime;
+             float num2 = num * deltaTime;
+             float num3 = 1.0f / (1.0f + num2 + 0.48f * num2 * num2 + 0.235f * num2 * num2 * num2);
+             float num4 = current - target;
+             float num5 = target;
+             float num6 = 1000.0f * smoothTime;
+             num4 = Math.min(Math.max(num4, -num6), num6);
+             target = current - num4;
+             float num7 = (velocity.get(0) + num * num4) * deltaTime;
+             velocity.put(0, (velocity.get(0) - num * num7) * num3);
+             float num8 = target + (num4 + num7) * num3;
+             if ((num5 - current) > 0.0f == (num8 > num5)) {
+                 num8 = num5;
+                 velocity.put(0, (num8 - num5) / deltaTime);
+             }
+             return num8;
+    }
+    
+    public static Vector2f dampSpringCrit(Vector2fc target, Vector2fc current, Vector2f velocity, float smoothTime, float deltaTime) {
+        float valueX;
+        float valueY;
+        try (MemoryStack stack = stackPush()) {
+            FloatBuffer xVelocity = stack.mallocFloat(1);
+            FloatBuffer yVelocity = stack.mallocFloat(1);
+            xVelocity.put(velocity.x);
+            yVelocity.put(velocity.y);
+            
+            valueX = dampSpringCrit(target.x(), current.x(), xVelocity, smoothTime, deltaTime);
+            valueY = dampSpringCrit(target.y(), current.y(), yVelocity, smoothTime, deltaTime);
+            
+            velocity.set(xVelocity.get(0), yVelocity.get(0));
+        }
+        return new Vector2f(valueX, valueY);
+    }
+    
+    public static Vector3f dampSpringCrit(Vector3fc target, Vector3fc current, Vector3f velocity, float smoothTime, float deltaTime) {
+        float valueX;
+        float valueY;
+        float valueZ;
+        try (MemoryStack stack = stackPush()) {
+            FloatBuffer xVelocity = stack.mallocFloat(1);
+            FloatBuffer yVelocity = stack.mallocFloat(1);
+            FloatBuffer zVelocity = stack.mallocFloat(1);
+            xVelocity.put(velocity.x);
+            yVelocity.put(velocity.y);
+            zVelocity.put(velocity.z);
+            
+            valueX = dampSpringCrit(target.x(), current.x(), xVelocity, smoothTime, deltaTime);
+            valueY = dampSpringCrit(target.y(), current.y(), yVelocity, smoothTime, deltaTime);
+            valueZ = dampSpringCrit(target.z(), current.z(), zVelocity, smoothTime, deltaTime);
+            
+            velocity.set(xVelocity.get(0), yVelocity.get(0), zVelocity.get(0));
+        }
+        return new Vector3f(valueX, valueY, valueZ);
+    }
+    
+    public static int nextInt(Random random, int min, int maxInc) {
+        return random.nextInt(maxInc - min + 1) + min;
     }
     
 }
