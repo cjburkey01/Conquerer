@@ -1,11 +1,7 @@
 package com.cjburkey.conquerer.gen.generator;
 
-import com.artemis.Entity;
-import com.cjburkey.conquerer.Conquerer;
-import com.cjburkey.conquerer.ecs.component.world.Location;
-import com.cjburkey.conquerer.ecs.component.world.Named;
-import com.cjburkey.conquerer.ecs.component.world.Territory;
 import com.cjburkey.conquerer.gen.Poisson;
+import com.cjburkey.conquerer.world.Territory;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,34 +15,34 @@ import org.joml.Vector2fc;
  */
 public class BasicGenerator implements IGenerator {
     
-    public Set<Entity> generateTerritories(int maxCount, float minDistance) {
+    public Set<Territory> generateTerritories(int maxCount, float minDistance) {
         Random random = new Random(System.nanoTime());
-        final Map<Vector2fc, Entity> territories = new Object2ObjectOpenHashMap<>();
+        final Map<Vector2fc, Territory> territories = new Object2ObjectOpenHashMap<>();
         
         new Voronoi(Poisson.getPoints(random, minDistance, 30, maxCount)).getEdges().forEach(edge -> {
-            Entity builderA = territories.get(edge.getPoint1());
-            if (builderA == null) {
-                builderA = newTerritory(random, edge.getPoint1());
-                territories.put(edge.getPoint1(), builderA);
+            Territory territoryA = territories.get(edge.getPoint1());
+            if (territoryA == null) {
+                territoryA = newTerritory(random, edge.getPoint1());
+                territories.put(edge.getPoint1(), territoryA);
             }
-            builderA.getComponent(Territory.class).voronoiEdges.add(edge);
+            territoryA.voronoiEdges.add(edge);
             
-            Entity builderB = territories.get(edge.getPoint2());
-            if (builderB == null) {
-                builderB = newTerritory(random, edge.getPoint2());
-                territories.put(edge.getPoint2(), builderB);
+            Territory territoryB = territories.get(edge.getPoint2());
+            if (territoryB == null) {
+                territoryB = newTerritory(random, edge.getPoint2());
+                territories.put(edge.getPoint2(), territoryB);
             }
-            builderB.getComponent(Territory.class).voronoiEdges.add(edge);
+            territoryB.voronoiEdges.add(edge);
         });
         
         return new HashSet<>(territories.values());
     }
     
-    private static Entity newTerritory(Random random, Vector2fc point) {
-        Entity entity = Territory.create(Conquerer.INSTANCE.world());
-        entity.getComponent(Named.class).randomName(random, 3, 7);
-        entity.getComponent(Location.class).location = point;
-        return entity;
+    private static Territory newTerritory(Random random, Vector2fc point) {
+        Territory territory = new Territory();
+        territory.randomName(random, 3, 7);
+        territory.location = point;
+        return territory;
     }
     
 }
