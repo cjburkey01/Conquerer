@@ -2,15 +2,26 @@ package com.cjburkey.conquerer.ecs.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.Entity;
 import com.artemis.systems.IteratingSystem;
 import com.cjburkey.conquerer.Util;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.input.CameraMovement;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
+import com.cjburkey.conquerer.ecs.component.render.MeshRender;
+import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
+import com.cjburkey.conquerer.ecs.component.transform.Rot;
+import com.cjburkey.conquerer.ecs.component.transform.Scale;
+import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.glfw.Input;
+import com.cjburkey.conquerer.math.Transformation;
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
+import org.joml.Vector3f;
 
+import static com.cjburkey.conquerer.Conquerer.*;
+import static com.cjburkey.conquerer.math.Transformation.*;
 import static org.joml.Math.*;
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -46,6 +57,25 @@ public class CameraMovementSystem extends IteratingSystem {
         if (deltaPosition.x != 0.0f || deltaPosition.y != 0.0f) {
             deltaPosition.normalize().mul((cameraMovement.speed + cameraMovement.goalZoom * cameraMovement.zoomMoveRatio) * delta);
         }
+        
+        // Mouse move
+        Vector2fc currMousePos = Input.mousePos();
+        Vector3f mouseWorldPos = cameraToPlane(pos.position, camera, currMousePos, INSTANCE.worldPlane);
+        
+        Mesh mesh = new Mesh().circle(0.1f, 4);
+        int testObj = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
+        Entity ent = INSTANCE.world().getEntity(testObj);
+        ent.getComponent(ShaderRender.class).shader = INSTANCE.shader();
+        ent.getComponent(ShaderRender.class).color = new Vector3f(0.3f, 0.75f, 0.3f);
+        ent.getComponent(MeshRender.class).mesh = mesh;
+        ent.getComponent(Pos.class).position.set(mouseWorldPos);
+        
+        if (Input.getMouseDown(GLFW_MOUSE_BUTTON_MIDDLE)) {
+            Vector3f prevWorldPos = cameraToPlane(pos.position, camera, cameraMovement.previousMousePos, INSTANCE.worldPlane);
+            Vector3f deltaMouse = mouseWorldPos.sub(prevWorldPos, new Vector3f());
+            deltaPosition.sub(deltaMouse.x, deltaMouse.y);
+        }
+        cameraMovement.previousMousePos.set(currMousePos);
         
         float scroll = min(max(5.0f, cameraMovement.goalZoom - Input.scrollY() * cameraMovement.zoomSpeed), 50.0f);
         

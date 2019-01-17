@@ -16,8 +16,10 @@ import com.cjburkey.conquerer.ecs.system.RenderSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
 import com.cjburkey.conquerer.glfw.Window;
+import com.cjburkey.conquerer.math.Plane;
 import com.cjburkey.conquerer.world.WorldHandler;
 import de.tomgrill.artemis.GameLoopInvocationStrat;
+import org.joml.Vector3f;
 
 import static com.cjburkey.conquerer.Log.*;
 
@@ -52,6 +54,8 @@ public final class Conquerer {
     // Game world
     public final WorldHandler worldHandler = new WorldHandler();
     
+    public final Plane worldPlane = new Plane(new Vector3f(), new Vector3f(0.0f, 0.0f, 1.0f));
+    
     private void startGame() {
         window = new Window("Conquerer v0.0.1", 300, 300, 4);
         window.setHalfMonitorSize();
@@ -67,6 +71,8 @@ public final class Conquerer {
         
         // Create starting main camera
         mainCamera = createObject(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
+        world.getEntity(mainCamera).getComponent(Pos.class).position.z = 3.0f;
+        world.getEntity(mainCamera).getComponent(SmoothMovement.class).goalPosition.set(0.0f, 0.0f, 3.0f);
         
         running = true;
         info("Initialized");

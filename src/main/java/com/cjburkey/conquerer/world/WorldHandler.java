@@ -42,7 +42,7 @@ public class WorldHandler {
             ent.getComponent(ShaderRender.class).shader = INSTANCE.shader();
             ent.getComponent(ShaderRender.class).color = new Vector3f(0.3f, 0.3f, 1.0f);
             ent.getComponent(MeshRender.class).mesh = mesh;
-            ent.getComponent(Pos.class).position.set(0.0f, 0.0f, -3.0f);
+            ent.getComponent(Pos.class).position.zero();
         }
     }
     

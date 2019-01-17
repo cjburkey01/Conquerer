@@ -1,6 +1,7 @@
 package com.cjburkey.conquerer.math;
 
 import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.glfw.Window;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -10,6 +11,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
+import static com.cjburkey.conquerer.Log.*;
 import static org.joml.Math.*;
 
 /**
@@ -90,27 +92,27 @@ public final class Transformation {
         return new Vector3f(screenCoords.x() / w.getWidth() * 2.0f - 1.0f, 1.0f - screenCoords.y() / w.getHeight() * 2.0f, 0.0f);
     }
     
-    public static Vector3f glPosToWorldRay(Matrix4fc projectionMatrix, Matrix4fc viewMatrix, Vector3fc glScreenPos) {
+    public static Vector3f glPosToWorldRay(Camera camera, Vector3fc glScreenPos) {
         // We need to enter homogeneous coordinates, so w is set to 1.
-        Vector4f ray = projectionMatrix
+        final Vector4f ray = camera.projectionMatrix
                 .invert(new Matrix4f())
                 .transform(new Vector4f(glScreenPos.x(), glScreenPos.y(), -1.0f, 1.0f));
         
-        // We are working with a vector, so the w component can be set to 0
+        // We are working with a direction vector, so the w component can be set to 0
         ray.z = -1.0f;
         ray.w = 0.0f;
-        viewMatrix
+        camera.viewMatrix
                 .invert(new Matrix4f())
                 .transform(ray);
         return new Vector3f(ray.x, ray.y, ray.z).normalize();
     }
     
-    public static Vector3f screenToWorldRay(Matrix4fc projectionMatrix, Matrix4fc viewMatrix, Vector2fc screenCoords) {
-        return glPosToWorldRay(projectionMatrix, viewMatrix, screenToGlPos(screenCoords));
+    public static Vector3f screenToWorldRay(Camera camera, Vector2fc screenCoords) {
+        return glPosToWorldRay(camera, screenToGlPos(screenCoords));
     }
     
-    public static Vector3f screenToPlane(Vector3fc position, Matrix4fc projectionMatrix, Matrix4fc viewMatrix, Vector2fc screenCoords, Plane plane) {
-        return plane.getIntersectionPoint(position, screenToWorldRay(projectionMatrix, viewMatrix, screenCoords));
+    public static Vector3f cameraToPlane(Vector3fc position, Camera camera, Vector2fc screenCoords, Plane plane) {
+        return plane.getIntersectionPoint(position, screenToWorldRay(camera, screenCoords));
     }
     
 }
