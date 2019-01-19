@@ -2,28 +2,19 @@ package com.cjburkey.conquerer.ecs.system;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
-import com.artemis.Entity;
 import com.artemis.systems.IteratingSystem;
-import com.cjburkey.conquerer.Util;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.input.CameraMovement;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
-import com.cjburkey.conquerer.ecs.component.render.MeshRender;
-import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
-import com.cjburkey.conquerer.ecs.component.transform.Rot;
-import com.cjburkey.conquerer.ecs.component.transform.Scale;
-import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.glfw.Input;
-import com.cjburkey.conquerer.math.Transformation;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 
 import static com.cjburkey.conquerer.Conquerer.*;
+import static com.cjburkey.conquerer.util.Util.*;
 import static com.cjburkey.conquerer.math.Transformation.*;
-import static org.joml.Math.*;
-import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * Created by CJ Burkey on 2019/01/12
@@ -50,11 +41,12 @@ public class CameraMovementSystem extends IteratingSystem {
         
         // Calculate delta position
         Vector2f deltaPosition = new Vector2f();
-        if (Input.getAnyKeysDown(GLFW_KEY_D, GLFW_KEY_RIGHT)) deltaPosition.x += 1.0f;
-        if (Input.getAnyKeysDown(GLFW_KEY_A, GLFW_KEY_LEFT)) deltaPosition.x -= 1.0f;
-        if (Input.getAnyKeysDown(GLFW_KEY_W, GLFW_KEY_UP)) deltaPosition.y += 1.0f;
-        if (Input.getAnyKeysDown(GLFW_KEY_S, GLFW_KEY_DOWN)) deltaPosition.y -= 1.0f;
+        if (Input.getAnyKeysDown(cameraMovement.rightKeys)) deltaPosition.x += 1.0f;
+        if (Input.getAnyKeysDown(cameraMovement.leftKeys)) deltaPosition.x -= 1.0f;
+        if (Input.getAnyKeysDown(cameraMovement.upKeys)) deltaPosition.y += 1.0f;
+        if (Input.getAnyKeysDown(cameraMovement.downKeys)) deltaPosition.y -= 1.0f;
         if (deltaPosition.x != 0.0f || deltaPosition.y != 0.0f) {
+            // TODO: MOVEMENT SPEED BASED ON ZOOM LEVEL
             deltaPosition.normalize().mul((cameraMovement.speed + cameraMovement.goalZoom * cameraMovement.zoomMoveRatio) * delta);
         }
         
@@ -62,31 +54,31 @@ public class CameraMovementSystem extends IteratingSystem {
         Vector2fc currMousePos = Input.mousePos();
         Vector3f mouseWorldPos = cameraToPlane(pos.position, camera, currMousePos, INSTANCE.worldPlane);
         
-        Mesh mesh = new Mesh().circle(0.1f, 4);
-        int testObj = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
-        Entity ent = INSTANCE.world().getEntity(testObj);
-        ent.getComponent(ShaderRender.class).shader = INSTANCE.shader();
-        ent.getComponent(ShaderRender.class).color = new Vector3f(0.3f, 0.75f, 0.3f);
-        ent.getComponent(MeshRender.class).mesh = mesh;
-        ent.getComponent(Pos.class).position.set(mouseWorldPos);
-        
-        if (Input.getMouseDown(GLFW_MOUSE_BUTTON_MIDDLE)) {
+        if (Input.getAnyMouseDown(cameraMovement.activatingMouseForDrag)) {
             Vector3f prevWorldPos = cameraToPlane(pos.position, camera, cameraMovement.previousMousePos, INSTANCE.worldPlane);
             Vector3f deltaMouse = mouseWorldPos.sub(prevWorldPos, new Vector3f());
             deltaPosition.sub(deltaMouse.x, deltaMouse.y);
         }
         cameraMovement.previousMousePos.set(currMousePos);
         
-        float scroll = min(max(5.0f, cameraMovement.goalZoom - Input.scrollY() * cameraMovement.zoomSpeed), 50.0f);
+        // TODO: ZOOM SPEED BASED ON CURRENT ZOOM LEVEL (TO MAKE ZOOMING OUT FASTER AND IN SLOWER)
+        float zoom = clamp(cameraMovement.goalZoom - Input.scrollY() * cameraMovement.zoomSpeed, cameraMovement.zoomClose, cameraMovement.zoomFar);
         
-        // Perform or schedule movement
         if (smoothMovement != null) {
+            // Schedule movement with the smooth mover
             smoothMovement.goalPosition.add(deltaPosition.x, deltaPosition.y, 0.0f);
-            cameraMovement.goalZoom = scroll;
-            camera.orthographicSize = Util.dampSpringCrit(cameraMovement.goalZoom, camera.orthographicSize, cameraMovement.zoomVelocity, smoothMovement.smoothing, delta);
+            
+            // Zoom smooth movement is handled separately from the smooth movement system
+            cameraMovement.goalZoom = zoom;
+            camera.orthographicSize = dampSpringCrit(cameraMovement.goalZoom,
+                    camera.orthographicSize,
+                    cameraMovement.zoomVelocity,
+                    smoothMovement.smoothing,
+                    delta);
         } else {
+            // Move the camera without the smooth movement
             pos.position.add(deltaPosition.x, deltaPosition.y, 0.0f);
-            camera.orthographicSize = scroll;
+            camera.orthographicSize = zoom;
         }
     }
     

@@ -3,7 +3,7 @@ package com.cjburkey.conquerer.ecs.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.cjburkey.conquerer.Util;
+import com.cjburkey.conquerer.util.Util;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
 

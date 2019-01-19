@@ -1,9 +1,9 @@
 package com.cjburkey.conquerer.gl;
 
-import com.cjburkey.conquerer.Util;
+import com.cjburkey.conquerer.util.IAppender;
+import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -11,7 +11,6 @@ import java.util.Objects;
 import jdk.internal.jline.internal.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
-import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.lwjgl.system.MemoryStack;
 
@@ -22,7 +21,7 @@ import static org.lwjgl.system.MemoryStack.*;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-@SuppressWarnings({"WeakerAccess", "SameParameterValue", "unused"})
+@SuppressWarnings({"WeakerAccess", "SameParameterValue", "unused", "UnusedReturnValue"})
 public final class Mesh {
     
     private static int currentVao = -1;
@@ -161,33 +160,17 @@ public final class Mesh {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     
-    public Mesh circle(float radius, int smoothness) {
+    public Mesh setLine(float thickness, Vector2fc... points) {
+        if (points.length <= 1) {
+            setIndices((ShortBuffer) null);
+            setVertices((FloatBuffer) null);
+            return this;
+        }
         try (MemoryStack stack = stackPush()) {
-            FloatBuffer vertices = stack.mallocFloat((smoothness + 1) * 3); // Vertices * Components
-            ShortBuffer indices = stack.mallocShort(smoothness * 3);        // Triangles * Vertices
+            FloatBuffer vertices = stack.mallocFloat((points.length - 1) * 4 * 3);  // Segments * QuadVertices * Vector3
+            ShortBuffer indices = stack.mallocShort((points.length - 1) * 2 * 3);   // Segments * QuadTriangles * Vector3
             
-            smoothness = Math.max(smoothness, 3);
-            float frac = 2.0f * (float) PI / smoothness;
-            
-            // Add center vertex
-            vertices.put(0.0f);
-            vertices.put(0.0f);
-            vertices.put(0.0f);
-            
-            // Vertices [0, smoothness)
-            for (int i = 0; i < smoothness; i++) {
-                float angle = frac * i;
-                
-                // Add new vertex
-                vertices.put(radius * (float) cos(-angle));
-                vertices.put(radius * (float) sin(-angle));
-                vertices.put(0.0f);
-                
-                // Add the triangle
-                indices.put((short) 0);
-                indices.put((short) (i + 1));
-                indices.put((short) (((i + smoothness - 1) % smoothness) + 1));
-            }
+            addLine(new IAppender.FloatBufferAppender(vertices), new IAppender.ShortBufferAppender(indices), thickness, points);
             
             vertices.flip();
             indices.flip();
@@ -198,52 +181,28 @@ public final class Mesh {
         return this;
     }
     
-    public Mesh line(float thickness, Vector2fc... points) {
-        if (points.length <= 1) {
-            setIndices((ShortBuffer) null);
-            setVertices((FloatBuffer) null);
-            return this;
-        }
+    public Mesh setEllipse(float width, float height, int smoothness) {
         try (MemoryStack stack = stackPush()) {
-            FloatBuffer vertices = stack.mallocFloat((points.length - 1) * 4 * 3);
-            ShortBuffer indices = stack.mallocShort((points.length - 1) * 2 * 3);
+            FloatBuffer vertices = stack.mallocFloat((smoothness + 1) * 3); // Vertices * Components
+            ShortBuffer indices = stack.mallocShort(smoothness * 3);        // Triangles * Vertices
             
-            for (int i = 1; i < points.length; i ++) {
-                Vector2fc a = points[i - 1];
-                Vector2fc b = points[i];
-                
-                Vector2f dir = b.sub(a, new Vector2f()).normalize();
-                //noinspection SuspiciousNameCombination
-                Vector2f r = new Vector2f(-dir.y, dir.x).mul(thickness / 2.0f);
-                
-                // BR
-                vertices.put(r.x + a.x());
-                vertices.put(r.y + a.y());
-                vertices.put(0.0f);
-                
-                // TR
-                vertices.put(r.x + b.x());
-                vertices.put(r.y + b.y());
-                vertices.put(0.0f);
-                
-                // TL
-                vertices.put(-r.x + b.x());
-                vertices.put(-r.y + b.y());
-                vertices.put(0.0f);
-                
-                // BL
-                vertices.put(-r.x + a.x());
-                vertices.put(-r.y + a.y());
-                vertices.put(0.0f);
-                
-                indices.put((short) 2);
-                indices.put((short) 1);
-                indices.put((short) 0);
-                
-                indices.put((short) 3);
-                indices.put((short) 2);
-                indices.put((short) 0);
-            }
+            addEllipse(new IAppender.FloatBufferAppender(vertices), new IAppender.ShortBufferAppender(indices), width, height, smoothness);
+            
+            vertices.flip();
+            indices.flip();
+            
+            setVertices(vertices);
+            setIndices(indices);
+        }
+        return this;
+    }
+    
+    public Mesh setCircle(float radius, int smoothness) {
+        try (MemoryStack stack = stackPush()) {
+            FloatBuffer vertices = stack.mallocFloat((smoothness + 1) * 3); // Vertices * Components
+            ShortBuffer indices = stack.mallocShort(smoothness * 3);        // Triangles * Vertices
+            
+            addCircle(new IAppender.FloatBufferAppender(vertices), new IAppender.ShortBufferAppender(indices), radius, smoothness);
             
             vertices.flip();
             indices.flip();
@@ -258,46 +217,153 @@ public final class Mesh {
         return new Builder();
     }
     
+    private static void addLine(IAppender<Float> vertices, IAppender<Short> indices, float thickness, Vector2fc... points) {
+        // Each loop cycle adds a quad segment of the line.
+        // p0---p1...p(n-2)---p(n-1)
+        for (int i = 1; i < points.length; i ++) {
+            // Get the previous point and the current point
+            Vector2fc a = points[i - 1];
+            Vector2fc b = points[i];
+            
+            // Calculate the normalized vector describing A -> B
+            Vector2f dir = b.sub(a, new Vector2f()).normalize();
+            
+            // Calculate the point to the right half of the thickness away
+            // This means when we invert it, the left will also be half the thickness away;
+            //      the two put together gives us our <THICKNESS> meter(s) thick line.
+            // (The "SuspiciousNameCombination" warning is IDEA telling me a "y" argument shouldn't
+            //      go into an "x" parameter, but it's used for vector rotation here, so it's intended)
+            @SuppressWarnings("SuspiciousNameCombination")
+            Vector2f r = new Vector2f(dir.y, -dir.x).mul(thickness / 2.0f);
+            
+            // Get the index at which the first vertex of this quad will be.
+            // We must divide by 3 because each 3 floating points is one vertex (x, y, and z)
+            short startingIndex = (short) (vertices.getPos() / 3);
+            
+            // Bottom right vertex (Index: 0)
+            vertices.put(r.x + a.x());
+            vertices.put(r.y + a.y());
+            vertices.put(0.0f);
+            
+            // Top right vertex (Index: 1)
+            vertices.put(r.x + b.x());
+            vertices.put(r.y + b.y());
+            vertices.put(0.0f);
+            
+            // Top left vertex (Index: 2)
+            vertices.put(-r.x + b.x());
+            vertices.put(-r.y + b.y());
+            vertices.put(0.0f);
+            
+            // Bottom left vertex (Index: 3)
+            vertices.put(-r.x + a.x());
+            vertices.put(-r.y + a.y());
+            vertices.put(0.0f);
+            
+            // First triangle (Indices: 0, 1, 2)
+            indices.put(startingIndex);
+            indices.put((short) (1 + startingIndex));
+            indices.put((short) (2 + startingIndex));
+            
+            // Second triangle (Indices: 0, 2, 3)
+            indices.put(startingIndex);
+            indices.put((short) (2 + startingIndex));
+            indices.put((short) (3 + startingIndex));
+        }
+    }
+    
+    private static void addEllipse(IAppender<Float> vertices, IAppender<Short> indices, float width, float height, int smoothness) {
+        // Require at least vertices
+        smoothness = max(smoothness, 4);
+        
+        // Get the rotation amount between vertices
+        final float frac = 2.0f * (float) PI / smoothness;
+        
+        // Get the index at which the first vertex of this circle will be.
+        // We must divide by 3 because each 3 floating points is one vertex (x, y, and z)
+        short startingIndex = (short) (vertices.getPos() / 3);
+        
+        // Add the center vertex
+        vertices.put(0.0f);
+        vertices.put(0.0f);
+        vertices.put(0.0f);
+        
+        // Vertices [0, smoothness)
+        for (int i = 0; i < smoothness; i++) {
+            float angle = frac * i;
+            
+            // Add new vertex
+            vertices.put(width * (float) cos(-angle));
+            vertices.put(height * (float) sin(-angle));
+            vertices.put(0.0f);
+            
+            // Add the triangle
+            indices.put(startingIndex);
+            indices.put((short) (startingIndex + (i + 1)));
+            indices.put((short) (startingIndex + (((i + smoothness - 1) % smoothness) + 1)));
+        }
+    }
+    
+    private static void addCircle(IAppender<Float> vertices, IAppender<Short> indices, float radius, int smoothness) {
+        addEllipse(vertices, indices, radius * 2.0f, radius * 2.0f, smoothness);
+    }
+    
+    @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
         
         private final FloatArrayList vertices = new FloatArrayList();
         private final ShortArrayList indices = new ShortArrayList();
         
+        private final IAppender<Float> vertexAppender = new IAppender.FloatCollectionAppender(vertices);
+        private final IAppender<Short> indexAppender = new IAppender.ShortCollectionAppender(indices);
+        
         private Builder() {
         }
         
-        public void pushVertex(float x, float y, float z) {
+        public Builder pushVertex(float x, float y, float z) {
             vertices.push(x);
             vertices.push(y);
             vertices.push(z);
+            return this;
         }
         
-        public void pushVertex(Vector3fc point) {
+        public Builder pushVertex(Vector3fc point) {
             pushVertex(point.x(), point.y(), point.z());
+            return this;
         }
         
-        public void pushIndex(short index) {
+        public Builder pushIndex(short index) {
             indices.push(index);
+            return this;
         }
         
-        public void apply(Mesh mesh) {
+        public Builder addLine(float thickness, Vector2fc... points) {
+            Mesh.addLine(vertexAppender, indexAppender, thickness, points);
+            return this;
+        }
+        
+        public Builder addEllipse(float width, float height, int smoothness) {
+            Mesh.addEllipse(vertexAppender, indexAppender, width, height, smoothness);
+            return this;
+        }
+        
+        public Builder addCircle(float radius, int smoothness) {
+            Mesh.addCircle(vertexAppender, indexAppender, radius, smoothness);
+            return this;
+        }
+        
+        public Builder clear() {
+            vertices.clear();
+            indices.clear();
+            return this;
+        }
+        
+        public Mesh apply(Mesh mesh) {
             mesh.setVertices(vertices.toArray(new float[0]));
             mesh.setIndices(indices.toArray(new short[0]));
+            return mesh;
         }
         
     }
-    
-//    public final void render() {
-//        if (!built || material == null) return;
-//        material.bind();
-//        bind();
-//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-//        glEnableVertexAttribArray(0);
-//        onPreRender();
-//        if (!onRender()) glDrawElements(GL_TRIANGLES, triangles, GL_UNSIGNED_SHORT, 0);
-//        onPostRender();
-//        glDisableVertexAttribArray(0);
-//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//    }
     
 }

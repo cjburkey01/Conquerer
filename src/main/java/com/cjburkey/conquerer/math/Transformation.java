@@ -11,6 +11,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
+import static com.cjburkey.conquerer.Conquerer.*;
 import static com.cjburkey.conquerer.Log.*;
 import static org.joml.Math.*;
 
@@ -88,15 +89,26 @@ public final class Transformation {
     }
     
     public static Vector3f screenToGlPos(Vector2fc screenCoords) {
-        Window w = Conquerer.INSTANCE.window();
+        Window w = INSTANCE.window();
         return new Vector3f(screenCoords.x() / w.getWidth() * 2.0f - 1.0f, 1.0f - screenCoords.y() / w.getHeight() * 2.0f, 0.0f);
     }
     
     public static Vector3f glPosToWorldRay(Camera camera, Vector3fc glScreenPos) {
-        // We need to enter homogeneous coordinates, so w is set to 1.
-        final Vector4f ray = camera.projectionMatrix
-                .invert(new Matrix4f())
-                .transform(new Vector4f(glScreenPos.x(), glScreenPos.y(), -1.0f, 1.0f));
+        final Vector4f ray;
+        
+        if (camera.perspective) {
+            // We need to enter homogeneous coordinates, so w is set to 1.
+            ray = camera.projectionMatrix
+                    .invert(new Matrix4f())
+                    .transform(new Vector4f(glScreenPos.x(), glScreenPos.y(), -1.0f, 1.0f));
+        } else {
+            // Idk why this works, but trial and error got me here :/
+            // Logically, the perspective matrix should transform the normal ray vector correctly, but it gives a wrong value.
+            float sa = camera.orthographicSize * (float) INSTANCE.window().getWidth() / INSTANCE.window().getHeight();
+            ray = new Vector4f();
+            ray.x = 2.0f * sa * ((glScreenPos.x() / 3.0f + 1.0f) / 2.0f) - sa;
+            ray.y = 2.0f * camera.orthographicSize * ((glScreenPos.y() / 3.0f + 1.0f) / 2.0f) - camera.orthographicSize;
+        }
         
         // We are working with a direction vector, so the w component can be set to 0
         ray.z = -1.0f;

@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gl.shader;
 
-import com.cjburkey.conquerer.Util;
+import com.cjburkey.conquerer.util.Util;
 
 import static org.lwjgl.opengl.GL20.*;
 

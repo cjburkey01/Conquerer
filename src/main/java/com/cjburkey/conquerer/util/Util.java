@@ -1,4 +1,4 @@
-package com.cjburkey.conquerer;
+package com.cjburkey.conquerer.util;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -28,14 +28,14 @@ import static org.lwjgl.system.MemoryStack.*;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class Util {
     
-    public static Optional<String> readResource(String name) {
-        name = name.replaceAll(Pattern.quote("\\"), "/").trim();
-        while (name.startsWith("/")) name = name.substring(1);
-        while (name.endsWith("/")) name = name.substring(0, name.length() - 1);
-        name = '/' + name;
-        InputStream stream = Util.class.getResourceAsStream(name);
+    public static Optional<String> readResource(String path) {
+        path = path.replaceAll(Pattern.quote("\\"), "/").trim();
+        while (path.startsWith("/")) path = path.substring(1);
+        while (path.endsWith("/")) path = path.substring(0, path.length() - 1);
+        path = '/' + path;
+        InputStream stream = Util.class.getResourceAsStream(path);
         if (stream == null) {
-            exception(new FileNotFoundException("Failed to locate resource: " + name));
+            exception(new FileNotFoundException("Failed to locate resource: " + path));
             return Optional.empty();
         }
         return readStream(stream);
@@ -212,6 +212,80 @@ public final class Util {
     
     public static int nextInt(Random random, int min, int maxInc) {
         return random.nextInt(maxInc - min + 1) + min;
+    }
+    
+    // -- MORE PURE UTILS -- //
+    
+    public static byte min(byte a, byte b) {
+        return a > b ? b : a;
+    }
+    
+    public static short min(short a, short b) {
+        return a > b ? b : a;
+    }
+    
+    public static int min(int a, int b) {
+        return a > b ? b : a;
+    }
+    
+    public static long min(long a, long b) {
+        return a > b ? b : a;
+    }
+    
+    public static float min(float a, float b) {
+        return a > b ? b : a;
+    }
+    
+    public static double min(double a, double b) {
+        return a > b ? b : a;
+    }
+    
+    public static byte max(byte a, byte b) {
+        return a < b ? b : a;
+    }
+    
+    public static short max(short a, short b) {
+        return a < b ? b : a;
+    }
+    
+    public static int max(int a, int b) {
+        return a < b ? b : a;
+    }
+    
+    public static long max(long a, long b) {
+        return a < b ? b : a;
+    }
+    
+    public static float max(float a, float b) {
+        return a < b ? b : a;
+    }
+    
+    public static double max(double a, double b) {
+        return a < b ? b : a;
+    }
+    
+    public static byte clamp(byte val, byte minInc, byte maxInc) {
+        return min(max(val, minInc), maxInc);
+    }
+    
+    public static short clamp(short val, short minInc, short maxInc) {
+        return min(max(val, minInc), maxInc);
+    }
+    
+    public static int clamp(int val, int minInc, int maxInc) {
+        return min(max(val, minInc), maxInc);
+    }
+    
+    public static long clamp(long val, long minInc, long maxInc) {
+        return min(max(val, minInc), maxInc);
+    }
+    
+    public static float clamp(float val, float minInc, float maxInc) {
+        return min(max(val, minInc), maxInc);
+    }
+    
+    public static double clamp(double val, double minInc, double maxInc) {
+        return min(max(val, minInc), maxInc);
     }
     
 }

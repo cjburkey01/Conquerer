@@ -17,6 +17,7 @@ import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
 import com.cjburkey.conquerer.glfw.Window;
 import com.cjburkey.conquerer.math.Plane;
+import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.world.WorldHandler;
 import de.tomgrill.artemis.GameLoopInvocationStrat;
 import org.joml.Vector3f;
@@ -52,7 +53,7 @@ public final class Conquerer {
             .build());
     
     // Game world
-    public final WorldHandler worldHandler = new WorldHandler();
+    public final WorldHandler worldHandler = new WorldHandler(1.0f, Rectf.fromCenter(0.0f, 0.0f, 30.0f, 30.0f));
     
     public final Plane worldPlane = new Plane(new Vector3f(), new Vector3f(0.0f, 0.0f, 1.0f));
     

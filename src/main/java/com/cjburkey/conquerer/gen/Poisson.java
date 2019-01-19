@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.gen;
 
+import com.cjburkey.conquerer.math.Rectf;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
@@ -10,17 +11,20 @@ import org.joml.Vector2fc;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
+import static com.cjburkey.conquerer.Log.*;
+import static java.lang.Integer.*;
 import static org.joml.Math.*;
 
 /**
  * Created by CJ Burkey on 2019/01/10
  */
-public class Poisson {
+@SuppressWarnings({"WeakerAccess", "unused"})
+public final class Poisson {
     
     private static final float SQRT_2f = (float) sqrt(2.0d);
     private static final float PI2f = (float) PI * 2.0f;
     
-    public static List<Vector2fc> getPoints(final Random random, final float minDist, final int maxIterations, final int stopAfter) {
+    public static List<Vector2fc> disc(final Random random, final float minDist, final int maxIterations, final int stopAfter, final Rectf bounds) {
         final Object2ObjectOpenHashMap<Vector2ic, Vector2fc> finalPoints = new Object2ObjectOpenHashMap<>();
         final ObjectArrayList<Vector2fc> activePoints = new ObjectArrayList<>();
         
@@ -34,6 +38,10 @@ public class Poisson {
             
             for (int iteration = 0; iteration < maxIterations && !foundPoint; iteration++) {
                 final Vector2fc newPoint = getRandomPoint(random, currentPoint, minDist);
+                if (!bounds.contains(newPoint)) {
+                    continue;   // Make sure the new point is within the bounds
+                }
+                
                 final Vector2ic newPointGridPos = getCell(newPoint, minDist);
                 boolean duplicateCell = finalPoints.containsKey(newPointGridPos);
                 
@@ -66,6 +74,14 @@ public class Poisson {
         }
         
         return new ObjectArrayList<>(finalPoints.values());
+    }
+    
+    public static List<Vector2fc> disc(final Random random, final float minDist, final int maxIterations, final int stopAfter) {
+        return disc(random, minDist, maxIterations, stopAfter, Rectf.infinite());
+    }
+    
+    public static List<Vector2fc> disc(final Random random, final float minDist, final int maxIterations, Rectf bounds) {
+        return disc(random, minDist, maxIterations, MAX_VALUE, bounds);
     }
     
     private static Vector2fc getRandomPoint(Random random, Vector2fc center, float minDist) {
