@@ -11,6 +11,7 @@ import java.util.Objects;
 import jdk.internal.jline.internal.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
+import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.lwjgl.system.MemoryStack;
 
@@ -24,18 +25,21 @@ import static org.lwjgl.system.MemoryStack.*;
 @SuppressWarnings({"WeakerAccess", "SameParameterValue", "unused", "UnusedReturnValue"})
 public final class Mesh {
     
+    // The currently bound mesh
     private static int currentVao = -1;
     
     // Buffers
     private final int vao;
-    private int[] vbo = new int[1];
-    private int[] ebo = new int[1];
+    private int[] vbo = new int[1];     // Vertices
+    private int[] ebo = new int[1];     // Triangles
+    private int[] cbo = new int[1];     // Colors
     
+    // Lists of buffers and vertex attributes used by this mesh
     private IntOpenHashSet buffers = new IntOpenHashSet();
     private IntOpenHashSet attributes = new IntOpenHashSet();
     
-    // Info
-    private int triangles;
+    // The number of VERTICES composing this mesh (the number of indices)
+    private int triangleVerts;
     
     public Mesh() {
         vao = glGenVertexArrays();
@@ -53,7 +57,7 @@ public final class Mesh {
     }
     
     public Mesh setIndices(@Nullable ShortBuffer indices) {
-        triangles = indices == null ? 0 : indices.limit();
+        triangleVerts = indices == null ? 0 : indices.limit();
         bufferData(GL_ELEMENT_ARRAY_BUFFER, ebo, indices);
         return this;
     }
@@ -63,6 +67,21 @@ public final class Mesh {
             return setIndices(Util.bufferShort(stack, indices));
         }
     }
+    
+    public Mesh setColors(@Nullable FloatBuffer colors) {
+        bufferData(GL_ARRAY_BUFFER, cbo, colors, 3, GL_FLOAT, 1);
+        return this;
+    }
+    
+    public Mesh setColors(final float[] indices) {
+        try (final MemoryStack stack = stackPush()) {
+            return setColors(Util.bufferFloat(stack, indices));
+        }
+    }
+    
+    // Methods below here should not need to be changed when new attributes are added to meshes.
+    // They use dynamic buffers allocated above when buffering data and automatically keep track
+    //      of active attrbute ids
     
     public void destroy() {
         // Delete buffers
@@ -93,7 +112,7 @@ public final class Mesh {
     }
     
     public int getTriangleCount() {
-        return triangles;
+        return triangleVerts;
     }
     
     private boolean preBuff(int buffer, int[] pointer, boolean hasData, int attribId) {
@@ -155,72 +174,20 @@ public final class Mesh {
         }
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
         for (int attribute : attributes) glEnableVertexAttribArray(attribute);
-        glDrawElements(GL_TRIANGLES, triangles, GL_UNSIGNED_SHORT, 0L);
+        glDrawElements(GL_TRIANGLES, triangleVerts, GL_UNSIGNED_SHORT, 0L);
         for (int attribute : attributes) glDisableVertexAttribArray(attribute);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     
-    public Mesh setLine(float thickness, Vector2fc... points) {
-        if (points.length <= 1) {
-            setIndices((ShortBuffer) null);
-            setVertices((FloatBuffer) null);
-            return this;
-        }
-        try (MemoryStack stack = stackPush()) {
-            FloatBuffer vertices = stack.mallocFloat((points.length - 1) * 4 * 3);  // Segments * QuadVertices * Vector3
-            ShortBuffer indices = stack.mallocShort((points.length - 1) * 2 * 3);   // Segments * QuadTriangles * Vector3
-            
-            addLine(new IAppender.FloatBufferAppender(vertices), new IAppender.ShortBufferAppender(indices), thickness, points);
-            
-            vertices.flip();
-            indices.flip();
-            
-            setVertices(vertices);
-            setIndices(indices);
-        }
-        return this;
-    }
-    
-    public Mesh setEllipse(float width, float height, int smoothness) {
-        try (MemoryStack stack = stackPush()) {
-            FloatBuffer vertices = stack.mallocFloat((smoothness + 1) * 3); // Vertices * Components
-            ShortBuffer indices = stack.mallocShort(smoothness * 3);        // Triangles * Vertices
-            
-            addEllipse(new IAppender.FloatBufferAppender(vertices), new IAppender.ShortBufferAppender(indices), width, height, smoothness);
-            
-            vertices.flip();
-            indices.flip();
-            
-            setVertices(vertices);
-            setIndices(indices);
-        }
-        return this;
-    }
-    
-    public Mesh setCircle(float radius, int smoothness) {
-        try (MemoryStack stack = stackPush()) {
-            FloatBuffer vertices = stack.mallocFloat((smoothness + 1) * 3); // Vertices * Components
-            ShortBuffer indices = stack.mallocShort(smoothness * 3);        // Triangles * Vertices
-            
-            addCircle(new IAppender.FloatBufferAppender(vertices), new IAppender.ShortBufferAppender(indices), radius, smoothness);
-            
-            vertices.flip();
-            indices.flip();
-            
-            setVertices(vertices);
-            setIndices(indices);
-        }
-        return this;
-    }
-    
-    public static Builder builder() {
-        return new Builder();
-    }
-    
-    private static void addLine(IAppender<Float> vertices, IAppender<Short> indices, float thickness, Vector2fc... points) {
+    private static void addLine(IAppender<Float> vertices,
+                                IAppender<Short> indices,
+                                IAppender<Float> colors,
+                                Vector3fc color,
+                                float thickness,
+                                Vector2fc... points) {
         // Each loop cycle adds a quad segment of the line.
         // p0---p1...p(n-2)---p(n-1)
-        for (int i = 1; i < points.length; i ++) {
+        for (int i = 1; i < points.length; i++) {
             // Get the previous point and the current point
             Vector2fc a = points[i - 1];
             Vector2fc b = points[i];
@@ -245,20 +212,44 @@ public final class Mesh {
             vertices.put(r.y + a.y());
             vertices.put(0.0f);
             
+            if (color != null) {
+                colors.put(color.x());
+                colors.put(color.y());
+                colors.put(color.z());
+            }
+            
             // Top right vertex (Index: 1)
             vertices.put(r.x + b.x());
             vertices.put(r.y + b.y());
             vertices.put(0.0f);
+            
+            if (color != null) {
+                colors.put(color.x());
+                colors.put(color.y());
+                colors.put(color.z());
+            }
             
             // Top left vertex (Index: 2)
             vertices.put(-r.x + b.x());
             vertices.put(-r.y + b.y());
             vertices.put(0.0f);
             
+            if (color != null) {
+                colors.put(color.x());
+                colors.put(color.y());
+                colors.put(color.z());
+            }
+            
             // Bottom left vertex (Index: 3)
             vertices.put(-r.x + a.x());
             vertices.put(-r.y + a.y());
             vertices.put(0.0f);
+            
+            if (color != null) {
+                colors.put(color.x());
+                colors.put(color.y());
+                colors.put(color.z());
+            }
             
             // First triangle (Indices: 0, 1, 2)
             indices.put(startingIndex);
@@ -272,7 +263,13 @@ public final class Mesh {
         }
     }
     
-    private static void addEllipse(IAppender<Float> vertices, IAppender<Short> indices, float width, float height, int smoothness) {
+    private static void addEllipse(IAppender<Float> vertices,
+                                   IAppender<Short> indices,
+                                   IAppender<Float> colors,
+                                   Vector3fc color, 
+                                   float width, 
+                                   float height, 
+                                   int smoothness) {
         // Require at least vertices
         smoothness = max(smoothness, 4);
         
@@ -297,6 +294,12 @@ public final class Mesh {
             vertices.put(height * (float) sin(-angle));
             vertices.put(0.0f);
             
+            if (color != null) {
+                colors.put(color.x());
+                colors.put(color.y());
+                colors.put(color.z());
+            }
+            
             // Add the triangle
             indices.put(startingIndex);
             indices.put((short) (startingIndex + (i + 1)));
@@ -304,18 +307,55 @@ public final class Mesh {
         }
     }
     
-    private static void addCircle(IAppender<Float> vertices, IAppender<Short> indices, float radius, int smoothness) {
-        addEllipse(vertices, indices, radius * 2.0f, radius * 2.0f, smoothness);
+    private static void addCircle(IAppender<Float> vertices,
+                                  IAppender<Short> indices,
+                                  IAppender<Float> colors,
+                                  Vector3fc color,
+                                  float radius,
+                                  int smoothness) {
+        addEllipse(vertices, indices, colors, color, radius * 2.0f, radius * 2.0f, smoothness);
+    }
+    
+    public static Builder builder() {
+        return new Builder();
     }
     
     @SuppressWarnings("UnusedReturnValue")
-    public static class Builder {
+    public static final class Builder {
+        
+        public static final class Colors {
+            
+            public static Vector3fc RGB(float r, float g, float b) { return new Vector3f(r, g, b); }
+            public static Vector3fc RGB(float gray) { return new Vector3f(gray); }
+            public static Vector3fc brightness(Vector3fc color, float brightness) { return color.mul(brightness, new Vector3f()); }
+            
+            public static final Vector3fc BLACK = RGB(0.0f);
+            public static final Vector3fc WHITE = RGB(1.0f);
+            public static final Vector3fc GRAY = RGB(0.5f);
+            
+            public static final Vector3fc BLUE = RGB(0.0f, 0.0f, 1.0f);
+            public static final Vector3fc GREEN = RGB(0.0f, 1.0f, 0.0f);
+            public static final Vector3fc CYAN = RGB(0.0f, 1.0f, 1.0f);
+            public static final Vector3fc RED = RGB(1.0f, 0.0f, 0.0f);
+            public static final Vector3fc PURPLE = RGB(1.0f, 0.0f, 1.0f);
+            public static final Vector3fc YELLOW = RGB(1.0f, 1.0f, 0.0f);
+            
+            public static final Vector3fc DARK_BLUE = brightness(BLUE, 0.5f);
+            public static final Vector3fc DARK_GREEN = brightness(GREEN, 0.5f);
+            public static final Vector3fc DARK_CYAN = brightness(CYAN, 0.5f);
+            public static final Vector3fc DARK_RED = brightness(RED, 0.5f);
+            public static final Vector3fc DARK_PURPLE = brightness(PURPLE, 0.5f);
+            public static final Vector3fc DARK_YELLOW = brightness(YELLOW, 0.5f);
+            
+        }
         
         private final FloatArrayList vertices = new FloatArrayList();
         private final ShortArrayList indices = new ShortArrayList();
+        private final FloatArrayList colors = new FloatArrayList();
         
         private final IAppender<Float> vertexAppender = new IAppender.FloatCollectionAppender(vertices);
         private final IAppender<Short> indexAppender = new IAppender.ShortCollectionAppender(indices);
+        private final IAppender<Float> colorAppender = new IAppender.FloatCollectionAppender(colors);
         
         private Builder() {
         }
@@ -337,30 +377,53 @@ public final class Mesh {
             return this;
         }
         
-        public Builder addLine(float thickness, Vector2fc... points) {
-            Mesh.addLine(vertexAppender, indexAppender, thickness, points);
+        public Builder pushColor(float r, float g, float b) {
+            colors.push(r);
+            colors.push(g);
+            colors.push(b);
             return this;
         }
         
-        public Builder addEllipse(float width, float height, int smoothness) {
-            Mesh.addEllipse(vertexAppender, indexAppender, width, height, smoothness);
+        public Builder pushColor(Vector3fc color) {
+            pushColor(color.x(), color.y(), color.z());
             return this;
         }
         
-        public Builder addCircle(float radius, int smoothness) {
-            Mesh.addCircle(vertexAppender, indexAppender, radius, smoothness);
+        public Builder addLine(Vector3fc color, float thickness, Vector2fc... points) {
+            Mesh.addLine(vertexAppender, indexAppender, colorAppender, color, thickness, points);
+            return this;
+        }
+        
+        public Builder addRay(Vector3fc color, float thickness, Vector2fc center, Vector2fc direction, float length) {
+            Mesh.addLine(vertexAppender, indexAppender, colorAppender, color, thickness, center, direction.mul(length, new Vector2f()).add(center));
+            return this;
+        }
+        
+        public Builder addRay(Vector3fc color, float thickness, Vector2fc center, Vector2fc direction) {
+            return addRay(color, thickness, center, direction, 1.0f);
+        }
+        
+        public Builder addEllipse(Vector3fc color, float width, float height, int smoothness) {
+            Mesh.addEllipse(vertexAppender, indexAppender, colorAppender, color, width, height, smoothness);
+            return this;
+        }
+        
+        public Builder addCircle(Vector3fc color, float radius, int smoothness) {
+            Mesh.addCircle(vertexAppender, indexAppender, colorAppender, color, radius, smoothness);
             return this;
         }
         
         public Builder clear() {
             vertices.clear();
             indices.clear();
+            colors.clear();
             return this;
         }
         
         public Mesh apply(Mesh mesh) {
             mesh.setVertices(vertices.toArray(new float[0]));
             mesh.setIndices(indices.toArray(new short[0]));
+            if (colors.size() > 0) mesh.setColors(colors.toArray(new float[0]));
             return mesh;
         }
         

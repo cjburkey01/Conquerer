@@ -288,4 +288,12 @@ public final class Util {
         return min(max(val, minInc), maxInc);
     }
     
+    public static Vector2f getNormal(Vector2fc convexVertex, Vector2fc convexCenter) {
+        return convexVertex.sub(convexCenter, new Vector2f()).normalize();
+    }
+    
+    public static Vector2f retractVert(Vector2fc convexVertex, Vector2fc convexCenter, float amount) {
+        return getNormal(convexVertex, convexCenter).mul(-amount).add(convexVertex);
+    }
+    
 }

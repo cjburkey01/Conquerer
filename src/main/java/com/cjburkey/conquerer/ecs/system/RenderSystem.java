@@ -55,7 +55,6 @@ public class RenderSystem extends IteratingSystem {
         
         // Render the mesh
         shaderRender.shader.bind();
-        shaderRender.shader.setUniform("color", shaderRender.color);
         if (camera != null && shaderRender.shader.getTransformsProjection()) shaderRender.shader.setUniform("projectionMatrix", camera.projectionMatrix);
         if (camera != null && shaderRender.shader.getTransformsView()) shaderRender.shader.setUniform("viewMatrix", camera.viewMatrix);
         if (modelMatrix != null && shaderRender.shader.getTransformsModel()) shaderRender.shader.setUniform("modelMatrix", modelMatrix);

@@ -25,7 +25,7 @@ public class WorldHandler {
     public final Terrain terrain = new Terrain(new BasicGenerator());
     public final float minTerritoryDistance;
     public final Rectf terrainBounds;
-    public final Vector3fc edgeColor = new Vector3f(0.5f, 1.0f, 0.5f);
+    public final float borderThickness = 0.05f;
     private Rectf worldBounds;
     
     public WorldHandler(float minTerritoryDistance, Rectf terrainBounds) {
@@ -45,15 +45,12 @@ public class WorldHandler {
     private void generateTerritoryEdges(Territory territory) {
         Mesh.Builder meshBuilder = Mesh.builder();
         
-        for (TerritoryEdge edge : territory.edges) {
-            meshBuilder.addLine(0.05f, edge.pointA, edge.pointB);
-        }
+        territory.updateGraphics(meshBuilder);
         
         Mesh mesh = meshBuilder.apply(new Mesh());
-        int testObj = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
-        Entity ent = INSTANCE.world().getEntity(testObj);
+        int worldTerritoryEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
+        Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
         ent.getComponent(ShaderRender.class).shader = INSTANCE.shader();
-        ent.getComponent(ShaderRender.class).color = edgeColor;
         ent.getComponent(MeshRender.class).mesh = mesh;
         ent.getComponent(Pos.class).position.zero();
     }

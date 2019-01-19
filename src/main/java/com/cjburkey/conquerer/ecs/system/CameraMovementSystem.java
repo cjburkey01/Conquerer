@@ -67,6 +67,8 @@ public class CameraMovementSystem extends IteratingSystem {
         if (smoothMovement != null) {
             // Schedule movement with the smooth mover
             smoothMovement.goalPosition.add(deltaPosition.x, deltaPosition.y, 0.0f);
+            smoothMovement.goalPosition.x = clamp(smoothMovement.goalPosition.x, cameraMovement.bounds.minX, cameraMovement.bounds.maxX);
+            smoothMovement.goalPosition.y = clamp(smoothMovement.goalPosition.y, cameraMovement.bounds.minY, cameraMovement.bounds.maxY);
             
             // Zoom smooth movement is handled separately from the smooth movement system
             cameraMovement.goalZoom = zoom;

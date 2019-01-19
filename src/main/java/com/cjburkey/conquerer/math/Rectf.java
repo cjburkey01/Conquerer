@@ -39,19 +39,6 @@ public class Rectf {
         this.centerY = (minY + maxY) / 2.0f;
     }
     
-    public Rectf(Rectf clone) {
-        minX = clone.minX;
-        minY = clone.minY;
-        maxX = clone.maxX;
-        maxY = clone.maxY;
-        
-        // Filling these instead of calculation may save computation time, but most importantly it eliminates the warning ;)
-        width = clone.width;
-        height = clone.height;
-        centerX = clone.centerX;
-        centerY = clone.centerY;
-    }
-    
     public Vector2f min() {
         return new Vector2f(minX, minY);
     }

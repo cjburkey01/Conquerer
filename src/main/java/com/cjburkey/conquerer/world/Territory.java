@@ -1,10 +1,17 @@
 package com.cjburkey.conquerer.world;
 
+import com.cjburkey.conquerer.gl.Mesh;
+import com.cjburkey.conquerer.math.CounterClockwiseVec2;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.joml.Random;
+import java.util.List;
+import org.joml.Vector2f;
 import org.joml.Vector2fc;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
-import static com.cjburkey.conquerer.gen.Name.*;
+import static com.cjburkey.conquerer.Conquerer.*;
+import static com.cjburkey.conquerer.util.Util.*;
+import static java.util.Collections.*;
 
 /**
  * Created by CJ Burkey on 2019/01/15
@@ -12,13 +19,100 @@ import static com.cjburkey.conquerer.gen.Name.*;
 @SuppressWarnings("WeakerAccess")
 public class Territory {
     
-    public String name;
-    public Vector2fc location;
-    public final ObjectArrayList<TerritoryEdge> edges = new ObjectArrayList<>();
-    public boolean isWater;
+    public static final Vector3fc edgeColor = new Vector3f(0.5f, 1.0f, 0.5f);
     
-    public void randomName(Random random, int minLengthInc, int maxLengthInc) {
-        name = generateName(random, minLengthInc, maxLengthInc);
+    public final String name;
+    public final Vector2fc location;
+    public final Vector2fc center;
+    private final ObjectArrayList<Vector2fc> vertices = new ObjectArrayList<>();
+    public final TerritoryEdge[] edges;
+    public final boolean isWater;
+    
+    private Territory(String name, Vector2fc location, TerritoryEdge[] edges, boolean isWater) {
+        this.name = name;
+        this.location = location;
+        
+        this.edges = edges;
+        this.isWater = isWater;
+        
+        for (TerritoryEdge edge : edges) {
+            if (!vertices.contains(edge.pointA)) vertices.add(edge.pointA);
+            if (!vertices.contains(edge.pointB)) vertices.add(edge.pointB);
+        }
+        vertices.sort(new CounterClockwiseVec2(location));
+        
+        float cx = 0.0f;
+        float cy = 0.0f;
+        for (Vector2fc vertex : vertices) {
+            cx += vertex.x();
+            cy += vertex.y();
+        }
+        center = new Vector2f(cx / vertices.size(), cy / vertices.size());
+    }
+    
+    public List<Vector2fc> vertices() {
+        return unmodifiableList(vertices);
+    }
+    
+    public void updateGraphics(Mesh.Builder meshBuilder) {
+        float bthick = INSTANCE.worldHandler.borderThickness;
+        for (TerritoryEdge edge : edges) {
+            Vector2fc a = retractVert(edge.pointA, center, bthick * 1.5f);
+            Vector2fc b = retractVert(edge.pointB, center, bthick * 1.5f);
+            meshBuilder.addLine(edgeColor, bthick, a, b);
+        }
+    }
+    
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    @SuppressWarnings({"unused", "UnusedReturnValue"})
+    public static class Builder {
+        
+        private String name;
+        private Vector2fc location;
+        private final ObjectArrayList<TerritoryEdge> edges = new ObjectArrayList<>();
+        private boolean isWater;
+        
+        private Builder() {
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+        
+        public Vector2fc getLocation() {
+            return location;
+        }
+        
+        public Builder setLocation(Vector2fc location) {
+            this.location = location;
+            return this;
+        }
+        
+        public ObjectArrayList<TerritoryEdge> getEdges() {
+            return edges;
+        }
+        
+        public boolean isWater() {
+            return isWater;
+        }
+        
+        public Builder setWater(boolean water) {
+            isWater = water;
+            return this;
+        }
+        
+        public Territory build() {
+            return new Territory(name, location, edges.toArray(new TerritoryEdge[0]), isWater);
+        }
+        
     }
     
 }

@@ -11,7 +11,6 @@ import org.joml.Vector2fc;
 import org.joml.Vector2i;
 import org.joml.Vector2ic;
 
-import static com.cjburkey.conquerer.Log.*;
 import static java.lang.Integer.*;
 import static org.joml.Math.*;
 

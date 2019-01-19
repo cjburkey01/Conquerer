@@ -101,4 +101,15 @@ public interface IAppender<T> {
         
     }
     
+    class VoidAppender<T> implements IAppender<T> {
+        
+        public void put(T data) {
+        }
+        
+        public int getPos() {
+            return 0;
+        }
+        
+    }
+    
 }

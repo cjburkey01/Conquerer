@@ -35,6 +35,7 @@ dependencies {
     implementation "org.apache.logging.log4j:log4j-core:$log4jVersion"
     implementation "it.unimi.dsi:fastutil:$fastUtilVersion"
     implementation "net.onedaybeard.artemis:artemis-odb:$artemisVersion"
+    
     implementation "org.lwjgl:lwjgl:$lwjglVersion"
     implementation "org.lwjgl:lwjgl-glfw:$lwjglVersion"
     implementation "org.lwjgl:lwjgl-openal:$lwjglVersion"

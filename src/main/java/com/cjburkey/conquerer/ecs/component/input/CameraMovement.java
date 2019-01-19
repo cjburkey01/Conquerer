@@ -1,6 +1,7 @@
 package com.cjburkey.conquerer.ecs.component.input;
 
 import com.artemis.Component;
+import com.cjburkey.conquerer.math.Rectf;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import org.joml.Vector2f;
 
@@ -19,6 +20,8 @@ public class CameraMovement extends Component {
     public float zoomMoveRatio = 0.5f;
     public float zoomClose = 5.0f;
     public float zoomFar = 50.0f;
+    
+    public Rectf bounds = Rectf.infinite();
     
     public final Vector2f previousMousePos = new Vector2f();
     

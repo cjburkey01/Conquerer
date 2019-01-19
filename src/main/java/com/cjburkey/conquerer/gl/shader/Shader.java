@@ -11,10 +11,11 @@ import org.joml.Vector3fc;
 import org.joml.Vector3ic;
 import org.joml.Vector4fc;
 import org.joml.Vector4ic;
+import org.lwjgl.system.MemoryStack;
 
 import static com.cjburkey.conquerer.Log.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.system.MemoryUtil.*;
+import static org.lwjgl.system.MemoryStack.*;
 
 /**
  * Created by CJ Burkey on 2018/11/25
@@ -155,17 +156,19 @@ public abstract class Shader {
     public void setUniform(String name, Matrix3fc value) {
         int at = getUniformLocation(name);
         if (at < 0) return;
-        FloatBuffer buff = memAllocFloat(9);
-        glUniformMatrix3fv(at, false, value.get(buff));
-        memFree(buff);
+        try (MemoryStack stack = stackPush()) {
+            FloatBuffer buff = stack.mallocFloat(9);
+            glUniformMatrix3fv(at, false, value.get(buff));
+        }
     }
     
     public void setUniform(String name, Matrix4fc value) {
         int at = getUniformLocation(name);
         if (at < 0) return;
-        FloatBuffer buff = memAllocFloat(16);
-        glUniformMatrix4fv(at, false, value.get(buff));
-        memFree(buff);
+        try (MemoryStack stack = stackPush()) {
+            FloatBuffer buff = stack.mallocFloat(16);
+            glUniformMatrix4fv(at, false, value.get(buff));
+        }
     }
     
     private int getUniformLocation(String name) {
