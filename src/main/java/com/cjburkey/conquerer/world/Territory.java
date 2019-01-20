@@ -4,7 +4,6 @@ import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.CounterClockwiseVec2;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
-import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -31,7 +30,6 @@ public class Territory {
     private Territory(String name, Vector2fc location, TerritoryEdge[] edges, boolean isWater) {
         this.name = name;
         this.location = location;
-        
         this.edges = edges;
         this.isWater = isWater;
         
@@ -41,13 +39,7 @@ public class Territory {
         }
         vertices.sort(new CounterClockwiseVec2(location));
         
-        float cx = 0.0f;
-        float cy = 0.0f;
-        for (Vector2fc vertex : vertices) {
-            cx += vertex.x();
-            cy += vertex.y();
-        }
-        center = new Vector2f(cx / vertices.size(), cy / vertices.size());
+        center = center(vertices);
     }
     
     public List<Vector2fc> vertices() {
@@ -56,9 +48,13 @@ public class Territory {
     
     public void updateGraphics(Mesh.Builder meshBuilder) {
         float bthick = INSTANCE.worldHandler.borderThickness;
-        meshBuilder.addLine(edgeColor, true, bthick, vertices.stream()
-                .map(vert -> retractVert(vert, location, bthick * 1.5f))
-                .toArray(Vector2fc[]::new));
+        for (int i = 0; i < vertices.size(); i ++) {
+            vertices.set(i, moveVert(vertices.get(i),
+                    vertices.get((i - 1 + vertices.size()) % vertices.size()),
+                    vertices.get((i + 1 + vertices.size()) % vertices.size()), 
+                    bthick * 1.5f));
+        }
+        meshBuilder.addLine(edgeColor, true, bthick, vertices.toArray(new Vector2fc[0]));
     }
     
     public static Builder builder() {
@@ -108,6 +104,7 @@ public class Territory {
         }
         
         public Territory build() {
+            TerritoryInitializer.generate(this);
             return new Territory(name, location, edges.toArray(new TerritoryEdge[0]), isWater);
         }
         

@@ -288,12 +288,36 @@ public final class Util {
         return min(max(val, minInc), maxInc);
     }
     
-    public static Vector2f getNormal(Vector2fc convexVertex, Vector2fc convexCenter) {
-        return convexVertex.sub(convexCenter, new Vector2f()).normalize();
+    public static Vector2f getTangent(Vector2fc vertex, Vector2fc previous, Vector2fc next) {
+        Vector2f dir = vertex.sub(previous, new Vector2f()).normalize();
+        return ((next.sub(vertex, new Vector2f())).normalize().add((vertex.sub(previous, new Vector2f())).normalize(), new Vector2f())).normalize();
     }
     
-    public static Vector2f retractVert(Vector2fc convexVertex, Vector2fc convexCenter, float amount) {
-        return getNormal(convexVertex, convexCenter).mul(-amount).add(convexVertex);
+    public static Vector2f moveVert(Vector2fc vertex, Vector2fc previous, Vector2fc next, float amount) {
+        Vector2f tan = getTangent(vertex, previous, next);
+        @SuppressWarnings("SuspiciousNameCombination")
+        Vector2f miter = new Vector2f(-tan.y, tan.x).normalize().mul(amount);
+        return miter.add(vertex);
+    }
+    
+    public static Vector2f center(Vector2fc[] vertices) {
+        float cx = 0.0f;
+        float cy = 0.0f;
+        for (Vector2fc vertex : vertices) {
+            cx += vertex.x();
+            cy += vertex.y();
+        }
+        return new Vector2f(cx / vertices.length, cy / vertices.length);
+    }
+    
+    public static Vector2f center(Collection<Vector2fc> vertices) {
+        float cx = 0.0f;
+        float cy = 0.0f;
+        for (Vector2fc vertex : vertices) {
+            cx += vertex.x();
+            cy += vertex.y();
+        }
+        return new Vector2f(cx / vertices.size(), cy / vertices.size());
     }
     
 }
