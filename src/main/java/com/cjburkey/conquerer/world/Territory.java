@@ -56,11 +56,9 @@ public class Territory {
     
     public void updateGraphics(Mesh.Builder meshBuilder) {
         float bthick = INSTANCE.worldHandler.borderThickness;
-        for (TerritoryEdge edge : edges) {
-            Vector2fc a = retractVert(edge.pointA, center, bthick * 1.5f);
-            Vector2fc b = retractVert(edge.pointB, center, bthick * 1.5f);
-            meshBuilder.addLine(edgeColor, bthick, a, b);
-        }
+        meshBuilder.addLine(edgeColor, true, bthick, vertices.stream()
+                .map(vert -> retractVert(vert, location, bthick * 1.5f))
+                .toArray(Vector2fc[]::new));
     }
     
     public static Builder builder() {

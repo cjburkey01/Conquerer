@@ -10,8 +10,6 @@ import com.cjburkey.conquerer.gen.Terrain;
 import com.cjburkey.conquerer.gen.generator.BasicGenerator;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.Rectf;
-import org.joml.Vector3f;
-import org.joml.Vector3fc;
 
 import static com.cjburkey.conquerer.Conquerer.*;
 import static com.cjburkey.conquerer.Log.*;

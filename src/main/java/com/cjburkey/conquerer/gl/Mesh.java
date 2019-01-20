@@ -11,10 +11,10 @@ import java.util.Objects;
 import jdk.internal.jline.internal.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
-import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.lwjgl.system.MemoryStack;
 
+import static com.cjburkey.conquerer.Log.*;
 import static org.joml.Math.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryStack.*;
@@ -179,96 +179,175 @@ public final class Mesh {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     
-    private static void addLine(IAppender<Float> vertices,
+    private static void addLineSegment(IAppender<Float> vertices,
                                 IAppender<Short> indices,
-                                IAppender<Float> colors,
-                                Vector3fc color,
                                 float thickness,
-                                Vector2fc... points) {
-        // Each loop cycle adds a quad segment of the line.
-        // p0---p1...p(n-2)---p(n-1)
-        for (int i = 1; i < points.length; i++) {
-            // Get the previous point and the current point
-            Vector2fc a = points[i - 1];
-            Vector2fc b = points[i];
+                                Vector2fc pointA,
+                                Vector2fc pointB) {
+        // Calculate the normalized vector describing A -> B
+        Vector2f dir = pointB.sub(pointA, new Vector2f()).normalize();
+        
+        // Calculate the point to the right half of the thickness away
+        // This means when we invert it, the left will also be half the thickness away;
+        //      the two put together gives us our <THICKNESS> meter(s) thick line.
+        // (The "SuspiciousNameCombination" warning is IDEA telling me a "y" argument shouldn't
+        //      go into an "x" parameter, but it's used for vector rotation here, so it's intended)
+        @SuppressWarnings("SuspiciousNameCombination")
+        Vector2f r = new Vector2f(dir.y, -dir.x).mul(thickness / 2.0f);
+        
+        // Get the index at which the first vertex of this quad will be.
+        // We must divide by 3 because each 3 floating points is one vertex (x, y, and z)
+        short startingIndex = (short) (vertices.getPos() / 3);
+        
+        // Bottom right vertex (Index: 0)
+        vertices.put(r.x + pointA.x());
+        vertices.put(r.y + pointA.y());
+        vertices.put(0.0f);
+        
+        // Top right vertex (Index: 1)
+        vertices.put(r.x + pointB.x());
+        vertices.put(r.y + pointB.y());
+        vertices.put(0.0f);
+        
+        // Top left vertex (Index: 2)
+        vertices.put(-r.x + pointB.x());
+        vertices.put(-r.y + pointB.y());
+        vertices.put(0.0f);
+        
+        // Bottom left vertex (Index: 3)
+        vertices.put(-r.x + pointA.x());
+        vertices.put(-r.y + pointA.y());
+        vertices.put(0.0f);
+        
+        // First triangle (Indices: 0, 1, 2)
+        indices.put(startingIndex);
+        indices.put((short) (1 + startingIndex));
+        indices.put((short) (2 + startingIndex));
+        
+        // Second triangle (Indices: 0, 2, 3)
+        indices.put(startingIndex);
+        indices.put((short) (2 + startingIndex));
+        indices.put((short) (3 + startingIndex));
+    }
+    
+    private static void addMiterLine(IAppender<Float> vertices,
+                                IAppender<Short> indices,
+                                boolean loops,
+                                float thickness,
+                                Vector2fc[] points) {
+        if (points.length < 3) {
+            return;
+        }
+        
+        short startingIndex = (short) (vertices.getPos() / 3);
+        
+        // Loop from P1 to P(n-2)
+        for (int i = 0; i < points.length; i++) {
+            // Get the current point and its neighboring points
+            Vector2fc pointA = null;
+            if (i > 0 || loops) {
+                pointA = points[(i - 1 + points.length) % points.length];
+            }
+            Vector2fc pointB = points[i];
+            Vector2fc pointC = null;
+            if (i < points.length - 1 || loops) {
+                pointC = points[(i + 1) % points.length];
+            }
             
             // Calculate the normalized vector describing A -> B
-            Vector2f dir = b.sub(a, new Vector2f()).normalize();
+            Vector2f dir;
+            if (pointA != null) {
+                dir = pointB.sub(pointA, new Vector2f()).normalize();
+            } else if (pointC != null) {
+                dir = pointC.sub(pointB, new Vector2f()).normalize();
+            } else {
+                error("Miter line point has neither previous nor subsequent point");
+                return;
+            }
             
-            // Calculate the point to the right half of the thickness away
-            // This means when we invert it, the left will also be half the thickness away;
-            //      the two put together gives us our <THICKNESS> meter(s) thick line.
+            // Calculate the line running tangent to this point
+            Vector2f tan;
+            if (pointA != null && pointC != null) {
+                tan = ((pointC.sub(pointB, new Vector2f())).normalize().add((pointB.sub(pointA, new Vector2f())).normalize(), new Vector2f())).normalize();
+            } else {
+                tan = new Vector2f(dir);
+            }
+            
+            // The normal line is the 90 degree right turn from the A -> B vector
             // (The "SuspiciousNameCombination" warning is IDEA telling me a "y" argument shouldn't
             //      go into an "x" parameter, but it's used for vector rotation here, so it's intended)
             @SuppressWarnings("SuspiciousNameCombination")
-            Vector2f r = new Vector2f(dir.y, -dir.x).mul(thickness / 2.0f);
+            Vector2f normal = new Vector2f(-dir.y, dir.x).normalize();
             
-            // Get the index at which the first vertex of this quad will be.
-            // We must divide by 3 because each 3 floating points is one vertex (x, y, and z)
-            short startingIndex = (short) (vertices.getPos() / 3);
+            // The miter line is a leftward 90 degree rotation of the tangent line
+            @SuppressWarnings("SuspiciousNameCombination")
+            Vector2f miter = new Vector2f(-tan.y, tan.x).normalize();
+            float miterLength = thickness / (2.0f * miter.dot(normal));
+            miter.mul(miterLength);
             
-            // Bottom right vertex (Index: 0)
-            vertices.put(r.x + a.x());
-            vertices.put(r.y + a.y());
+            // Create the vertices along the miter line for this given point
+            vertices.put(pointB.x() + miter.x);
+            vertices.put(pointB.y() + miter.y);
             vertices.put(0.0f);
             
-            if (color != null) {
-                colors.put(color.x());
-                colors.put(color.y());
-                colors.put(color.z());
-            }
-            
-            // Top right vertex (Index: 1)
-            vertices.put(r.x + b.x());
-            vertices.put(r.y + b.y());
+            vertices.put(pointB.x() - miter.x);
+            vertices.put(pointB.y() - miter.y);
             vertices.put(0.0f);
-            
-            if (color != null) {
-                colors.put(color.x());
-                colors.put(color.y());
-                colors.put(color.z());
-            }
-            
-            // Top left vertex (Index: 2)
-            vertices.put(-r.x + b.x());
-            vertices.put(-r.y + b.y());
-            vertices.put(0.0f);
-            
-            if (color != null) {
-                colors.put(color.x());
-                colors.put(color.y());
-                colors.put(color.z());
-            }
-            
-            // Bottom left vertex (Index: 3)
-            vertices.put(-r.x + a.x());
-            vertices.put(-r.y + a.y());
-            vertices.put(0.0f);
-            
-            if (color != null) {
-                colors.put(color.x());
-                colors.put(color.y());
-                colors.put(color.z());
-            }
-            
-            // First triangle (Indices: 0, 1, 2)
-            indices.put(startingIndex);
-            indices.put((short) (1 + startingIndex));
-            indices.put((short) (2 + startingIndex));
-            
-            // Second triangle (Indices: 0, 2, 3)
-            indices.put(startingIndex);
-            indices.put((short) (2 + startingIndex));
-            indices.put((short) (3 + startingIndex));
         }
+        
+        // Triangulate (fill in the indices)
+        short vertsAdded = (short) ((vertices.getPos() / 3) - startingIndex);
+        for (short i = 0; i < points.length - (loops ? 0 : 1); i++) {
+            int index1 = startingIndex + (((i * 2) + 1 + vertsAdded) % vertsAdded);
+            int index2 = startingIndex + (((i * 2) + 2 + vertsAdded) % vertsAdded);
+            
+            indices.put((short) index1);
+            indices.put((short) index2);
+            indices.put((short) (startingIndex + (((i * 2) + vertsAdded) % vertsAdded)));
+            
+            indices.put((short) index1);
+            indices.put((short) (startingIndex + (((i * 2) + 3 + vertsAdded) % vertsAdded)));
+            indices.put((short) index2);
+        }
+    }
+    
+    private static void addQuad(IAppender<Float> vertices,
+                                IAppender<Short> indices,
+                                Vector2fc ccw0,
+                                Vector2fc ccw1,
+                                Vector2fc ccw2,
+                                Vector2fc ccw3) {
+        short startVertex = (short) (vertices.getPos() / 3);
+        
+        vertices.put(ccw0.x());
+        vertices.put(ccw0.y());
+        vertices.put(0.0f);
+        
+        vertices.put(ccw1.x());
+        vertices.put(ccw1.y());
+        vertices.put(0.0f);
+        
+        vertices.put(ccw2.x());
+        vertices.put(ccw2.y());
+        vertices.put(0.0f);
+        
+        vertices.put(ccw3.x());
+        vertices.put(ccw3.y());
+        vertices.put(0.0f);
+        
+        indices.put(startVertex);
+        indices.put((short) (startVertex + 1));
+        indices.put((short) (startVertex + 2));
+        
+        indices.put(startVertex);
+        indices.put((short) (startVertex + 2));
+        indices.put((short) (startVertex + 3));
     }
     
     private static void addEllipse(IAppender<Float> vertices,
                                    IAppender<Short> indices,
-                                   IAppender<Float> colors,
-                                   Vector3fc color, 
-                                   float width, 
-                                   float height, 
+                                   float width,
+                                   float height,
                                    int smoothness) {
         // Require at least vertices
         smoothness = max(smoothness, 4);
@@ -294,12 +373,6 @@ public final class Mesh {
             vertices.put(height * (float) sin(-angle));
             vertices.put(0.0f);
             
-            if (color != null) {
-                colors.put(color.x());
-                colors.put(color.y());
-                colors.put(color.z());
-            }
-            
             // Add the triangle
             indices.put(startingIndex);
             indices.put((short) (startingIndex + (i + 1)));
@@ -309,11 +382,9 @@ public final class Mesh {
     
     private static void addCircle(IAppender<Float> vertices,
                                   IAppender<Short> indices,
-                                  IAppender<Float> colors,
-                                  Vector3fc color,
                                   float radius,
                                   int smoothness) {
-        addEllipse(vertices, indices, colors, color, radius * 2.0f, radius * 2.0f, smoothness);
+        addEllipse(vertices, indices, radius * 2.0f, radius * 2.0f, smoothness);
     }
     
     public static Builder builder() {
@@ -323,39 +394,12 @@ public final class Mesh {
     @SuppressWarnings("UnusedReturnValue")
     public static final class Builder {
         
-        public static final class Colors {
-            
-            public static Vector3fc RGB(float r, float g, float b) { return new Vector3f(r, g, b); }
-            public static Vector3fc RGB(float gray) { return new Vector3f(gray); }
-            public static Vector3fc brightness(Vector3fc color, float brightness) { return color.mul(brightness, new Vector3f()); }
-            
-            public static final Vector3fc BLACK = RGB(0.0f);
-            public static final Vector3fc WHITE = RGB(1.0f);
-            public static final Vector3fc GRAY = RGB(0.5f);
-            
-            public static final Vector3fc BLUE = RGB(0.0f, 0.0f, 1.0f);
-            public static final Vector3fc GREEN = RGB(0.0f, 1.0f, 0.0f);
-            public static final Vector3fc CYAN = RGB(0.0f, 1.0f, 1.0f);
-            public static final Vector3fc RED = RGB(1.0f, 0.0f, 0.0f);
-            public static final Vector3fc PURPLE = RGB(1.0f, 0.0f, 1.0f);
-            public static final Vector3fc YELLOW = RGB(1.0f, 1.0f, 0.0f);
-            
-            public static final Vector3fc DARK_BLUE = brightness(BLUE, 0.5f);
-            public static final Vector3fc DARK_GREEN = brightness(GREEN, 0.5f);
-            public static final Vector3fc DARK_CYAN = brightness(CYAN, 0.5f);
-            public static final Vector3fc DARK_RED = brightness(RED, 0.5f);
-            public static final Vector3fc DARK_PURPLE = brightness(PURPLE, 0.5f);
-            public static final Vector3fc DARK_YELLOW = brightness(YELLOW, 0.5f);
-            
-        }
-        
         private final FloatArrayList vertices = new FloatArrayList();
         private final ShortArrayList indices = new ShortArrayList();
         private final FloatArrayList colors = new FloatArrayList();
         
         private final IAppender<Float> vertexAppender = new IAppender.FloatCollectionAppender(vertices);
         private final IAppender<Short> indexAppender = new IAppender.ShortCollectionAppender(indices);
-        private final IAppender<Float> colorAppender = new IAppender.FloatCollectionAppender(colors);
         
         private Builder() {
         }
@@ -368,8 +412,7 @@ public final class Mesh {
         }
         
         public Builder pushVertex(Vector3fc point) {
-            pushVertex(point.x(), point.y(), point.z());
-            return this;
+            return pushVertex(point.x(), point.y(), point.z());
         }
         
         public Builder pushIndex(short index) {
@@ -385,18 +428,31 @@ public final class Mesh {
         }
         
         public Builder pushColor(Vector3fc color) {
-            pushColor(color.x(), color.y(), color.z());
+            return pushColor(color.x(), color.y(), color.z());
+        }
+        
+        public Builder fillColor(Vector3fc color) {
+            for (int i = colors.size(); i < vertices.size(); i += 3) {
+                colors.add(color.x());
+                colors.add(color.y());
+                colors.add(color.z());
+            }
             return this;
         }
         
-        public Builder addLine(Vector3fc color, float thickness, Vector2fc... points) {
-            Mesh.addLine(vertexAppender, indexAppender, colorAppender, color, thickness, points);
-            return this;
+        public Builder addLine(Vector3fc color, boolean loops, float thickness, Vector2fc... points) {
+            if (points.length < 2) return this;
+            if (points.length == 2) {
+                Mesh.addLineSegment(vertexAppender, indexAppender, thickness, points[0], points[1]);
+            } else {
+                Mesh.addMiterLine(vertexAppender, indexAppender, loops, thickness, points);
+            }
+            return fillColor(color);
         }
         
         public Builder addRay(Vector3fc color, float thickness, Vector2fc center, Vector2fc direction, float length) {
-            Mesh.addLine(vertexAppender, indexAppender, colorAppender, color, thickness, center, direction.mul(length, new Vector2f()).add(center));
-            return this;
+            Mesh.addLineSegment(vertexAppender, indexAppender, thickness, center, direction.mul(length, new Vector2f()).add(center));
+            return fillColor(color);
         }
         
         public Builder addRay(Vector3fc color, float thickness, Vector2fc center, Vector2fc direction) {
@@ -404,13 +460,13 @@ public final class Mesh {
         }
         
         public Builder addEllipse(Vector3fc color, float width, float height, int smoothness) {
-            Mesh.addEllipse(vertexAppender, indexAppender, colorAppender, color, width, height, smoothness);
-            return this;
+            Mesh.addEllipse(vertexAppender, indexAppender, width, height, smoothness);
+            return fillColor(color);
         }
         
         public Builder addCircle(Vector3fc color, float radius, int smoothness) {
-            Mesh.addCircle(vertexAppender, indexAppender, colorAppender, color, radius, smoothness);
-            return this;
+            Mesh.addCircle(vertexAppender, indexAppender, radius, smoothness);
+            return fillColor(color);
         }
         
         public Builder clear() {

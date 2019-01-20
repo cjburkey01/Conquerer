@@ -33,7 +33,6 @@ public final class Conquerer {
     /*
         This is my main area for TODO
         
-        TODO: FIX CORNERS OF LINES IN MESH GENERATION
         TODO: GENERATE PHYSICAL TERRAIN BENEATH TERRITORIES
         TODO: KEEP TRACK OF OWNERS OF TERRITORIES
         TODO: HIDE LINES BETWEEN TERRITORIES OWNED BY THE SAME EMPIRE
@@ -82,7 +81,6 @@ public final class Conquerer {
         // Create starting main camera
         mainCamera = createObject(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
         world.getEntity(mainCamera).getComponent(CameraMovement.class).bounds = worldHandler.terrainBounds;
-        
         world.getEntity(mainCamera).getComponent(Pos.class).position.z = 3.0f;
         world.getEntity(mainCamera).getComponent(SmoothMovement.class).goalPosition.set(0.0f, 0.0f, 3.0f);
         

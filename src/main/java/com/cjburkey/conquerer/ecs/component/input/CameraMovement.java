@@ -18,7 +18,7 @@ public class CameraMovement extends Component {
     public float speed = 50.0f;
     public float zoomSpeed = 1.0f;
     public float zoomMoveRatio = 0.5f;
-    public float zoomClose = 5.0f;
+    public float zoomClose = 1.0f;
     public float zoomFar = 50.0f;
     
     public Rectf bounds = Rectf.infinite();
