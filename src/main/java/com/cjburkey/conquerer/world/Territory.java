@@ -48,13 +48,14 @@ public class Territory {
     
     public void updateGraphics(Mesh.Builder meshBuilder) {
         float bthick = INSTANCE.worldHandler.borderThickness;
-        for (int i = 0; i < vertices.size(); i ++) {
-            vertices.set(i, moveVert(vertices.get(i),
-                    vertices.get((i - 1 + vertices.size()) % vertices.size()),
-                    vertices.get((i + 1 + vertices.size()) % vertices.size()), 
-                    bthick * 1.5f));
+        Vector2fc[] vertices = this.vertices.toArray(new Vector2fc[0]);
+        for (int i = 0; i < vertices.length; i ++) {
+            vertices[i] = moveVert(vertices[i],
+                    vertices[(i - 1 + vertices.length) % vertices.length],
+                    vertices[(i + 1 + vertices.length) % vertices.length], 
+                    bthick * 1.5f);
         }
-        meshBuilder.addLine(edgeColor, true, bthick, vertices.toArray(new Vector2fc[0]));
+        meshBuilder.addLine(edgeColor, true, bthick, vertices);
     }
     
     public static Builder builder() {
