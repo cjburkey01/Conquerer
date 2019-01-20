@@ -26,10 +26,6 @@ public final class Input {
     private static final Vector2f deltaScroll = new Vector2f();
     
     static void init(long window) {
-        keyboardButtons.keySet().forEach((int key) -> keyboardButtons.put(key, false));
-        keyboardButtonsUp.clear();
-        mouseButtons.keySet().forEach((int button) -> mouseButtons.put(button, false));
-        mouseButtonsUp.clear();
         
         glfwSetKeyCallback(window, (win, key, scancode, action, mods) -> {
             if (action == GLFW_PRESS) {
@@ -58,6 +54,11 @@ public final class Input {
     static void update() {
         deltaMousePos.zero();
         deltaScroll.zero();
+        
+        keyboardButtons.keySet().forEach((int key) -> keyboardButtons.put(key, false));
+        keyboardButtonsUp.clear();
+        mouseButtons.keySet().forEach((int button) -> mouseButtons.put(button, false));
+        mouseButtonsUp.clear();
     }
     
     public static boolean getKeyDown(int key) {

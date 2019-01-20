@@ -15,6 +15,7 @@ import com.cjburkey.conquerer.ecs.system.CameraSystem;
 import com.cjburkey.conquerer.ecs.system.RenderSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
+import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.glfw.Window;
 import com.cjburkey.conquerer.math.Plane;
 import com.cjburkey.conquerer.math.Rectf;
@@ -23,6 +24,8 @@ import de.tomgrill.artemis.GameLoopInvocationStrat;
 import org.joml.Vector3f;
 
 import static com.cjburkey.conquerer.Log.*;
+import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Created by CJ Burkey on 2019/01/10
@@ -112,6 +115,14 @@ public final class Conquerer {
     
     public BasicShader shader() {
         return shader;
+    }
+    
+    private boolean fill = true;
+    public void onFrameUpdate() {
+        if (Input.getKeyPressed(GLFW_KEY_C)) {
+            fill = !fill;
+            glPolygonMode(GL_FRONT_AND_BACK, fill ? GL_FILL : GL_LINE);
+        }
     }
     
     @SafeVarargs
