@@ -300,7 +300,7 @@ public final class Util {
         return miter.add(vertex);
     }
     
-    public static Vector2f center(Vector2fc[] vertices) {
+    public static Vector2f center(Vector2fc... vertices) {
         float cx = 0.0f;
         float cy = 0.0f;
         for (Vector2fc vertex : vertices) {

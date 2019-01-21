@@ -37,7 +37,7 @@ public class WorldHandler {
         worldBounds = terrain.bounds().grow(minTerritoryDistance);
         info("Generated territories: {}", terrain.getTerritoryCount());
         
-        terrain.getTerritories().forEach(this::generateTerritoryEdges);
+        terrain.getTerritories().values().forEach(this::generateTerritoryEdges);
     }
     
     private void generateTerritoryEdges(Territory territory) {
@@ -47,6 +47,7 @@ public class WorldHandler {
         
         Mesh mesh = meshBuilder.apply(new Mesh());
         int worldTerritoryEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
+        territory.entity = worldTerritoryEntity;
         Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
         ent.getComponent(ShaderRender.class).shader = INSTANCE.shader();
         ent.getComponent(MeshRender.class).mesh = mesh;

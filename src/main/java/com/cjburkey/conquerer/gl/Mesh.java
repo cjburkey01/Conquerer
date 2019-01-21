@@ -440,14 +440,24 @@ public final class Mesh {
             return this;
         }
         
-        public Builder addLine(Vector3fc color, boolean loops, float thickness, Vector2fc... points) {
+        public Builder addLine(Vector3fc color, boolean loops, float thickness, float z, Vector2fc... points) {
             if (points.length < 2) return this;
+            int startVert = vertices.size();
             if (points.length == 2) {
                 Mesh.addLineSegment(vertexAppender, indexAppender, thickness, points[0], points[1]);
             } else {
                 Mesh.addMiterLine(vertexAppender, indexAppender, loops, thickness, points);
             }
+            if (z != 0.0f) {
+                for (int vert = startVert; vert < vertices.size(); vert += 3) {
+                    vertices.set(vert + 2, z);
+                }
+            }
             return fillColor(color);
+        }
+        
+        public Builder addLine(Vector3fc color, boolean loops, float thickness, Vector2fc... points) {
+            return addLine(color, loops, thickness, 0.0f, points);
         }
         
         public Builder addRay(Vector3fc color, float thickness, Vector2fc center, Vector2fc direction, float length) {

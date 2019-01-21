@@ -2,7 +2,8 @@ package com.cjburkey.conquerer.gen.generator;
 
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.world.Territory;
-import java.util.Set;
+import java.util.Map;
+import org.joml.Vector2fc;
 
 /**
  * Created by CJ Burkey on 2019/01/11
@@ -10,7 +11,7 @@ import java.util.Set;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public interface IGenerator {
     
-    Set<Territory> generateTerritories();
+    Map<Vector2fc, Territory> generateTerritories();
     
     IGenerator setBounds(Rectf bounds);
     IGenerator setMinDistance(float minDistance);

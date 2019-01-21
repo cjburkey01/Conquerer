@@ -2,30 +2,26 @@ package com.cjburkey.conquerer.world;
 
 import java.util.Formatter;
 import java.util.Objects;
-import org.ajwerner.voronoi.VoronoiEdge;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 
 /**
  * Created by CJ Burkey on 2019/01/18
  */
-@SuppressWarnings("WeakerAccess")
 public class TerritoryEdge {
     
+    public Territory territoryA;
+    public Territory territoryB;
     public final Vector2fc pointA;
     public final Vector2fc pointB;
     public final Vector2fc territoryLocA;
-    public final Vector2fc territoryLocB;
+    public Vector2fc territoryLocB;
     
     public TerritoryEdge(Vector2fc pointA, Vector2fc pointB, Vector2fc territoryLocA, Vector2fc territoryLocB) {
         this.pointA = new Vector2f(pointA);
         this.pointB = new Vector2f(pointB);
         this.territoryLocA = new Vector2f(territoryLocA);
         this.territoryLocB = new Vector2f(territoryLocB);
-    }
-    
-    public TerritoryEdge(VoronoiEdge edge) {
-        this(edge.getPointA(), edge.getPointB(), edge.getPoint1(), edge.getPoint2());
     }
     
     public boolean equals(Object o) {

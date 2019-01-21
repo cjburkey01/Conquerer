@@ -123,6 +123,13 @@ public final class Conquerer {
             fill = !fill;
             glPolygonMode(GL_FRONT_AND_BACK, fill ? GL_FILL : GL_LINE);
         }
+        if (Input.getKeyPressed(GLFW_KEY_ESCAPE)) {
+            exit();
+        }
+        if (Input.getKeyPressed(GLFW_KEY_R)) {
+            info("Regenerating terrain");
+            worldHandler.generateWorld();
+        }
     }
     
     @SafeVarargs

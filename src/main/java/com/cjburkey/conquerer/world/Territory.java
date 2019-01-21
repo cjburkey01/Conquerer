@@ -2,6 +2,7 @@ package com.cjburkey.conquerer.world;
 
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.CounterClockwiseVec2;
+import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import org.joml.Vector2fc;
@@ -26,6 +27,7 @@ public class Territory {
     private final ObjectArrayList<Vector2fc> vertices = new ObjectArrayList<>();
     public final TerritoryEdge[] edges;
     public final boolean isWater;
+    public int entity = -1;
     
     private Territory(String name, Vector2fc location, TerritoryEdge[] edges, boolean isWater) {
         this.name = name;
@@ -46,6 +48,13 @@ public class Territory {
         return unmodifiableList(vertices);
     }
     
+    public void cleanupEntity() {
+        if (entity >= 0) {
+            INSTANCE.world().delete(entity);
+            entity = -1;
+        }
+    }
+    
     public void updateGraphics(Mesh.Builder meshBuilder) {
         float bthick = INSTANCE.worldHandler.borderThickness;
         Vector2fc[] vertices = this.vertices.toArray(new Vector2fc[0]);
@@ -56,6 +65,16 @@ public class Territory {
                     bthick * 1.5f);
         }
         meshBuilder.addLine(edgeColor, true, bthick, vertices);
+        
+        for (TerritoryEdge edge : edges) {
+            if (edge.territoryLocB != null) {
+                meshBuilder.addLine(new Vector3f(1.0f).sub(edgeColor),
+                        false,
+                        bthick / 2.0f, 0.1f,
+                        edge.territoryLocA,
+                        Util.center(edge.pointA, edge.pointB));
+            }
+        }
     }
     
     public static Builder builder() {
