@@ -21,6 +21,7 @@ import com.cjburkey.conquerer.math.Plane;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.world.WorldHandler;
 import de.tomgrill.artemis.GameLoopInvocationStrat;
+import org.joml.Random;
 import org.joml.Vector3f;
 
 import static com.cjburkey.conquerer.Log.*;
@@ -64,7 +65,9 @@ public final class Conquerer {
             .build());
     
     // Game world
-    public final WorldHandler worldHandler = new WorldHandler(1.0f, Rectf.fromCenter(0.0f, 0.0f, 30.0f, 30.0f));
+    public final WorldHandler worldHandler = new WorldHandler(new Random(System.nanoTime()), 
+            1.0f,
+            Rectf.fromCenter(0.0f, 0.0f, 30.0f, 30.0f));
     
     public final Plane worldPlane = new Plane(new Vector3f(), new Vector3f(0.0f, 0.0f, 1.0f));
     

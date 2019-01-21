@@ -3,6 +3,7 @@ package com.cjburkey.conquerer.math;
 import com.cjburkey.conquerer.util.Util;
 import java.util.Formatter;
 import java.util.Objects;
+import org.joml.Random;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 
@@ -65,6 +66,12 @@ public class Rectf {
     
     public Rectf grow(float amount) {
         return grow(amount, amount);
+    }
+    
+    public Vector2f getRandomPoint(Random random) {
+        float x = random.nextFloat() * width - minX;
+        float y = random.nextFloat() * height - minY;
+        return new Vector2f(x, y);
     }
     
     public boolean contains(float x, float y, boolean incMax) {

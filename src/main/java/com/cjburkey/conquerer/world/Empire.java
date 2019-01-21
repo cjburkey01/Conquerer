@@ -1,6 +1,5 @@
 package com.cjburkey.conquerer.world;
 
-import java.util.UUID;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -10,7 +9,6 @@ import org.joml.Vector3fc;
 @SuppressWarnings("WeakerAccess")
 public class Empire {
     
-    public final UUID uuid = UUID.randomUUID();
     public final String name;
     public final Vector3fc color;
     

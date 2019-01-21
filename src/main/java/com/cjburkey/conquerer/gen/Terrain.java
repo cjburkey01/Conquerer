@@ -2,6 +2,7 @@ package com.cjburkey.conquerer.gen;
 
 import com.cjburkey.conquerer.gen.generator.IGenerator;
 import com.cjburkey.conquerer.math.Rectf;
+import com.cjburkey.conquerer.world.BiomeHandler;
 import com.cjburkey.conquerer.world.Territory;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Collections;
@@ -9,7 +10,6 @@ import java.util.Map;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 
-import static com.cjburkey.conquerer.Conquerer.*;
 import static com.cjburkey.conquerer.util.Util.*;
 
 /**
@@ -19,13 +19,15 @@ import static com.cjburkey.conquerer.util.Util.*;
 public class Terrain {
     
     public final IGenerator generator;
+    public final BiomeHandler biomeHandler;
     
     private final Object2ObjectOpenHashMap<Vector2fc, Territory> territories = new Object2ObjectOpenHashMap<>();
     private final Vector2f min = new Vector2f();
     private final Vector2f max = new Vector2f();
     private Rectf bounds;
     
-    public Terrain(IGenerator generator) {
+    public Terrain(BiomeHandler biomeHandler, IGenerator generator) {
+        this.biomeHandler = biomeHandler;
         this.generator = generator;
         reset();
     }

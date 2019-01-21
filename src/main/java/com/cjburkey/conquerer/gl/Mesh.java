@@ -350,7 +350,7 @@ public final class Mesh {
                                    float height,
                                    int smoothness) {
         // Require at least vertices
-        smoothness = max(smoothness, 4);
+        smoothness = Util.max(smoothness, 4);
         
         // Get the rotation amount between vertices
         final float frac = 2.0f * (float) PI / smoothness;
@@ -476,6 +476,21 @@ public final class Mesh {
         
         public Builder addCircle(Vector3fc color, float radius, int smoothness) {
             Mesh.addCircle(vertexAppender, indexAppender, radius, smoothness);
+            return fillColor(color);
+        }
+        
+        public Builder addPolygon(Vector3fc color, Vector2fc... ccwVertices) {
+            Vector2f center = Util.center(ccwVertices);
+            short startingIndex = (short) (vertexAppender.getPos() / 3);
+            pushVertex(center.x, center.y, 0.0f);
+            for (Vector2fc vertex : ccwVertices) {
+                pushVertex(vertex.x(), vertex.y(), 0.0f);
+            }
+            for (int i = 0; i < ccwVertices.length; i++) {
+                indexAppender.put(startingIndex);
+                indexAppender.put((short) (startingIndex + (i + 1)));
+                indexAppender.put((short) (startingIndex + (((i + ccwVertices.length - 1) % ccwVertices.length) + 1)));
+            }
             return fillColor(color);
         }
         
