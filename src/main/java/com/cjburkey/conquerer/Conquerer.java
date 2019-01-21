@@ -43,6 +43,7 @@ public final class Conquerer {
      */
     
     private static final int UPS = 60;
+    public static final Random RANDOM = new Random(System.nanoTime());
     
     public int mainCamera = -1;
     
@@ -65,9 +66,7 @@ public final class Conquerer {
             .build());
     
     // Game world
-    public final WorldHandler worldHandler = new WorldHandler(new Random(System.nanoTime()), 
-            1.0f,
-            Rectf.fromCenter(0.0f, 0.0f, 30.0f, 30.0f));
+    public final WorldHandler worldHandler = new WorldHandler(1.0f, Rectf.fromCenter(0.0f, 0.0f, 30.0f, 30.0f));
     
     public final Plane worldPlane = new Plane(new Vector3f(), new Vector3f(0.0f, 0.0f, 1.0f));
     
@@ -82,7 +81,7 @@ public final class Conquerer {
         shader = new BasicShader("colored", true, true, true);
         
         // Generate and render the world
-        worldHandler.generateWorld();
+        worldHandler.generateWorld(RANDOM);
         
         // Create starting main camera
         mainCamera = createObject(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
@@ -131,7 +130,7 @@ public final class Conquerer {
         }
         if (Input.getKeyPressed(GLFW_KEY_R)) {
             info("Regenerating terrain");
-            worldHandler.generateWorld();
+            worldHandler.generateWorld(RANDOM);
         }
     }
     

@@ -15,7 +15,7 @@ public class CounterClockwiseVec2 implements Comparator<Vector2fc> {
     }
     
     public int compare(Vector2fc o1, Vector2fc o2) {
-        return -clockwiseVec2.compare(o1, o2);  // Negate clockwise
+        return -clockwiseVec2.compare(o1, o2);      // Negate clockwise
     }
     
 }

@@ -320,12 +320,12 @@ public final class Util {
         return new Vector2f(cx / vertices.size(), cy / vertices.size());
     }
     
-    public static float simplexSample2f(float min, float max, float noiseScale, float x, float y) {
-        return ((max - min) * (((float) SimplexNoise.noise(x / noiseScale, y / noiseScale) + 1.0f) / 2.0f)) + min;
+    public static float simplexSample2f(float min, float max, float noiseScale, float x, float y, int seed) {
+        return ((max - min) * (((float) SimplexNoise.noise(x / noiseScale + seed, y / noiseScale + seed) + 1.0f) / 2.0f)) + min;
     }
     
-    public static float simplexSample2f(float min, float max, float noiseScale, Vector2fc location) {
-        return simplexSample2f(min, max, noiseScale, location.x(), location.y());
+    public static float simplexSample2f(float min, float max, float noiseScale, Vector2fc location, int seed) {
+        return simplexSample2f(min, max, noiseScale, location.x(), location.y(), seed);
     }
     
 }

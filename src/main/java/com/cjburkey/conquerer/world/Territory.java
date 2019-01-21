@@ -4,6 +4,7 @@ import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.ClockwiseVec2;
 import com.cjburkey.conquerer.math.CounterClockwiseVec2;
+import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import org.joml.Vector2fc;
@@ -43,7 +44,7 @@ public class Territory {
             if (!vertices.contains(edge.pointA)) vertices.add(edge.pointA);
             if (!vertices.contains(edge.pointB)) vertices.add(edge.pointB);
         }
-        vertices.sort(new ClockwiseVec2(location));
+        vertices.sort(new CounterClockwiseVec2(Util.center(vertices)));
         
         center = center(vertices);
     }
@@ -67,7 +68,7 @@ public class Territory {
     }
     
     public void updateGraphics(Mesh.Builder meshBuilder) {
-        if (currentOwner != null) {
+//        if (currentOwner != null) {
             float bthick = INSTANCE.worldHandler.borderThickness;
             Vector2fc[] vertices = this.vertices.toArray(new Vector2fc[0]);
             for (int i = 0; i < vertices.length; i++) {
@@ -77,9 +78,9 @@ public class Territory {
                         -bthick * 1.5f);
             }
             meshBuilder.addLine(edgeColor, true, bthick, vertices);
-        }
+//        }
         if (biome != null) {
-            meshBuilder.addPolygon(biome.color/*.mul(0.5f, new Vector3f())*/, this.vertices.toArray(new Vector2fc[0]));
+            meshBuilder.addPolygon(biome.color.mul(0.5f, new Vector3f()), this.vertices.toArray(new Vector2fc[0]));
         }
     }
     

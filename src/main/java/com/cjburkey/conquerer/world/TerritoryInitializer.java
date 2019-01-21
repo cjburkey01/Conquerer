@@ -16,8 +16,11 @@ class TerritoryInitializer {
         final BiomeHandler biomeHandler = worldHandler.terrain.biomeHandler;
         
         final Vector2fc location = territoryBuilder.getLocation();
-        float temp = simplexSample2f(biomeHandler.getBounds().minX, biomeHandler.getBounds().maxX, tempScale, location);
-        float precip = simplexSample2f(biomeHandler.getBounds().minY, biomeHandler.getBounds().maxY, precipScale, location);
+        
+        // Bound X = Temperature
+        // Bound Y = Precipitation
+        float temp = simplexSample2f(biomeHandler.getBounds().minX, biomeHandler.getBounds().maxX, tempScale, location, worldHandler.seed());
+        float precip = simplexSample2f(biomeHandler.getBounds().minY, biomeHandler.getBounds().maxY, precipScale, location, worldHandler.seed());
         
         territoryBuilder.setBiome(biomeHandler.getBiome(temp, precip));
     }

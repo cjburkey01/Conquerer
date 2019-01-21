@@ -21,30 +21,33 @@ import static com.cjburkey.conquerer.Log.*;
 @SuppressWarnings("WeakerAccess")
 public class WorldHandler {
     
-    public final long seed;
+    private int seed = 0;
     public final Terrain terrain = new Terrain(new BiomeHandler(), new BasicGenerator());
     public final float minTerritoryDistance;
     public final Rectf terrainBounds;
     public final float borderThickness = 0.05f;
     private Rectf worldBounds;
     
-    public WorldHandler(long seed, float minTerritoryDistance, Rectf terrainBounds) {
-        this.seed = seed;
+    public WorldHandler(float minTerritoryDistance, Rectf terrainBounds) {
         this.minTerritoryDistance = minTerritoryDistance;
         this.terrainBounds = terrainBounds;
     }
     
-    public WorldHandler(Random random, float minTerritoryDistance, Rectf terrainBounds) {
-        this(random.nextInt(Integer.MAX_VALUE - 1) - (Integer.MAX_VALUE - 1) / 2, minTerritoryDistance, terrainBounds);
-    }
-    
-    public void generateWorld() {
+    public void generateWorld(int seed) {
+        this.seed = seed;
         terrain.generator.setMinDistance(minTerritoryDistance).setBounds(terrainBounds);
         terrain.generate();
         worldBounds = terrain.bounds().grow(minTerritoryDistance);
         info("Generated territories: {}", terrain.getTerritoryCount());
         
         terrain.getTerritories().values().forEach(this::generateTerritoryEdges);
+    }
+    
+    public void generateWorld(Random random) {
+        // Terrain generation stops working for seeds above 2000000 or so.
+        // The simplex noise implementation we use is fast, but not perfect at higher numbers.
+        // This allows a total possible number of 4000000 worlds.
+        generateWorld(random.nextInt(2000000 * 2) - 2000000);
     }
     
     private void generateTerritoryEdges(Territory territory) {
@@ -59,6 +62,10 @@ public class WorldHandler {
         ent.getComponent(ShaderRender.class).shader = INSTANCE.shader();
         ent.getComponent(MeshRender.class).mesh = mesh;
         ent.getComponent(Pos.class).position.zero();
+    }
+    
+    public int seed() {
+        return seed;
     }
     
     public Rectf worldBounds() {
