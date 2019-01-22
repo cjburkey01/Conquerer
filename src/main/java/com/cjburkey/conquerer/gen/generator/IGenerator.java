@@ -2,6 +2,7 @@ package com.cjburkey.conquerer.gen.generator;
 
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.world.Territory;
+import com.cjburkey.conquerer.world.WorldHandler;
 import java.util.Map;
 import org.joml.Vector2fc;
 
@@ -11,7 +12,7 @@ import org.joml.Vector2fc;
 @SuppressWarnings({"UnusedReturnValue", "unused"})
 public interface IGenerator {
     
-    Map<Vector2fc, Territory> generateTerritories();
+    Map<Vector2fc, Territory> generateTerritories(WorldHandler worldHandler);
     
     IGenerator setBounds(Rectf bounds);
     IGenerator setMinDistance(float minDistance);

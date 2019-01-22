@@ -1,8 +1,10 @@
 package com.cjburkey.conquerer.util;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.Collection;
@@ -21,6 +23,7 @@ import org.lwjgl.system.MemoryStack;
 import static com.cjburkey.conquerer.Log.*;
 import static java.nio.charset.StandardCharsets.*;
 import static org.lwjgl.system.MemoryStack.*;
+import static org.lwjgl.system.MemoryUtil.*;
 
 /**
  * Created by CJ Burkey on 2019/01/12
@@ -28,7 +31,9 @@ import static org.lwjgl.system.MemoryStack.*;
 @SuppressWarnings({"unused", "WeakerAccess"})
 public final class Util {
     
-    public static Optional<String> readResource(String path) {
+    // -- RESOURCE LOADING -- //
+    
+    public static Optional<InputStream> getStreanForResource(String path) {
         path = path.replaceAll(Pattern.quote("\\"), "/").trim();
         while (path.startsWith("/")) path = path.substring(1);
         while (path.endsWith("/")) path = path.substring(0, path.length() - 1);
@@ -38,7 +43,13 @@ public final class Util {
             exception(new FileNotFoundException("Failed to locate resource: " + path));
             return Optional.empty();
         }
-        return readStream(stream);
+        return Optional.of(stream);
+    }
+    
+    public static Optional<String> readResource(String path) {
+        Optional<InputStream> stream = getStreanForResource(path);
+        if (!stream.isPresent()) return Optional.empty();
+        return readStream(stream.get());
     }
     
     public static Optional<String> readStream(InputStream stream) {
@@ -52,6 +63,23 @@ public final class Util {
         }
         return Optional.of(output.toString().trim());
     }
+    
+    public static Optional<ByteBuffer> readRawStream(InputStream stream) {
+        if (stream == null) return Optional.empty();
+        ByteBuffer output;
+        try {
+            byte[] bytes = IOUtils.toByteArray(stream);
+            output = memAlloc(bytes.length);
+            output.put(bytes);
+            output.flip();
+        } catch (IOException e) {
+            exception(e);
+            return Optional.empty();
+        }
+        return Optional.of(output);
+    }
+    
+    // -- BUFFER UTILS -- //
     
     public static FloatBuffer bufferVec3(MemoryStack stack, Collection<Vector3f> vectors) {
         FloatBuffer buffer = stack.mallocFloat(vectors.size() * 3);
@@ -109,6 +137,8 @@ public final class Util {
         return buffer;
     }
     
+    // -- LERPING -- //
+    
     public static float lerp(float start, float goal, float progress) {
         return start + (goal - start) * progress;
     }
@@ -130,6 +160,8 @@ public final class Util {
                 lerp(start.z(), goal.z(), progress),
                 lerp(start.w(), goal.w(), progress));
     }
+    
+    // -- SMOOTH DAMPING -- //
     
     // Stolen (translated) from Unity C# (shhh)
     public static float dampSpringCrit(float target, float current, float[] velocity, float smoothTime, float deltaTime) {
@@ -210,11 +242,17 @@ public final class Util {
         return new Vector3f(valueX, valueY, valueZ);
     }
     
+    // -- RANDOM -- //
+    
     public static int nextInt(Random random, int min, int maxInc) {
         return random.nextInt(maxInc - min + 1) + min;
     }
     
-    // -- MORE PURE UTILS -- //
+    public static float nextFloat(Random random, float min, float max) {
+        return (random.nextFloat() * (max - min)) + min;
+    }
+    
+    // -- PURE NUMBER UTILS -- //
     
     public static byte min(byte a, byte b) {
         return a > b ? b : a;
@@ -288,6 +326,8 @@ public final class Util {
         return min(max(val, minInc), maxInc);
     }
     
+    // -- VECTOR UTILS -- //
+    
     public static Vector2f getTangent(Vector2fc vertex, Vector2fc previous, Vector2fc next) {
         Vector2f dir = vertex.sub(previous, new Vector2f()).normalize();
         return ((next.sub(vertex, new Vector2f())).normalize().add((vertex.sub(previous, new Vector2f())).normalize(), new Vector2f())).normalize();
@@ -320,12 +360,26 @@ public final class Util {
         return new Vector2f(cx / vertices.size(), cy / vertices.size());
     }
     
+    // -- NOISE SAMPLING -- //
+    
     public static float simplexSample2f(float min, float max, float noiseScale, float x, float y, int seed) {
         return ((max - min) * (((float) SimplexNoise.noise(x / noiseScale + seed, y / noiseScale + seed) + 1.0f) / 2.0f)) + min;
     }
     
     public static float simplexSample2f(float min, float max, float noiseScale, Vector2fc location, int seed) {
         return simplexSample2f(min, max, noiseScale, location.x(), location.y(), seed);
+    }
+    
+    // -- COLOR UTILS -- //
+    
+    public static Vector3f randomColor(Random random, float minBrightness, float maxBrightness) {
+        return new Vector3f(nextFloat(random, minBrightness, maxBrightness),
+                nextFloat(random, minBrightness, maxBrightness),
+                nextFloat(random, minBrightness, maxBrightness));
+    }
+    
+    public static Vector3f randomGray(Random random, float minBrightness, float maxBrightness) {
+        return new Vector3f(nextFloat(random, minBrightness, maxBrightness));
     }
     
 }

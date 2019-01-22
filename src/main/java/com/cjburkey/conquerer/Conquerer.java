@@ -3,25 +3,33 @@ package com.cjburkey.conquerer;
 import com.artemis.ArchetypeBuilder;
 import com.artemis.BaseSystem;
 import com.artemis.Component;
+import com.artemis.Entity;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.input.CameraMovement;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
+import com.cjburkey.conquerer.ecs.component.render.MeshRender;
+import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
 import com.cjburkey.conquerer.ecs.component.transform.Rot;
+import com.cjburkey.conquerer.ecs.component.transform.Scale;
 import com.cjburkey.conquerer.ecs.system.CameraMovementSystem;
 import com.cjburkey.conquerer.ecs.system.CameraSystem;
 import com.cjburkey.conquerer.ecs.system.RenderSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
+import com.cjburkey.conquerer.gl.Mesh;
+import com.cjburkey.conquerer.gl.TextHelper;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
 import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.glfw.Window;
 import com.cjburkey.conquerer.math.Plane;
 import com.cjburkey.conquerer.math.Rectf;
+import com.cjburkey.conquerer.util.Util;
 import com.cjburkey.conquerer.world.WorldHandler;
 import de.tomgrill.artemis.GameLoopInvocationStrat;
 import org.joml.Random;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import static com.cjburkey.conquerer.Log.*;
@@ -45,12 +53,15 @@ public final class Conquerer {
     private static final int UPS = 60;
     public static final Random RANDOM = new Random(System.nanoTime());
     
+    public static final TextHelper.Font robotoRegular = TextHelper.loadFont(Util.getStreanForResource("font/Roboto/Roboto-Regular.ttf").orElse(null));
+    
     public int mainCamera = -1;
     
     // Game engine
     private boolean running = false;
     private Window window;
-    private BasicShader shader;
+    private BasicShader shaderColored;
+    private BasicShader shaderTextured;
     
     private static final BaseSystem[] ARTEMIS_SYSTEMS = new BaseSystem[] {
             new SmoothMovementSystem(),
@@ -78,10 +89,26 @@ public final class Conquerer {
         window.setClearColor(0.1f, 0.1f, 0.1f);
         window.show();
         
-        shader = new BasicShader("colored", true, true, true);
+        shaderColored = new BasicShader("colored/colored", true, true, true);
+        shaderTextured = new BasicShader("textured/textured", true, true, true);
+        
+        {
+            TextHelper.FontBitmap bitmap = robotoRegular.generateBitmap("Hello world!", 36);
+            bitmap.texture.bind();
+            Mesh.Builder meshBuilder = Mesh.builder();
+            meshBuilder.addText(bitmap, "Hello world!");
+//            meshBuilder.addUvQuad(new Vector2f(), new Vector2f(1.0f), new Vector2f(0.0f, 1.0f), new Vector2f(1.0f, 0.0f));
+            Mesh mesh = meshBuilder.apply(new Mesh());
+            int worldTerritoryEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
+            Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
+            ent.getComponent(ShaderRender.class).shader = shaderTextured;
+            shaderTextured.setUniform("sampler", 0);
+            ent.getComponent(MeshRender.class).mesh = mesh;
+            ent.getComponent(Pos.class).position.set(0.0f, 0.0f, 1.0f);
+        }
         
         // Generate and render the world
-        worldHandler.generateWorld(RANDOM);
+//        worldHandler.generateWorld(RANDOM);
         
         // Create starting main camera
         mainCamera = createObject(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
@@ -115,8 +142,12 @@ public final class Conquerer {
         return world;
     }
     
-    public BasicShader shader() {
-        return shader;
+    public BasicShader shaderColored() {
+        return shaderColored;
+    }
+    
+    public BasicShader shaderTextured() {
+        return shaderTextured;
     }
     
     private boolean fill = true;

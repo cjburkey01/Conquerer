@@ -4,6 +4,7 @@ import com.cjburkey.conquerer.gen.generator.IGenerator;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.world.BiomeHandler;
 import com.cjburkey.conquerer.world.Territory;
+import com.cjburkey.conquerer.world.WorldHandler;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.util.Collections;
 import java.util.Map;
@@ -35,16 +36,16 @@ public class Terrain {
     public Terrain reset() {
         territories.values().forEach(Territory::cleanupEntity);
         territories.clear();
-        min.set(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
-        max.set(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+        min.set(Float.POSITIVE_INFINITY);
+        max.set(Float.NEGATIVE_INFINITY);
         bounds = null;
         return this;
     }
     
-    public Terrain generate() {
+    public Terrain generate(WorldHandler worldHandler) {
         // [Re]generate the terrain
         reset();
-        this.territories.putAll(generator.generateTerritories());
+        this.territories.putAll(generator.generateTerritories(worldHandler));
         
         // Calculate the new bounds
         for (Territory territory : territories.values()) {

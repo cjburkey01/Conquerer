@@ -5,6 +5,7 @@ import com.cjburkey.conquerer.gen.Poisson;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.world.Territory;
 import com.cjburkey.conquerer.world.TerritoryEdge;
+import com.cjburkey.conquerer.world.WorldHandler;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Map;
@@ -25,9 +26,9 @@ public class BasicGenerator implements IGenerator {
     private Rectf genBounds = Rectf.fromCenter(0.0f, 0.0f, 25.0f, 25.0f);
     private float minDistance = 1.0f;
     
-    public Map<Vector2fc, Territory> generateTerritories() {
+    public Map<Vector2fc, Territory> generateTerritories(WorldHandler worldHandler) {
         // DEBUG
-        debug("Generating territories within {}", genBounds);
+        debug("Generating (seed: {}) territories within {}", worldHandler.seed(), genBounds);
         debug("Discarding excess territories outside {}", trueBounds);
         long start = System.nanoTime();
         
@@ -62,7 +63,7 @@ public class BasicGenerator implements IGenerator {
                 }
             }
             if (!isDestroyed) {
-                Territory territory = builder.build();
+                Territory territory = builder.build(worldHandler);
                 territoriesMap.put(territory.location, territory);
             }
         }

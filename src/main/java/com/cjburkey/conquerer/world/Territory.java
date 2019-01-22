@@ -2,7 +2,6 @@ package com.cjburkey.conquerer.world;
 
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.gl.Mesh;
-import com.cjburkey.conquerer.math.ClockwiseVec2;
 import com.cjburkey.conquerer.math.CounterClockwiseVec2;
 import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -13,6 +12,7 @@ import org.joml.Vector3fc;
 
 import static com.cjburkey.conquerer.Conquerer.*;
 import static com.cjburkey.conquerer.util.Util.*;
+import static com.cjburkey.conquerer.world.TerritoryInitializer.*;
 import static java.util.Collections.*;
 
 /**
@@ -21,7 +21,7 @@ import static java.util.Collections.*;
 @SuppressWarnings("WeakerAccess")
 public class Territory {
     
-    public static final Vector3fc edgeColor = new Vector3f(0.5f, 1.0f, 0.5f);
+    public static final Vector3fc waterColor = new Vector3f(0.0f, 0.467f, 0.745f);
     
     public final String name;
     public final Vector2fc location;
@@ -31,7 +31,7 @@ public class Territory {
     private BiomeHandler.Biome biome;
     public final boolean isWater;
     public int entity = -1;
-    private Empire currentOwner;
+    private EmpireHandler.Empire currentOwner;
     
     private Territory(String name, Vector2fc location, TerritoryEdge[] edges, BiomeHandler.Biome biome, boolean isWater) {
         this.name = name;
@@ -68,7 +68,7 @@ public class Territory {
     }
     
     public void updateGraphics(Mesh.Builder meshBuilder) {
-//        if (currentOwner != null) {
+        if (currentOwner != null) {
             float bthick = INSTANCE.worldHandler.borderThickness;
             Vector2fc[] vertices = this.vertices.toArray(new Vector2fc[0]);
             for (int i = 0; i < vertices.length; i++) {
@@ -77,22 +77,22 @@ public class Territory {
                         vertices[(i + 1 + vertices.length) % vertices.length],
                         -bthick * 1.5f);
             }
-            meshBuilder.addLine(edgeColor, true, bthick, vertices);
-//        }
+            meshBuilder.addLine(currentOwner.color, true, bthick, vertices);
+        }
         if (biome != null) {
-            meshBuilder.addPolygon(biome.color.mul(0.5f, new Vector3f()), this.vertices.toArray(new Vector2fc[0]));
+            meshBuilder.addPolygon(isWater ? waterColor : biome.color, this.vertices.toArray(new Vector2fc[0]));
         }
     }
     
-    public void setCurrentOwner(Empire empire) {
+    public void setCurrentOwner(EmpireHandler.Empire empire) {
         currentOwner = empire;
         refreshGraphics();
     }
-
-    public Empire getCurrentOwner() {
+    
+    public EmpireHandler.Empire getCurrentOwner() {
         return currentOwner;
     }
-
+    
     public void setBiome(BiomeHandler.Biome biome) {
         if (biome == null) return;
         this.biome = biome;
@@ -119,17 +119,13 @@ public class Territory {
         private Builder() {
         }
         
-        public String getName() {
-            return name;
-        }
-        
         public Builder setName(String name) {
             this.name = name;
             return this;
         }
         
-        public Vector2fc getLocation() {
-            return location;
+        public String getName() {
+            return name;
         }
         
         public Builder setLocation(Vector2fc location) {
@@ -137,12 +133,12 @@ public class Territory {
             return this;
         }
         
-        public ObjectArrayList<TerritoryEdge> getEdges() {
-            return edges;
+        public Vector2fc getLocation() {
+            return location;
         }
         
-        public boolean isWater() {
-            return isWater;
+        public ObjectArrayList<TerritoryEdge> getEdges() {
+            return edges;
         }
         
         public Builder setWater(boolean isWater) {
@@ -150,8 +146,8 @@ public class Territory {
             return this;
         }
         
-        public BiomeHandler.Biome getBiome() {
-            return biome;
+        public boolean isWater() {
+            return isWater;
         }
         
         public Builder setBiome(BiomeHandler.Biome biome) {
@@ -159,8 +155,12 @@ public class Territory {
             return this;
         }
         
-        public Territory build() {
-            TerritoryInitializer.generate(INSTANCE.worldHandler, this);
+        public BiomeHandler.Biome getBiome() {
+            return biome;
+        }
+        
+        public Territory build(WorldHandler worldHandler) {
+            generateTerritoryBiome(worldHandler, this);
             return new Territory(name, location, edges.toArray(new TerritoryEdge[0]), biome, isWater);
         }
         

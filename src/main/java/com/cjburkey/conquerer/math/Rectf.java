@@ -149,4 +149,18 @@ public class Rectf {
         return new Rectf(NEGATIVE_INFINITY, NEGATIVE_INFINITY, POSITIVE_INFINITY, POSITIVE_INFINITY);
     }
     
+    public static Rectf containing(Rectf... containAll) {
+        float minX = POSITIVE_INFINITY;
+        float minY = POSITIVE_INFINITY;
+        float maxX = NEGATIVE_INFINITY;
+        float maxY = NEGATIVE_INFINITY;
+        for (Rectf contained : containAll) {
+            minX = Util.min(minX, contained.minX);
+            minY = Util.min(minY, contained.minY);
+            maxX = Util.max(maxX, contained.maxX);
+            maxY = Util.max(maxY, contained.maxY);
+        }
+        return new Rectf(minX, minY, maxX, maxY);
+    }
+    
 }

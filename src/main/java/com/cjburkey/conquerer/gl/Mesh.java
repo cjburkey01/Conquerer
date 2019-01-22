@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
+import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.IAppender;
 import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
@@ -12,6 +13,7 @@ import jdk.internal.jline.internal.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3fc;
+import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryStack;
 
 import static com.cjburkey.conquerer.Log.*;
@@ -33,6 +35,7 @@ public final class Mesh {
     private int[] vbo = new int[1];     // Vertices
     private int[] ebo = new int[1];     // Triangles
     private int[] cbo = new int[1];     // Colors
+    private int[] uvbo = new int[1];    // Texture coordinates
     
     // Lists of buffers and vertex attributes used by this mesh
     private IntOpenHashSet buffers = new IntOpenHashSet();
@@ -76,6 +79,17 @@ public final class Mesh {
     public Mesh setColors(final float[] indices) {
         try (final MemoryStack stack = stackPush()) {
             return setColors(Util.bufferFloat(stack, indices));
+        }
+    }
+    
+    public Mesh setUvs(@Nullable FloatBuffer uvs) {
+        bufferData(GL_ARRAY_BUFFER, cbo, uvs, 2, GL_FLOAT, 2);
+        return this;
+    }
+    
+    public Mesh setUvs(final float[] uvs) {
+        try (final MemoryStack stack = stackPush()) {
+            return setUvs(Util.bufferFloat(stack, uvs));
         }
     }
     
@@ -397,6 +411,7 @@ public final class Mesh {
         private final FloatArrayList vertices = new FloatArrayList();
         private final ShortArrayList indices = new ShortArrayList();
         private final FloatArrayList colors = new FloatArrayList();
+        private final FloatArrayList uvs = new FloatArrayList();
         
         private final IAppender<Float> vertexAppender = new IAppender.FloatCollectionAppender(vertices);
         private final IAppender<Short> indexAppender = new IAppender.ShortCollectionAppender(indices);
@@ -438,6 +453,16 @@ public final class Mesh {
                 colors.add(color.z());
             }
             return this;
+        }
+        
+        public Builder pushUv(float x, float y) {
+            uvs.push(x);
+            uvs.push(y);
+            return this;
+        }
+        
+        public Builder pushUv(Vector2fc uv) {
+            return pushUv(uv.x(), uv.y());
         }
         
         public Builder addLine(Vector3fc color, boolean loops, float thickness, float z, Vector2fc... points) {
@@ -494,10 +519,66 @@ public final class Mesh {
             return fillColor(color);
         }
         
+        public Builder addUvQuad(Vector2fc topLeft, Vector2fc bottomRight, Vector2fc uvTopLeft, Vector2fc uvBottomRight) {
+            pushVertex(topLeft.x(), topLeft.y(), 0.0f);
+            pushVertex(topLeft.x(), bottomRight.y(), 0.0f);
+            pushVertex(bottomRight.x(), bottomRight.y(), 0.0f);
+            pushVertex(bottomRight.x(), topLeft.y(), 0.0f);
+            
+            pushIndex((short) 2);
+            pushIndex((short) 1);
+            pushIndex((short) 0);
+            
+            pushIndex((short) 3);
+            pushIndex((short) 2);
+            pushIndex((short) 0);
+            
+            pushUv(uvTopLeft.x(), uvTopLeft.y());
+            pushUv(uvTopLeft.x(), uvBottomRight.y());
+            pushUv(uvBottomRight.x(), uvBottomRight.y());
+            pushUv(uvBottomRight.x(), uvTopLeft.y());
+            
+            return this;
+        }
+        
+        // TODO: MAKE THIS FUNCTION
+        public Builder addText(TextHelper.FontBitmap fontBitmap, String text) {
+            float x = 0.0f;
+            char[] characters = text.toCharArray();
+            for (int i = 0; i < characters.length; i++) {
+                TextHelper.Font font = fontBitmap.font;
+                
+                // Load the bounds of the UVs
+                Vector4fc uvBounds = fontBitmap.getUvs(characters[i]);
+                if (uvBounds == null) {
+                    error("Failed to load character '{}' from font", characters[i]);
+                    continue;
+                }
+                
+                Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);
+                Vector2f at = new Vector2f(x, -font.ascent * font.getScale(fontBitmap.lineHeight) - bounds.minY);
+                debug("{}, {} to {}, {}", at.x, at.y, at.x + bounds.width, at.y - bounds.height);
+                
+                addUvQuad(at,
+                        at.add(bounds.width, -bounds.height),
+//                        new Vector2f(uvBounds.x(), uvBounds.y()),
+                        new Vector2f(1.0f, 0.0f),
+//                        new Vector2f(uvBounds.z(), uvBounds.w())
+                        new Vector2f(0.0f, 1.0f)
+                );
+                
+                float width = font.getCharacterWidth(characters[i], fontBitmap.lineHeight);
+                float kern = (i < (characters.length - 1)) ? font.getCharacterKerning(characters[i], characters[i + 1], fontBitmap.lineHeight) : 0.0f;
+                x += width + kern;
+            }
+            return this;
+        }
+        
         public Builder clear() {
             vertices.clear();
             indices.clear();
             colors.clear();
+            uvs.clear();
             return this;
         }
         
@@ -505,6 +586,7 @@ public final class Mesh {
             mesh.setVertices(vertices.toArray(new float[0]));
             mesh.setIndices(indices.toArray(new short[0]));
             if (colors.size() > 0) mesh.setColors(colors.toArray(new float[0]));
+            if (uvs.size() > 0) mesh.setUvs(uvs.toArray(new float[0]));
             return mesh;
         }
         

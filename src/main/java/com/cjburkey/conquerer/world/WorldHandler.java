@@ -10,6 +10,7 @@ import com.cjburkey.conquerer.gen.Terrain;
 import com.cjburkey.conquerer.gen.generator.BasicGenerator;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.Rectf;
+import com.cjburkey.conquerer.util.Util;
 import org.joml.Random;
 
 import static com.cjburkey.conquerer.Conquerer.*;
@@ -22,11 +23,15 @@ import static com.cjburkey.conquerer.Log.*;
 public class WorldHandler {
     
     private int seed = 0;
-    public final Terrain terrain = new Terrain(new BiomeHandler(), new BasicGenerator());
     public final float minTerritoryDistance;
     public final Rectf terrainBounds;
     public final float borderThickness = 0.05f;
     private Rectf worldBounds;
+    
+    // Handlers
+    public final EmpireHandler empireHandler = new EmpireHandler();
+    public final BiomeHandler biomeHandler = new BiomeHandler();
+    public final Terrain terrain = new Terrain(biomeHandler, new BasicGenerator());
     
     public WorldHandler(float minTerritoryDistance, Rectf terrainBounds) {
         this.minTerritoryDistance = minTerritoryDistance;
@@ -36,7 +41,7 @@ public class WorldHandler {
     public void generateWorld(int seed) {
         this.seed = seed;
         terrain.generator.setMinDistance(minTerritoryDistance).setBounds(terrainBounds);
-        terrain.generate();
+        terrain.generate(this);
         worldBounds = terrain.bounds().grow(minTerritoryDistance);
         info("Generated territories: {}", terrain.getTerritoryCount());
         
@@ -45,9 +50,9 @@ public class WorldHandler {
     
     public void generateWorld(Random random) {
         // Terrain generation stops working for seeds above 2000000 or so.
-        // The simplex noise implementation we use is fast, but not perfect at higher numbers.
-        // This allows a total possible number of 4000000 worlds.
-        generateWorld(random.nextInt(2000000 * 2) - 2000000);
+        // The simplex noise implementation we use is fast, but not perfect with higher inputs (it becomes very grid-like).
+        // 2000000 around zero allows for a total possible number of 4000000 worlds, which should be plenty.
+        generateWorld(Util.nextInt(random, -2000000, 2000000));
     }
     
     private void generateTerritoryEdges(Territory territory) {
@@ -59,7 +64,7 @@ public class WorldHandler {
         int worldTerritoryEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
         territory.entity = worldTerritoryEntity;
         Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
-        ent.getComponent(ShaderRender.class).shader = INSTANCE.shader();
+        ent.getComponent(ShaderRender.class).shader = INSTANCE.shaderColored();
         ent.getComponent(MeshRender.class).mesh = mesh;
         ent.getComponent(Pos.class).position.zero();
     }

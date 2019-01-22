@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.gen;
 
+import com.cjburkey.conquerer.util.Util;
 import org.joml.Random;
 
 import static org.joml.Math.*;
@@ -39,7 +40,7 @@ public class Name {
     // Alternates between random monographic and digraphic consonants and vowels until the generated name reaches a length somewhere within [min, max]
     public static String generateName(Random random, int minLengthInc, int maxLengthInc) {
         StringBuilder builder = new StringBuilder();
-        boolean vowel = random.nextInt(2) == 0;
+        boolean vowel = Util.nextInt(random, 0, 1) == 0;
         int length = random.nextInt(maxLengthInc - minLengthInc + 1) + minLengthInc;
         while (builder.length() < length) {
             String[] from = vowel ? vowels : consonants;

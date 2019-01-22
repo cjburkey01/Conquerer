@@ -14,13 +14,13 @@ import static com.cjburkey.conquerer.util.Util.*;
  * Created by CJ Burkey on 2019/01/19
  */
 @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
-public class BiomeHandler {
+public final class BiomeHandler {
     
     private final ObjectOpenHashSet<Biome> biomes = new ObjectOpenHashSet<>();
     private Rectf bounds;
     
     public BiomeHandler() {
-        // Defaults from the Whittaker Biome Diagraph, found at https://w3.marietta.edu/~biol/biomes/biome_main.htm
+        // Defaults based loosely upon the Whittaker Biome Diagram found at https://w3.marietta.edu/~biol/biomes/biome_main.htm
         create("Tropical Rainforest", 25.0f, 3.35f, 0.082f, 0.941f, 0.227f);
         create("Temperate Rainforest", 12.0f, 2.6f, 0.027f, 0.976f, 0.6735f);
         create("Tropical Seasonal Forest", 23.0f, 1.8f, 0.608f, 0.878f, 0.137f);
