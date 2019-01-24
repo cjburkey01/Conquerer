@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-public class Scale extends PooledComponent {
+public final class Scale extends PooledComponent {
     
     public final Vector3f scale = new Vector3f();
     

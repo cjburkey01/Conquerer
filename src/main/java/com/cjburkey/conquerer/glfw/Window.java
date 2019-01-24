@@ -73,9 +73,6 @@ public class Window {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
-        // Enable the depth buffer
-//        glEnable(GL_DEPTH_TEST);
-        
         // Ignore the back of faces on the meshes to reduce drawing
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -92,7 +89,7 @@ public class Window {
     }
     
     public void prepareFrame() {
-        prepareFrame(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        prepareFrame(GL_COLOR_BUFFER_BIT);
     }
     
     public void finishFrame() {

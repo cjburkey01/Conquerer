@@ -19,7 +19,8 @@ import static com.cjburkey.conquerer.math.Transformation.*;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-public class CameraMovementSystem extends IteratingSystem {
+@SuppressWarnings("unused")
+public final class CameraMovementSystem extends IteratingSystem {
     
     private ComponentMapper<Pos> mPos;
     private ComponentMapper<Camera> mCamera;

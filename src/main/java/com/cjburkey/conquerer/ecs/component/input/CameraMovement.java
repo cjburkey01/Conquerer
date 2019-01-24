@@ -10,7 +10,7 @@ import static org.lwjgl.glfw.GLFW.*;
 /**
  * Created by CJ Burkey on 2019/01/15
  */
-public class CameraMovement extends Component {
+public final class CameraMovement extends Component {
     
     public float goalZoom = 0.0f;
     public float[] zoomVelocity = new float[] { 0.0f };

@@ -6,7 +6,7 @@ import org.joml.Matrix4f;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-public class Camera extends Component {
+public final class Camera extends Component {
     
     public boolean perspective = false;
     public float orthographicSize = 10.0f;

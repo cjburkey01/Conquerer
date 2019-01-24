@@ -8,8 +8,10 @@ import org.joml.Vector2fc;
 /**
  * Created by CJ Burkey on 2019/01/18
  */
-public class TerritoryEdge {
+@SuppressWarnings("WeakerAccess")
+public final class TerritoryEdge {
     
+    @SuppressWarnings("unused")
     public Territory territoryA;
     public Territory territoryB;
     public final Vector2fc pointA;

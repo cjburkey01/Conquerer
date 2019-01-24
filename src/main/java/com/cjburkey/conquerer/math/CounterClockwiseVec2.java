@@ -6,7 +6,7 @@ import org.joml.Vector2fc;
 /**
  * Created by CJ Burkey on 2019/01/18
  */
-public class CounterClockwiseVec2 implements Comparator<Vector2fc> {
+public final class CounterClockwiseVec2 implements Comparator<Vector2fc> {
     
     private final ClockwiseVec2 clockwiseVec2;
     

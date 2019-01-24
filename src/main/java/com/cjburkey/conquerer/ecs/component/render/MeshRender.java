@@ -8,7 +8,7 @@ import com.cjburkey.conquerer.gl.Mesh;
  * Created by CJ Burkey on 2019/01/12
  */
 @PooledWeaver
-public class MeshRender extends Component {
+public final class MeshRender extends Component {
     
     public Mesh mesh;
     

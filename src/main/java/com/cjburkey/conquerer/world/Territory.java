@@ -19,7 +19,7 @@ import static java.util.Collections.*;
  * Created by CJ Burkey on 2019/01/15
  */
 @SuppressWarnings("WeakerAccess")
-public class Territory {
+public final class Territory {
     
     public static final Vector3fc waterColor = new Vector3f(0.0f, 0.467f, 0.745f);
     

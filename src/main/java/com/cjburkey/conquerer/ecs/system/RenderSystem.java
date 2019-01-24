@@ -3,7 +3,6 @@ package com.cjburkey.conquerer.ecs.system;
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
-import com.artemis.systems.IteratingSystem;
 import com.cjburkey.conquerer.Conquerer;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
@@ -14,15 +13,13 @@ import com.cjburkey.conquerer.ecs.component.transform.Rot;
 import com.cjburkey.conquerer.ecs.component.transform.Scale;
 import com.cjburkey.conquerer.math.Transformation;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import org.joml.Matrix4fc;
 
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-@SuppressWarnings("WeakerAccess")
-public class RenderSystem extends BaseEntitySystem {
+@SuppressWarnings({"WeakerAccess", "unused"})
+public final class RenderSystem extends BaseEntitySystem {
     
     // Keep sorted map of objects by their z-values to draw furthest away first
     private final IntArrayList entities = new IntArrayList();
@@ -86,6 +83,9 @@ public class RenderSystem extends BaseEntitySystem {
         
         // Render the mesh
         shaderRender.shader.bind();
+        for (ShaderRender.ShaderCallback callback : shaderRender.uniformCallbacks.values()) {
+            callback.onCall(shaderRender.shader);
+        }
         if (camera != null && shaderRender.shader.getTransformsProjection()) shaderRender.shader.setUniform("projectionMatrix", camera.projectionMatrix);
         if (camera != null && shaderRender.shader.getTransformsView()) shaderRender.shader.setUniform("viewMatrix", camera.viewMatrix);
         if (modelMatrix != null && shaderRender.shader.getTransformsModel()) shaderRender.shader.setUniform("modelMatrix", modelMatrix);

@@ -10,7 +10,8 @@ import com.cjburkey.conquerer.ecs.component.transform.Pos;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-public class SmoothMovementSystem extends IteratingSystem {
+@SuppressWarnings("unused")
+public final class SmoothMovementSystem extends IteratingSystem {
     
     private ComponentMapper<Pos> mPos;
     private ComponentMapper<SmoothMovement> mSmoothMovement;

@@ -31,7 +31,6 @@ import com.cjburkey.conquerer.world.WorldHandler;
 import de.tomgrill.artemis.GameLoopInvocationStrat;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.joml.Random;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -42,7 +41,7 @@ import static org.lwjgl.opengl.GL11.*;
 /**
  * Created by CJ Burkey on 2019/01/10
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public final class Conquerer {
     
     /*
@@ -119,6 +118,9 @@ public final class Conquerer {
         // Add some sample text :)
         Entity e = world.getEntity(createWorldText(robotoAscii256, "The quick brown fox jumped over the lazy dog! So he did!", 1.0f));
         e.getComponent(Pos.class).position.set(0.0f, 0.0f, 1.0f);
+        e.getComponent(ShaderRender.class).uniformCallbacks.put("color",
+                shader -> shader.setUniform("color", new Vector4f(1.0f))
+        );
         
         // The below comment contains the debug code to display a given bitmap
         // Just change "robotoAscii256" to a FontHelper.FontBitmap instance
@@ -230,7 +232,6 @@ public final class Conquerer {
         int textEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
         Entity ent = INSTANCE.world().getEntity(textEntity);
         ent.getComponent(ShaderRender.class).shader = shaderFont;
-        shaderFont.setUniform("color", new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
         ent.getComponent(MeshRender.class).mesh = mesh;
         ent.getComponent(Pos.class).position.zero();
         ent.getComponent(Textured.class).texture = bitmap.texture;

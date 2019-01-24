@@ -17,7 +17,7 @@ import static com.cjburkey.conquerer.util.Util.*;
  * Created by CJ Burkey on 2019/01/12
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
-public class Terrain {
+public final class Terrain {
     
     public final IGenerator generator;
     public final BiomeHandler biomeHandler;

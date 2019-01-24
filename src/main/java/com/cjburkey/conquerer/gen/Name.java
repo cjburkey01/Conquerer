@@ -8,7 +8,7 @@ import static org.joml.Math.*;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-public class Name {
+public final class Name {
     
     private static final String[] consonants = new String[] {
             // Monographs

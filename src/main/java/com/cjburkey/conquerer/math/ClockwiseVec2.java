@@ -10,7 +10,7 @@ import static org.joml.Math.*;
  * Created by CJ Burkey on 2019/01/18
  */
 @SuppressWarnings("WeakerAccess")
-public class ClockwiseVec2 implements Comparator<Vector2fc> {
+public final class ClockwiseVec2 implements Comparator<Vector2fc> {
     
     private final Vector2fc center;
     

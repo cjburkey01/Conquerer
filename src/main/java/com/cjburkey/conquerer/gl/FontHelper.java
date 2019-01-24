@@ -25,7 +25,7 @@ import static org.lwjgl.system.MemoryUtil.*;
  * Created by CJ Burkey on 2019/01/21
  */
 @SuppressWarnings("unused")
-public class FontHelper {
+public final class FontHelper {
     
     public static Font loadFont(InputStream inputStream) {
         if (inputStream == null) throw new NullPointerException("Input stream cannot be null to load font");

@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-public class Pos extends PooledComponent {
+public final class Pos extends PooledComponent {
     
     public final Vector3f position = new Vector3f();
     

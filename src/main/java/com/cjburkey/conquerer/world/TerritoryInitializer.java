@@ -8,7 +8,8 @@ import static com.cjburkey.conquerer.util.Util.*;
 /**
  * Created by CJ Burkey on 2019/01/19
  */
-class TerritoryInitializer {
+@SuppressWarnings("FieldCanBeLocal")
+final class TerritoryInitializer {
     
     private static final float tempScale = 20.0f;
     private static final float precipScale = 20.0f;

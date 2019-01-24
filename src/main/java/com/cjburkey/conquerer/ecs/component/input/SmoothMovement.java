@@ -6,7 +6,7 @@ import org.joml.Vector3f;
 /**
  * Created by CJ Burkey on 2019/01/15
  */
-public class SmoothMovement extends PooledComponent {
+public final class SmoothMovement extends PooledComponent {
     
     public final Vector3f goalPosition = new Vector3f();
     public final Vector3f velocity = new Vector3f();

@@ -8,7 +8,7 @@ import com.cjburkey.conquerer.gl.Texture;
  * Created by CJ Burkey on 2019/01/24
  */
 @PooledWeaver
-public class Textured extends Component {
+public final class Textured extends Component {
     
     public Texture texture;
     

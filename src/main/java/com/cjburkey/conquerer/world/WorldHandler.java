@@ -20,7 +20,7 @@ import static com.cjburkey.conquerer.Log.*;
  * Created by CJ Burkey on 2019/01/16
  */
 @SuppressWarnings("WeakerAccess")
-public class WorldHandler {
+public final class WorldHandler {
     
     private int seed = 0;
     public final float minTerritoryDistance;
