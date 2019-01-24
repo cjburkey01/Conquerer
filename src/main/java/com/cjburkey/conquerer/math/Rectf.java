@@ -40,6 +40,30 @@ public class Rectf {
         this.centerY = (minY + maxY) / 2.0f;
     }
     
+    public int minXi() {
+        return (int) minX;
+    }
+    
+    public int minYi() {
+        return (int) minY;
+    }
+    
+    public int maxXi() {
+        return (int) maxX;
+    }
+    
+    public int maxYi() {
+        return (int) maxY;
+    }
+    
+    public int widthi() {
+        return (int) width;
+    }
+    
+    public int heighti() {
+        return (int) height;
+    }
+    
     public Vector2f min() {
         return new Vector2f(minX, minY);
     }

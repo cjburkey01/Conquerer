@@ -520,18 +520,20 @@ public final class Mesh {
         }
         
         public Builder addUvQuad(Vector2fc topLeft, Vector2fc bottomRight, Vector2fc uvTopLeft, Vector2fc uvBottomRight) {
+            short startingIndex = (short) (vertexAppender.getPos() / 3);
+            
             pushVertex(topLeft.x(), topLeft.y(), 0.0f);
             pushVertex(topLeft.x(), bottomRight.y(), 0.0f);
             pushVertex(bottomRight.x(), bottomRight.y(), 0.0f);
             pushVertex(bottomRight.x(), topLeft.y(), 0.0f);
             
-            pushIndex((short) 2);
-            pushIndex((short) 1);
-            pushIndex((short) 0);
+            pushIndex(startingIndex);
+            pushIndex((short) (startingIndex + 1));
+            pushIndex((short) (startingIndex + 2));
             
-            pushIndex((short) 3);
-            pushIndex((short) 2);
-            pushIndex((short) 0);
+            pushIndex(startingIndex);
+            pushIndex((short) (startingIndex + 2));
+            pushIndex((short) (startingIndex + 3));
             
             pushUv(uvTopLeft.x(), uvTopLeft.y());
             pushUv(uvTopLeft.x(), uvBottomRight.y());
@@ -542,33 +544,36 @@ public final class Mesh {
         }
         
         // TODO: MAKE THIS FUNCTION
-        public Builder addText(TextHelper.FontBitmap fontBitmap, String text) {
+        public Builder addText(FontHelper.FontBitmap fontBitmap, String text) {
             float x = 0.0f;
             char[] characters = text.toCharArray();
             for (int i = 0; i < characters.length; i++) {
-                TextHelper.Font font = fontBitmap.font;
+                FontHelper.Font font = fontBitmap.font;
                 
                 // Load the bounds of the UVs
-                Vector4fc uvBounds = fontBitmap.getUvs(characters[i]);
+                final Vector4fc uvBounds = fontBitmap.getUvs(characters[i]);
                 if (uvBounds == null) {
-                    error("Failed to load character '{}' from font", characters[i]);
+                    error("Failed to load character '{}' from provided font bitmap", characters[i]);
                     continue;
                 }
                 
-                Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);
-                Vector2f at = new Vector2f(x, -font.ascent * font.getScale(fontBitmap.lineHeight) - bounds.minY);
-                debug("{}, {} to {}, {}", at.x, at.y, at.x + bounds.width, at.y - bounds.height);
+                final Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);
+                final float scale = font.getScale(fontBitmap.lineHeight);
+                final Vector2fc at = new Vector2f(x, -font.ascent * scale - bounds.minY);
+                final Vector2fc to = at.add(bounds.width, -bounds.height, new Vector2f());
+                final Vector2fc tl = new Vector2f(min(at.x(), to.x()), max(at.y(), to.y()));
+                final Vector2fc br = new Vector2f(max(at.x(), to.x()), min(at.y(), to.y()));
+                debug("'{}' from {}, {} to {}, {}", characters[i], at.x(), at.y(), to.x(), to.y());
                 
-                addUvQuad(at,
-                        at.add(bounds.width, -bounds.height),
-//                        new Vector2f(uvBounds.x(), uvBounds.y()),
-                        new Vector2f(1.0f, 0.0f),
-//                        new Vector2f(uvBounds.z(), uvBounds.w())
-                        new Vector2f(0.0f, 1.0f)
+                addUvQuad(
+                        at,
+                        to,
+                        new Vector2f(uvBounds.x(), uvBounds.y()),
+                        new Vector2f(uvBounds.z(), uvBounds.w())
                 );
                 
                 float width = font.getCharacterWidth(characters[i], fontBitmap.lineHeight);
-                float kern = (i < (characters.length - 1)) ? font.getCharacterKerning(characters[i], characters[i + 1], fontBitmap.lineHeight) : 0.0f;
+                float kern = ((i < (characters.length - 1)) ? font.getCharacterKerning(characters[i], characters[i + 1], fontBitmap.lineHeight) : 0.0f);
                 x += width + kern;
             }
             return this;

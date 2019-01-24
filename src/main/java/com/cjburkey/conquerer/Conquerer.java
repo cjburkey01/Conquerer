@@ -19,7 +19,7 @@ import com.cjburkey.conquerer.ecs.system.CameraSystem;
 import com.cjburkey.conquerer.ecs.system.RenderSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
 import com.cjburkey.conquerer.gl.Mesh;
-import com.cjburkey.conquerer.gl.TextHelper;
+import com.cjburkey.conquerer.gl.FontHelper;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
 import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.glfw.Window;
@@ -53,7 +53,7 @@ public final class Conquerer {
     private static final int UPS = 60;
     public static final Random RANDOM = new Random(System.nanoTime());
     
-    public static final TextHelper.Font robotoRegular = TextHelper.loadFont(Util.getStreanForResource("font/Roboto/Roboto-Regular.ttf").orElse(null));
+    public static final FontHelper.Font robotoRegular = FontHelper.loadFont(Util.getStreanForResource("font/Roboto/Roboto-Regular.ttf").orElse(null));
     
     public int mainCamera = -1;
     
@@ -93,11 +93,11 @@ public final class Conquerer {
         shaderTextured = new BasicShader("textured/textured", true, true, true);
         
         {
-            TextHelper.FontBitmap bitmap = robotoRegular.generateBitmap("Hello world!", 36);
+            FontHelper.FontBitmap bitmap = robotoRegular.generateBitmap("Hello world!", 36);
             bitmap.texture.bind();
             Mesh.Builder meshBuilder = Mesh.builder();
             meshBuilder.addText(bitmap, "Hello world!");
-//            meshBuilder.addUvQuad(new Vector2f(), new Vector2f(1.0f), new Vector2f(0.0f, 1.0f), new Vector2f(1.0f, 0.0f));
+//            meshBuilder.addUvQuad(new Vector2f(), new Vector2f(1.0f, -1.0f), new Vector2f(0.0f, 1.0f), new Vector2f(1.0f, 0.0f));
             Mesh mesh = meshBuilder.apply(new Mesh());
             int worldTerritoryEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
             Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
@@ -105,6 +105,7 @@ public final class Conquerer {
             shaderTextured.setUniform("sampler", 0);
             ent.getComponent(MeshRender.class).mesh = mesh;
             ent.getComponent(Pos.class).position.set(0.0f, 0.0f, 1.0f);
+            ent.getComponent(Scale.class).scale.set(0.1f);
         }
         
         // Generate and render the world
@@ -112,7 +113,7 @@ public final class Conquerer {
         
         // Create starting main camera
         mainCamera = createObject(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
-        world.getEntity(mainCamera).getComponent(CameraMovement.class).bounds = worldHandler.terrainBounds;
+//        world.getEntity(mainCamera).getComponent(CameraMovement.class).bounds = worldHandler.terrainBounds;
         world.getEntity(mainCamera).getComponent(Pos.class).position.z = 3.0f;
         world.getEntity(mainCamera).getComponent(SmoothMovement.class).goalPosition.set(0.0f, 0.0f, 3.0f);
         

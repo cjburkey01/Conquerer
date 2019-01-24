@@ -1,6 +1,7 @@
 package com.cjburkey.conquerer.gl;
 
 import com.cjburkey.conquerer.math.Rectf;
+import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.chars.CharOpenHashSet;
 import java.io.InputStream;
@@ -11,7 +12,6 @@ import org.joml.Vector4fc;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.system.MemoryStack;
 
-import static com.cjburkey.conquerer.Log.*;
 import static com.cjburkey.conquerer.util.Util.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.stb.STBTruetype.*;
@@ -22,7 +22,7 @@ import static org.lwjgl.system.MemoryUtil.*;
  * Created by CJ Burkey on 2019/01/21
  */
 @SuppressWarnings("unused")
-public class TextHelper {
+public class FontHelper {
     
     public static Font loadFont(InputStream inputStream) {
         if (inputStream == null) throw new NullPointerException("Input stream cannot be null to load font");
@@ -97,32 +97,55 @@ public class TextHelper {
             // Keep track of the UVs for each character
             final Char2ObjectOpenHashMap<Vector4fc> uvs = new Char2ObjectOpenHashMap<>();
             final Texture texture = new Texture();
+            texture.initSubImage(bitmapWidth, bitmapHeight, GL_RED);
             
-            // Create the image buffer
-            // This contains the raw pixel data for the glyph
-            ByteBuffer rawTexture = memAlloc(bitmapWidth * bitmapHeight);
             int x = 0;
+            int y = 0;
+            int nextY = 0;
+            final float scale = getScale(lineHeight);
             
             for (char character : characters) {
-                // Write the character into the texture
+                // Get this character's bounding box
                 Rectf boundingBox = getBoundingBox(character, lineHeight);
-                float scale = getScale(lineHeight);
+                int w = boundingBox.widthi();
+                int h = boundingBox.heighti();
                 
-                rawTexture.position(x);
-                stbtt_MakeCodepointBitmap(fontInfo, rawTexture, (int) boundingBox.width, (int) boundingBox.height, bitmapWidth, scale, scale, character);
+                // Verify this character will fit into the bitmap without going out of bounds at all
+                if ((x + w) >= bitmapWidth) {
+                    x = 0;
+                    y = nextY;
+                }
+                if ((y + h) >= bitmapHeight) {
+                    throw new IllegalStateException("Character bitmap of size 512x512 not large enough to hold " + characters.length + " characters");
+                }
                 
-                // Increment the x and move onto the next character
-                uvs.put(character, new Vector4f((float) x / bitmapWidth,
-                        1.0f,
-                        (x + boundingBox.width) / bitmapWidth,
-                        1.0f - (boundingBox.height / bitmapHeight)));
-                x += getBoundingBox(character, lineHeight).width;
+                // Generate a texture large enough to hold this bitmap
+                ByteBuffer rawTexture = memAlloc(w * h);
+                stbtt_MakeCodepointBitmap(fontInfo, rawTexture, w, h, w, scale, scale, character);
+                rawTexture.flip();
+                
+                // Send the generated texture into the texture via subimage
+                texture.subBufferImage(rawTexture, x, y, w, h, GL_RED, false, true);
+                
+                // Cleanup!
+                memFree(rawTexture);
+                
+                // Add to the list of uvs so we can generate the text mesh
+                uvs.put(character, new Vector4f((float) x / bitmapWidth, 
+                        (float) y / bitmapHeight, 
+                        (float) (x + w) / bitmapWidth, 
+                        (float) (y + h) / bitmapHeight));
+                
+                // The next y position should be clear of all previous lines' characters
+                nextY = Util.max(nextY, y + h);
+                
+                // Increment the position for the next character
+                // This is checked to be a valid position on the next loop around
+                // Even if this is out of bounds, it could be the last character required
+                x += w;
             }
             
-            // Send the texture to the graphics card
-            rawTexture.position(0);
-            texture.bufferImage(rawTexture, bitmapWidth, bitmapHeight, GL_RED, GL_RED, true, true, true);
-            memFree(rawTexture);
+            texture.generateMipmaps();
             
             return new FontBitmap(bitmapWidth, bitmapHeight, lineHeight, this, texture, uvs);
         }
