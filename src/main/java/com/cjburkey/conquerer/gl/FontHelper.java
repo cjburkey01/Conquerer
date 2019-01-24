@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
+import com.cjburkey.conquerer.Conquerer;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
@@ -12,7 +13,9 @@ import org.joml.Vector4fc;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.system.MemoryStack;
 
+import static com.cjburkey.conquerer.Log.*;
 import static com.cjburkey.conquerer.util.Util.*;
+import static org.joml.Math.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.stb.STBTruetype.*;
 import static org.lwjgl.system.MemoryStack.*;
@@ -53,6 +56,7 @@ public class FontHelper {
                 this.decent = ascent.get(0);
                 this.lineGap = ascent.get(0);
             }
+            Conquerer.onExit.add(fontInfo::close);
         }
         
         public float getScale(int lineHeight) {
@@ -83,21 +87,17 @@ public class FontHelper {
             return stbtt_GetCodepointKernAdvance(fontInfo, character, nextCharacter) * getScale(lineHeight);
         }
         
-        public FontBitmap generateBitmap(String input, int lineHeight) {
+        public FontBitmap generateBitmap(CharSequence input, int bitmapPower, int lineHeight) {
             // Get a unique array of characters (no repeats to make texture small. Use uvs instead of raw image)
-            final CharOpenHashSet charactersUnique = new CharOpenHashSet();
-            for (char character : input.toCharArray()) charactersUnique.add(character);
-            final char[] characters = charactersUnique.toArray(new char[0]);
+            final char[] characters = unique(input);
             
-            // Generate a bitmap bounding box
-            // TODO: CALCULATE SIZE AUTOMATICALLY; MIGHT BE DIFFICULT...RIP ME
-            int bitmapWidth = 512;
-            int bitmapHeight = 512;
+            // Generate the power-of-two bitmap size
+            final int bitmapSize = (int) Math.pow(2.0f, bitmapPower);
             
             // Keep track of the UVs for each character
             final Char2ObjectOpenHashMap<Vector4fc> uvs = new Char2ObjectOpenHashMap<>();
             final Texture texture = new Texture();
-            texture.initSubImage(bitmapWidth, bitmapHeight, GL_RED);
+            texture.initSubImage(bitmapSize, bitmapSize, GL_RED);
             
             int x = 0;
             int y = 0;
@@ -111,12 +111,13 @@ public class FontHelper {
                 int h = boundingBox.heighti();
                 
                 // Verify this character will fit into the bitmap without going out of bounds at all
-                if ((x + w) >= bitmapWidth) {
+                if ((x + w) >= bitmapSize) {
                     x = 0;
-                    y = nextY;
+                    y = nextY + 2;
                 }
-                if ((y + h) >= bitmapHeight) {
-                    throw new IllegalStateException("Character bitmap of size 512x512 not large enough to hold " + characters.length + " characters");
+                if ((y + h) >= bitmapSize) {
+                    exception(new IllegalStateException("Character bitmap of size " + bitmapSize + " not large enough to hold " + characters.length + " characters"));
+                    break;
                 }
                 
                 // Generate a texture large enough to hold this bitmap
@@ -125,16 +126,16 @@ public class FontHelper {
                 rawTexture.flip();
                 
                 // Send the generated texture into the texture via subimage
-                texture.subBufferImage(rawTexture, x, y, w, h, GL_RED, false, true);
+                texture.subBufferImage(rawTexture, x, y, w, h, GL_RED, true, true);
                 
                 // Cleanup!
                 memFree(rawTexture);
                 
                 // Add to the list of uvs so we can generate the text mesh
-                uvs.put(character, new Vector4f((float) x / bitmapWidth, 
-                        (float) y / bitmapHeight, 
-                        (float) (x + w) / bitmapWidth, 
-                        (float) (y + h) / bitmapHeight));
+                uvs.put(character, new Vector4f((float) x / bitmapSize, 
+                        (float) y / bitmapSize, 
+                        (float) (x + w) / bitmapSize, 
+                        (float) (y + h) / bitmapSize));
                 
                 // The next y position should be clear of all previous lines' characters
                 nextY = Util.max(nextY, y + h);
@@ -142,16 +143,38 @@ public class FontHelper {
                 // Increment the position for the next character
                 // This is checked to be a valid position on the next loop around
                 // Even if this is out of bounds, it could be the last character required
-                x += w;
+                x += w + 2;
             }
             
             texture.generateMipmaps();
             
-            return new FontBitmap(bitmapWidth, bitmapHeight, lineHeight, this, texture, uvs);
+            return new FontBitmap(bitmapSize, lineHeight, this, texture, uvs);
         }
         
-        public void destroy() {
-            fontInfo.close();
+        public FontBitmap generateBitmap(CharSequence input, int lineHeight) {
+            int totalArea = 0;
+            char[] chars = unique(input);
+            for (char character : chars) {
+                Rectf boundingBox = getBoundingBox(character, lineHeight);
+                totalArea += boundingBox.widthi() * boundingBox.heighti() + 4;  // The 4 is the 2 pixel padding added to each character
+            }
+            int size = (int) ceil(Math.log(ceil(sqrt(totalArea))) / Math.log(2.0f));
+            debug("Generating font bitmap of size {} for {} characters for total area of {}", (int) Math.pow(2.0f, size), input.length(), totalArea);
+            return generateBitmap(input, size, lineHeight);
+        }
+        
+        public FontBitmap generateAsciiBitmap(int lineHeight) {
+            StringBuilder ascii = new StringBuilder();
+            for (int i = 0; i < 127; i ++) {
+                ascii.append((char) i);
+            }
+            return generateBitmap(ascii, lineHeight);
+        }
+        
+        private char[] unique(CharSequence input) {
+            final CharOpenHashSet charactersUnique = new CharOpenHashSet();
+            for (int i = 0; i < input.length(); i ++) charactersUnique.add(input.charAt(i));
+            return charactersUnique.toArray(new char[0]);
         }
         
     }
@@ -160,15 +183,13 @@ public class FontHelper {
     public static final class FontBitmap {
         
         public final int width;
-        public final int height;
         public final int lineHeight;
         public final Font font;
         public final Texture texture;
         private final Char2ObjectOpenHashMap<Vector4fc> uvs;
         
-        public FontBitmap(int width, int height, int lineHeight, Font font, Texture texture, Char2ObjectOpenHashMap<Vector4fc> uvs) {
+        public FontBitmap(int width, int lineHeight, Font font, Texture texture, Char2ObjectOpenHashMap<Vector4fc> uvs) {
             this.width = width;
-            this.height = height;
             this.lineHeight = lineHeight;
             this.font = font;
             this.texture = texture;

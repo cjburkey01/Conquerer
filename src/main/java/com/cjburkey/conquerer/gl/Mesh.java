@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
+import com.cjburkey.conquerer.Conquerer;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.IAppender;
 import com.cjburkey.conquerer.util.Util;
@@ -46,6 +47,7 @@ public final class Mesh {
     
     public Mesh() {
         vao = glGenVertexArrays();
+        Conquerer.onExit.add(this::destroy);
     }
     
     public Mesh setVertices(@Nullable FloatBuffer vertices) {
@@ -98,14 +100,18 @@ public final class Mesh {
     //      of active attrbute ids
     
     public void destroy() {
-        // Delete buffers
+        // Delete all the buffers
         for (int buffer : buffers) glDeleteBuffers(buffer);
         buffers.clear();
         
         // Delete vertex array
         glDeleteVertexArrays(vao);
         
-        currentVao = 0;
+        // Unbind this mesh if it was bound
+        if (currentVao == vao) {
+            glBindVertexArray(0);
+            currentVao = 0;
+        }
     }
     
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -289,7 +295,7 @@ public final class Mesh {
             
             // The normal line is the 90 degree right turn from the A -> B vector
             // (The "SuspiciousNameCombination" warning is IDEA telling me a "y" argument shouldn't
-            //      go into an "x" parameter, but it's used for vector rotation here, so it's intended)
+            //      go into an "x" parameter, but it's used for vector rotation here, so it's intended and muy bueno)
             @SuppressWarnings("SuspiciousNameCombination")
             Vector2f normal = new Vector2f(-dir.y, dir.x).normalize();
             
@@ -303,7 +309,6 @@ public final class Mesh {
             vertices.put(pointB.x() + miter.x);
             vertices.put(pointB.y() + miter.y);
             vertices.put(0.0f);
-            
             vertices.put(pointB.x() - miter.x);
             vertices.put(pointB.y() - miter.y);
             vertices.put(0.0f);
@@ -544,11 +549,16 @@ public final class Mesh {
         }
         
         // TODO: MAKE THIS FUNCTION
-        public Builder addText(FontHelper.FontBitmap fontBitmap, String text) {
+        public Builder addText(FontHelper.FontBitmap fontBitmap, String text, float size) {
+            final float s = size / fontBitmap.lineHeight;
             float x = 0.0f;
             char[] characters = text.toCharArray();
             for (int i = 0; i < characters.length; i++) {
                 FontHelper.Font font = fontBitmap.font;
+                
+                // Generate the position for the character quad
+                final Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);
+                final Vector2fc tl = new Vector2f(x, -font.ascent * (font.getScale(fontBitmap.lineHeight) * s) - bounds.minY * s);
                 
                 // Load the bounds of the UVs
                 final Vector4fc uvBounds = fontBitmap.getUvs(characters[i]);
@@ -557,23 +567,17 @@ public final class Mesh {
                     continue;
                 }
                 
-                final Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);
-                final float scale = font.getScale(fontBitmap.lineHeight);
-                final Vector2fc at = new Vector2f(x, -font.ascent * scale - bounds.minY);
-                final Vector2fc to = at.add(bounds.width, -bounds.height, new Vector2f());
-                final Vector2fc tl = new Vector2f(min(at.x(), to.x()), max(at.y(), to.y()));
-                final Vector2fc br = new Vector2f(max(at.x(), to.x()), min(at.y(), to.y()));
-                debug("'{}' from {}, {} to {}, {}", characters[i], at.x(), at.y(), to.x(), to.y());
-                
+                // Add the quad (TopLeft to BottomRight) with the provided UVs from the font bitmap
                 addUvQuad(
-                        at,
-                        to,
+                        tl,
+                        tl.add(bounds.width * s, -bounds.height * s, new Vector2f()),
                         new Vector2f(uvBounds.x(), uvBounds.y()),
                         new Vector2f(uvBounds.z(), uvBounds.w())
                 );
                 
-                float width = font.getCharacterWidth(characters[i], fontBitmap.lineHeight);
-                float kern = ((i < (characters.length - 1)) ? font.getCharacterKerning(characters[i], characters[i + 1], fontBitmap.lineHeight) : 0.0f);
+                // Increment the position
+                float width = font.getCharacterWidth(characters[i], fontBitmap.lineHeight) * s;
+                float kern = ((i < (characters.length - 1)) ? font.getCharacterKerning(characters[i], characters[i + 1], fontBitmap.lineHeight) : 0.0f) * s;
                 x += width + kern;
             }
             return this;

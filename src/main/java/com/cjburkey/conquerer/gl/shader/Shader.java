@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.gl.shader;
 
+import com.cjburkey.conquerer.Conquerer;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.nio.FloatBuffer;
@@ -36,6 +37,7 @@ public abstract class Shader {
     
     public Shader() {
         program = glCreateProgram();
+        Conquerer.onExit.add(this::destroy);
     }
     
     public boolean getTransformsProjection() {

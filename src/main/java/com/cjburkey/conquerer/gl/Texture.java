@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
+import com.cjburkey.conquerer.Conquerer;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL30.*;
@@ -17,6 +18,7 @@ public class Texture {
     
     public Texture() {
         texture = glGenTextures();
+        Conquerer.onExit.add(this::destroy);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      // Stop alignment checks by OpenGL
         glEnable(GL_TEXTURE);
         glActiveTexture(GL_TEXTURE0);
@@ -25,7 +27,7 @@ public class Texture {
     public void apply(boolean linear, boolean clamp) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (linear ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (linear ? GL_LINEAR : GL_NEAREST));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (linear ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_LINEAR));
     }
     
