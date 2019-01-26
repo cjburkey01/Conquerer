@@ -4,6 +4,7 @@ import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.CounterClockwiseVec2;
 import com.cjburkey.conquerer.util.Util;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.List;
 import org.joml.Vector2fc;
@@ -11,6 +12,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import static com.cjburkey.conquerer.Conquerer.*;
+import static com.cjburkey.conquerer.Log.*;
 import static com.cjburkey.conquerer.util.Util.*;
 import static com.cjburkey.conquerer.world.TerritoryInitializer.*;
 import static java.util.Collections.*;
@@ -30,7 +32,7 @@ public final class Territory {
     public final TerritoryEdge[] edges;
     private BiomeHandler.Biome biome;
     public final boolean isWater;
-    public int entity = -1;
+    public final IntArrayList entities = new IntArrayList();
     private EmpireHandler.Empire currentOwner;
     
     private Territory(String name, Vector2fc location, TerritoryEdge[] edges, BiomeHandler.Biome biome, boolean isWater) {
@@ -54,17 +56,15 @@ public final class Territory {
     }
     
     public void cleanupEntity() {
-        if (entity >= 0) {
-            INSTANCE.world().delete(entity);
-            entity = -1;
-        }
+        entities.forEach((int entity) -> INSTANCE.world().delete(entity));
+        entities.clear();
     }
     
     public void refreshGraphics() {
-        if (entity < 0) return;
+        if (entities.size() < 1) return;
         Mesh.Builder meshBuilder = Mesh.builder();
         updateGraphics(meshBuilder);
-        meshBuilder.apply(INSTANCE.world().getEntity(entity).getComponent(MeshRender.class).mesh);
+        meshBuilder.apply(INSTANCE.world().getEntity(entities.getInt(0)).getComponent(MeshRender.class).mesh);
     }
     
     public void updateGraphics(Mesh.Builder meshBuilder) {

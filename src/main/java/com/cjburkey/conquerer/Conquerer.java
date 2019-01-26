@@ -31,6 +31,7 @@ import com.cjburkey.conquerer.world.WorldHandler;
 import de.tomgrill.artemis.GameLoopInvocationStrat;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.joml.Random;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -44,8 +45,12 @@ import static org.lwjgl.opengl.GL11.*;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class Conquerer {
     
+    private Conquerer() {
+        debug("Running in JVM {}", System.getProperty("java.version"));
+    }
+    
     /*
-        This is my main area for TODO
+        This is my main area for TODO:
         
         TODO: HIDE LINES BETWEEN TERRITORIES OWNED BY THE SAME EMPIRE
      */
@@ -116,11 +121,11 @@ public final class Conquerer {
         worldHandler.generateWorld(RANDOM);
         
         // Add some sample text :)
-        Entity e = world.getEntity(createWorldText(robotoAscii256, "The quick brown fox jumped over the lazy dog! So he did!", 1.0f));
-        e.getComponent(Pos.class).position.set(0.0f, 0.0f, 1.0f);
-        e.getComponent(ShaderRender.class).uniformCallbacks.put("color",
-                shader -> shader.setUniform("color", new Vector4f(1.0f))
-        );
+//        Entity e = world.getEntity(createWorldText(robotoAscii256, "The quick brown fox jumped over the lazy dog! So he did!", 1.0f));
+//        e.getComponent(Pos.class).position.set(0.0f, 0.0f, 1.0f);
+//        e.getComponent(ShaderRender.class).uniformCallbacks.put("color",
+//                shader -> shader.setUniform("color", new Vector4f(1.0f))
+//        );
         
         // The below comment contains the debug code to display a given bitmap
         // Just change "robotoAscii256" to a FontHelper.FontBitmap instance
@@ -184,7 +189,6 @@ public final class Conquerer {
         return aleoAscii256;
     }
     
-    
     public BasicShader shaderColored() {
         return shaderColored;
     }
@@ -221,20 +225,22 @@ public final class Conquerer {
         return world.create(builder.build(world));
     }
     
-    @SuppressWarnings("UnusedReturnValue")
+    
     public final int createWorldText(FontHelper.FontBitmap bitmap, String input, float size) {
         // Generate the mesh for the text
         Mesh.Builder meshBuilder = Mesh.builder();
-        meshBuilder.addText(bitmap, input, size);
-        Mesh mesh = meshBuilder.apply(new Mesh());
+        Vector2f mutSize = new Vector2f();
+        meshBuilder.addText(bitmap, input, size, mutSize);
+        debug("Text size: {}, {}", mutSize.x, mutSize.y);
         
         // Add the generated mesh onto a new entity
-        int textEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
-        Entity ent = INSTANCE.world().getEntity(textEntity);
+        int textEntity = createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
+        Entity ent = world.getEntity(textEntity);
         ent.getComponent(ShaderRender.class).shader = shaderFont;
-        ent.getComponent(MeshRender.class).mesh = mesh;
+        ent.getComponent(MeshRender.class).mesh = meshBuilder.apply(new Mesh());
         ent.getComponent(Pos.class).position.zero();
         ent.getComponent(Textured.class).texture = bitmap.texture;
+        
         return textEntity;
     }
     

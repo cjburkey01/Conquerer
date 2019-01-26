@@ -3,6 +3,7 @@ package com.cjburkey.conquerer.ecs.system;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
+import com.cjburkey.conquerer.Conquerer;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.input.CameraMovement;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
@@ -11,10 +12,12 @@ import com.cjburkey.conquerer.glfw.Input;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
+import org.lwjgl.glfw.GLFW;
 
 import static com.cjburkey.conquerer.Conquerer.*;
 import static com.cjburkey.conquerer.util.Util.*;
 import static com.cjburkey.conquerer.math.Transformation.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * Created by CJ Burkey on 2019/01/12
@@ -55,6 +58,19 @@ public final class CameraMovementSystem extends IteratingSystem {
         Vector2fc currMousePos = Input.mousePos();
         Vector3f mouseWorldPos = cameraToPlane(pos.position, camera, currMousePos, INSTANCE.worldPlane);
         
+        // Change cursor for dragging
+        if (Input.getAnyMousePressed(cameraMovement.activatingMouseForDrag)) {
+            INSTANCE.window().setCursor(GLFW_CROSSHAIR_CURSOR);
+            for (int btn : cameraMovement.activatingMouseForDrag) {
+                if (Input.getMousePressed(btn)) cameraMovement.startedDragBtn = btn;
+            }
+        }
+        if (Input.getMouseUp(cameraMovement.startedDragBtn)) {
+            cameraMovement.startedDragBtn = -1;
+            INSTANCE.window().setCursor(-1);
+        }
+        
+        // Camera dragging
         if (Input.getAnyMouseDown(cameraMovement.activatingMouseForDrag)) {
             Vector3f prevWorldPos = cameraToPlane(pos.position, camera, cameraMovement.previousMousePos, INSTANCE.worldPlane);
             Vector3f deltaMouse = mouseWorldPos.sub(prevWorldPos, new Vector3f());

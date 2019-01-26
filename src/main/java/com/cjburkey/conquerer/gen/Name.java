@@ -41,13 +41,13 @@ public final class Name {
     public static String generateName(Random random, int minLengthInc, int maxLengthInc) {
         StringBuilder builder = new StringBuilder();
         boolean vowel = Util.nextInt(random, 0, 1) == 0;
-        int length = random.nextInt(maxLengthInc - minLengthInc + 1) + minLengthInc;
+        int length = Util.nextInt(random, minLengthInc, maxLengthInc);
         while (builder.length() < length) {
             String[] from = vowel ? vowels : consonants;
             vowel = !vowel;
             builder.append(from[random.nextInt(from.length)]);
         }
-        return builder.substring(minLengthInc, min(builder.length(), maxLengthInc));
+        return builder.substring(0, min(builder.length(), maxLengthInc));
     }
     
 }

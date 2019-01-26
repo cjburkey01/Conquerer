@@ -26,6 +26,8 @@ public class Window {
     private final Vector3f clearColor = new Vector3f();
     private boolean shouldClose = false;
     private boolean vsync = false;
+    private int cursor = GLFW_ARROW_CURSOR;
+    private long currentCursor = -1L;
     
     public Window(String title, int width, int height, int multisample) {
         this.title = title;
@@ -186,6 +188,23 @@ public class Window {
     
     public GLFWVidMode getMonitor() {
         return getMonitor(glfwGetPrimaryMonitor());
+    }
+    
+    public void setCursor(int cursor) {
+        if (this.cursor != cursor) {
+            if (currentCursor != -1) glfwDestroyCursor(currentCursor);
+            glfwSetCursor(window, NULL);
+            this.cursor = cursor;
+            currentCursor = -1;
+            if (cursor != -1) {
+                currentCursor = glfwCreateStandardCursor(cursor);
+                glfwSetCursor(window, currentCursor);
+            }
+        }
+    }
+    
+    public int getCursor() {
+        return cursor;
     }
     
 }

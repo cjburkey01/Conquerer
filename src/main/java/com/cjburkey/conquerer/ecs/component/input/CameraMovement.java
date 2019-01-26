@@ -26,6 +26,7 @@ public final class CameraMovement extends Component {
     public final Vector2f previousMousePos = new Vector2f();
     
     // Input
+    public int startedDragBtn;
     public final IntOpenHashSet activatingMouseForDrag = new IntOpenHashSet();
     public final IntOpenHashSet leftKeys = new IntOpenHashSet();
     public final IntOpenHashSet rightKeys = new IntOpenHashSet();

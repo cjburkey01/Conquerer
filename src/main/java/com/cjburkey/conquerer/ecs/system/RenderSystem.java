@@ -15,6 +15,8 @@ import com.cjburkey.conquerer.math.Transformation;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.joml.Matrix4fc;
 
+import static com.cjburkey.conquerer.Log.*;
+
 /**
  * Created by CJ Burkey on 2019/01/12
  */
@@ -42,7 +44,13 @@ public final class RenderSystem extends BaseEntitySystem {
     }
     
     protected void removed(int entityId) {
-        entities.rem(entityId);
+        super.removed(entityId);
+        int at = entities.indexOf(entityId);
+        if (at < 0) {
+            debug("Failed to remove entity {}", entityId);
+        } else {
+            entities.removeInt(at);
+        }
     }
     
     protected void processSystem() {
@@ -83,9 +91,7 @@ public final class RenderSystem extends BaseEntitySystem {
         
         // Render the mesh
         shaderRender.shader.bind();
-        for (ShaderRender.ShaderCallback callback : shaderRender.uniformCallbacks.values()) {
-            callback.onCall(shaderRender.shader);
-        }
+        shaderRender.uniformCallbacks.values().forEach(callback -> callback.onCall(shaderRender.shader));
         if (camera != null && shaderRender.shader.getTransformsProjection()) shaderRender.shader.setUniform("projectionMatrix", camera.projectionMatrix);
         if (camera != null && shaderRender.shader.getTransformsView()) shaderRender.shader.setUniform("viewMatrix", camera.viewMatrix);
         if (modelMatrix != null && shaderRender.shader.getTransformsModel()) shaderRender.shader.setUniform("modelMatrix", modelMatrix);

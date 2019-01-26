@@ -549,15 +549,15 @@ public final class Mesh {
         }
         
         // TODO: MAKE THIS FUNCTION
-        public Builder addText(FontHelper.FontBitmap fontBitmap, String text, float size) {
+        public Builder addText(FontHelper.FontBitmap fontBitmap, String text, float size, @Nullable Vector2f mutSize) {
             final float s = size / fontBitmap.lineHeight;
             float x = 0.0f;
             char[] characters = text.toCharArray();
+            FontHelper.Font font = fontBitmap.font;
             for (int i = 0; i < characters.length; i++) {
-                FontHelper.Font font = fontBitmap.font;
-                
                 // Generate the position for the character quad
                 final Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);
+                if (mutSize != null) mutSize.y = max(mutSize.y, bounds.height);
                 final Vector2fc tl = new Vector2f(x, -font.ascent * (font.getScale(fontBitmap.lineHeight) * s) - bounds.minY * s);
                 
                 // Load the bounds of the UVs
@@ -578,17 +578,40 @@ public final class Mesh {
                 // Increment the position
                 float width = font.getCharacterWidth(characters[i], fontBitmap.lineHeight) * s;
                 float kern = ((i < (characters.length - 1)) ? font.getCharacterKerning(characters[i], characters[i + 1], fontBitmap.lineHeight) : 0.0f) * s;
+                if (mutSize != null) mutSize.x += width + kern;
                 x += width + kern;
+            }
+            if (mutSize != null) {
+                mutSize.y *= s;
             }
             return this;
         }
         
-        public Builder clear() {
+        public Builder clearVertices() {
             vertices.clear();
+            return this;
+        }
+        
+        public Builder clearIndices() {
             indices.clear();
+            return this;
+        }
+        
+        public Builder clearColors() {
             colors.clear();
+            return this;
+        }
+        
+        public Builder clearUvs() {
             uvs.clear();
             return this;
+        }
+        
+        public Builder clear() {
+            clearVertices();
+            clearIndices();
+            clearColors();
+            return clearUvs();
         }
         
         public Mesh apply(Mesh mesh) {
