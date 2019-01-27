@@ -59,7 +59,15 @@ public final class Transformation {
     public static Matrix4fc getModelMatrix(Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale) {
         return modelMatrix
                 .identity()
-                .translate(modelPosition)
+                .translate(modelPosition.x(), modelPosition.y(), modelPosition.z())
+                .rotate(modelRotation)
+                .scale(modelScale);
+    }
+    
+    public static Matrix4fc getModelMatrix(Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale, float overrideZ) {
+        return modelMatrix
+                .identity()
+                .translate(modelPosition.x(), modelPosition.y(), overrideZ)
                 .rotate(modelRotation)
                 .scale(modelScale);
     }

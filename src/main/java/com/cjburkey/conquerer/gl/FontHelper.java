@@ -87,17 +87,18 @@ public final class FontHelper {
             return stbtt_GetCodepointKernAdvance(fontInfo, character, nextCharacter) * getScale(lineHeight);
         }
         
-        public FontBitmap generateBitmap(CharSequence input, int bitmapPower, int lineHeight) {
+        public FontBitmap generateBitmap(CharSequence input, int bitmapSizePower, int lineHeight) {
             // Get a unique array of characters (no repeats to make texture small. Use uvs instead of raw image)
             final char[] characters = unique(input);
             
             // Generate the power-of-two bitmap size
-            final int bitmapSize = (int) Math.pow(2.0f, bitmapPower);
+            // (0x1 << x) == (2^x)
+            final int bitmapSize = 0x1 << bitmapSizePower;
             
             // Keep track of the UVs for each character
             final Char2ObjectOpenHashMap<Vector4fc> uvs = new Char2ObjectOpenHashMap<>();
             final Texture texture = new Texture();
-            texture.initSubImage(bitmapSize, bitmapSize, GL_RED);
+            texture.initSubImage(bitmapSize, bitmapSize, GL_RGB);
             
             int x = 0;
             int y = 0;
@@ -152,14 +153,17 @@ public final class FontHelper {
         }
         
         public FontBitmap generateBitmap(CharSequence input, int lineHeight) {
+            // Calculate the area required for all of the characters
             int totalArea = 0;
             char[] chars = unique(input);
             for (char character : chars) {
                 Rectf boundingBox = getBoundingBox(character, lineHeight);
                 totalArea += boundingBox.widthi() * boundingBox.heighti() + 4;  // The 4 is the 2 pixel padding added to each character
             }
+            
+            // Find the next-highest power-of-two width that gives us at least the required area.
             int size = (int) ceil(Math.log(ceil(sqrt(totalArea))) / Math.log(2.0f));
-            debug("Generating font bitmap of size {} for {} characters for total area of {}", (int) Math.pow(2.0f, size), input.length(), totalArea);
+            debug("Generating font bitmap of size {} for {} characters with a total area of {} pixels", (int) Math.pow(2.0f, size), input.length(), totalArea);
             return generateBitmap(input, size, lineHeight);
         }
         

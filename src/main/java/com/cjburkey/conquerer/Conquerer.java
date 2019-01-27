@@ -12,6 +12,7 @@ import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
 import com.cjburkey.conquerer.ecs.component.render.Textured;
+import com.cjburkey.conquerer.ecs.component.render.ui.UiElement;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
 import com.cjburkey.conquerer.ecs.component.transform.Rot;
 import com.cjburkey.conquerer.ecs.component.transform.Scale;
@@ -19,6 +20,7 @@ import com.cjburkey.conquerer.ecs.system.CameraMovementSystem;
 import com.cjburkey.conquerer.ecs.system.CameraSystem;
 import com.cjburkey.conquerer.ecs.system.RenderSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
+import com.cjburkey.conquerer.ecs.system.UiElementSystem;
 import com.cjburkey.conquerer.gl.FontHelper;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
@@ -33,7 +35,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.joml.Random;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 import static com.cjburkey.conquerer.Log.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -66,6 +67,7 @@ public final class Conquerer {
     public static final FontHelper.Font roboto = FontHelper.loadFont(Util.getStreanForResource("font/Roboto/Roboto-Regular.ttf").orElse(null));
     public static final FontHelper.Font aleo = FontHelper.loadFont(Util.getStreanForResource("font/Aleo/Aleo-Regular.ttf").orElse(null));
     
+    // Pre-baked font bitmaps
     private static FontHelper.FontBitmap robotoAscii256;
     private static FontHelper.FontBitmap aleoAscii256;
     
@@ -85,6 +87,7 @@ public final class Conquerer {
             new CameraSystem(),
             new CameraMovementSystem(),
             new RenderSystem(),
+            new UiElementSystem(),
     };
     
     // Artemis ECS world
@@ -117,8 +120,28 @@ public final class Conquerer {
         shaderTextured = new BasicShader("textured/textured", true, true, true);
         shaderFont = new BasicShader("font/font", true, true, true);
         
+        // Initialize UI shader
+        // This not kept in this class because it can be accessed with UiElementSystem.shader()
+        UiElementSystem.initShader(new BasicShader("ui/ui", true, false, true));
+        
         // Generate and render the world
         worldHandler.generateWorld(RANDOM);
+        
+        // UI Test
+        {
+            int uiTest = createObject(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class);
+            Entity uiTestE = world.getEntity(uiTest);
+            
+            Vector2f textSize = new Vector2f();
+            uiTestE.getComponent(MeshRender.class).mesh = Mesh
+                    .builder()
+                    .addText(aleoAscii256, "Hello world!", 55.0f, textSize)
+                    .apply(new Mesh());
+            uiTestE.getComponent(UiElement.class).texture = aleoAscii256.texture;
+            uiTestE.getComponent(Pos.class).position.add(10.0f, textSize.y + 10.0f, 0.0f);
+            uiTestE.getComponent(UiElement.class).isFont = true;
+            uiTestE.getComponent(UiElement.class).colorize.set(1.0f, 0.0f, 1.0f, 1.0f);
+        }
         
         // Add some sample text :)
 //        Entity e = world.getEntity(createWorldText(robotoAscii256, "The quick brown fox jumped over the lazy dog! So he did!", 1.0f));

@@ -40,6 +40,7 @@ public final class CameraSystem extends IteratingSystem {
             camera.projectionMatrix.set(Transformation.getOrthographicMatrix(w.getWidth(), w.getHeight(), camera.orthographicSize, camera.nearPlane, camera.farPlane));
         }
         camera.viewMatrix.set(Transformation.getViewMatrix(pos.position, rot.rotation));
+        camera.windowMatrix.set(Transformation.getOrthographicMatrix(0.0f, w.getWidth(), 0.0f, w.getHeight(), camera.nearPlane, camera.farPlane));
     }
     
 }

@@ -548,7 +548,27 @@ public final class Mesh {
             return this;
         }
         
-        // TODO: MAKE THIS FUNCTION
+        public Builder addColorQuad(Vector2fc topLeft, Vector2fc bottomRight, Vector3fc color) {
+            short startingIndex = (short) (vertexAppender.getPos() / 3);
+            
+            pushVertex(topLeft.x(), topLeft.y(), 0.0f);
+            pushVertex(topLeft.x(), bottomRight.y(), 0.0f);
+            pushVertex(bottomRight.x(), bottomRight.y(), 0.0f);
+            pushVertex(bottomRight.x(), topLeft.y(), 0.0f);
+            
+            pushIndex(startingIndex);
+            pushIndex((short) (startingIndex + 1));
+            pushIndex((short) (startingIndex + 2));
+            
+            pushIndex(startingIndex);
+            pushIndex((short) (startingIndex + 2));
+            pushIndex((short) (startingIndex + 3));
+            
+            for (int i = 0; i < 4; i ++) pushColor(color);
+            
+            return this;
+        }
+        
         public Builder addText(FontHelper.FontBitmap fontBitmap, String text, float size, @Nullable Vector2f mutSize) {
             final float s = size / fontBitmap.lineHeight;
             float x = 0.0f;
@@ -558,7 +578,7 @@ public final class Mesh {
                 // Generate the position for the character quad
                 final Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);
                 if (mutSize != null) mutSize.y = max(mutSize.y, bounds.height);
-                final Vector2fc tl = new Vector2f(x, -font.ascent * (font.getScale(fontBitmap.lineHeight) * s) - bounds.minY * s);
+                final Vector2f tl = new Vector2f(x, -font.ascent * (font.getScale(fontBitmap.lineHeight) * s) - bounds.minY * s);
                 
                 // Load the bounds of the UVs
                 final Vector4fc uvBounds = fontBitmap.getUvs(characters[i]);
@@ -567,10 +587,12 @@ public final class Mesh {
                     continue;
                 }
                 
+                Vector2f br = tl.add(bounds.width * s, -bounds.height * s, new Vector2f());
+                
                 // Add the quad (TopLeft to BottomRight) with the provided UVs from the font bitmap
                 addUvQuad(
                         tl,
-                        tl.add(bounds.width * s, -bounds.height * s, new Vector2f()),
+                        br,
                         new Vector2f(uvBounds.x(), uvBounds.y()),
                         new Vector2f(uvBounds.z(), uvBounds.w())
                 );

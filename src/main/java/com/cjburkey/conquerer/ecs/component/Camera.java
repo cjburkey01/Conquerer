@@ -17,5 +17,6 @@ public final class Camera extends Component {
     // Filled in by the system
     public final Matrix4f projectionMatrix = new Matrix4f();
     public final Matrix4f viewMatrix = new Matrix4f();
+    public final Matrix4f windowMatrix = new Matrix4f();
     
 }
