@@ -12,7 +12,6 @@ import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
 import com.cjburkey.conquerer.ecs.component.render.Textured;
-import com.cjburkey.conquerer.ecs.component.render.ui.UiElement;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
 import com.cjburkey.conquerer.ecs.component.transform.Rot;
 import com.cjburkey.conquerer.ecs.component.transform.Scale;
@@ -28,6 +27,8 @@ import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.glfw.Window;
 import com.cjburkey.conquerer.math.Plane;
 import com.cjburkey.conquerer.math.Rectf;
+import com.cjburkey.conquerer.ui.UiSolidBox;
+import com.cjburkey.conquerer.ui.UiText;
 import com.cjburkey.conquerer.util.Util;
 import com.cjburkey.conquerer.world.WorldHandler;
 import de.tomgrill.artemis.GameLoopInvocationStrat;
@@ -43,7 +44,7 @@ import static org.lwjgl.opengl.GL11.*;
 /**
  * Created by CJ Burkey on 2019/01/10
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess", "unused", "FieldCanBeLocal"})
 public final class Conquerer {
     
     private Conquerer() {
@@ -90,10 +91,15 @@ public final class Conquerer {
             new UiElementSystem(),
     };
     
+    // This is the game loop we use
+    // It allows separation of render and update/logic tasks.
+    // It creates a constant world update rate and a variable render rate
+    private GameLoopInvocationStrat gameLoop = new GameLoopInvocationStrat((int) (1000.0f / UPS));
+    
     // Artemis ECS world
     private World world = new World(new WorldConfigurationBuilder()
             .with(ARTEMIS_SYSTEMS)
-            .register(new GameLoopInvocationStrat(10000 / UPS))
+            .register(gameLoop)
             .build());
     
     // Game world
@@ -101,6 +107,10 @@ public final class Conquerer {
     
     // The plane to be flat with the world to allow calculating rays against the "playing field"
     public final Plane worldPlane = new Plane(new Vector3f(), new Vector3f(0.0f, 0.0f, 1.0f));
+    
+    // Test UI
+    private UiText fpsDisplay;
+    private UiText upsDisplay;
     
     private void startGame() {
         // Create and initialize both the window and the OpenGL context
@@ -129,26 +139,22 @@ public final class Conquerer {
         
         // UI Test
         {
-            int uiTest = createObject(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class);
-            Entity uiTestE = world.getEntity(uiTest);
+            // Background
+            new UiSolidBox(new Vector2f(200.0f, 60.0f))
+                    .setColor(new Vector3f(0.0f));
             
-            Vector2f textSize = new Vector2f();
-            uiTestE.getComponent(MeshRender.class).mesh = Mesh
-                    .builder()
-                    .addText(aleoAscii256, "Hello world!", 55.0f, textSize)
-                    .apply(new Mesh());
-            uiTestE.getComponent(UiElement.class).texture = aleoAscii256.texture;
-            uiTestE.getComponent(Pos.class).position.add(10.0f, textSize.y + 10.0f, 0.0f);
-            uiTestE.getComponent(UiElement.class).isFont = true;
-            uiTestE.getComponent(UiElement.class).colorize.set(1.0f, 0.0f, 1.0f, 1.0f);
+            // FPS
+            fpsDisplay = new UiText("FPS: ", robotoAscii256)
+                    .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
+                    .setSize(24.0f);
+            fpsDisplay.position().set(20.0f, 6.0f, 0.0f);
+            
+            // UPS
+            upsDisplay = new UiText("UPS: ", robotoAscii256)
+                    .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
+                    .setSize(24.0f);
+            upsDisplay.position().set(20.0f, 30.0f, 0.0f);
         }
-        
-        // Add some sample text :)
-//        Entity e = world.getEntity(createWorldText(robotoAscii256, "The quick brown fox jumped over the lazy dog! So he did!", 1.0f));
-//        e.getComponent(Pos.class).position.set(0.0f, 0.0f, 1.0f);
-//        e.getComponent(ShaderRender.class).uniformCallbacks.put("color",
-//                shader -> shader.setUniform("color", new Vector4f(1.0f))
-//        );
         
         // The below comment contains the debug code to display a given bitmap
         // Just change "robotoAscii256" to a FontHelper.FontBitmap instance
@@ -156,7 +162,7 @@ public final class Conquerer {
 //            Mesh.Builder meshBuilder = Mesh.builder();
 //            meshBuilder.addUvQuad(new Vector2f(), new Vector2f(5.0f, -5.0f), new Vector2f(0.0f, 0.0f), new Vector2f(1.0f, 1.0f));
 //            Mesh mesh = meshBuilder.apply(new Mesh());
-//            int test = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
+//            int test = INSTANCE.createEntity(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
 //            Entity ent = INSTANCE.world().getEntity(test);
 //            ent.getComponent(ShaderRender.class).shader = shaderTextured;
 //            shaderFont.setUniform("color", new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
@@ -167,7 +173,7 @@ public final class Conquerer {
 //        }
         
         // Create starting main camera
-        mainCamera = createObject(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
+        mainCamera = createEntity(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
         world.getEntity(mainCamera).getComponent(CameraMovement.class).bounds = worldHandler.terrainBounds;
         world.getEntity(mainCamera).getComponent(Pos.class).position.z = 3.0f;
         world.getEntity(mainCamera).getComponent(SmoothMovement.class).goalPosition.set(0.0f, 0.0f, 3.0f);
@@ -177,8 +183,14 @@ public final class Conquerer {
         info("Initialized");
         
         // Go!
+        long last = System.nanoTime();
         while (running) {
             world.process();
+            if ((System.nanoTime() - last) >= 1000000000.0f / 10.0f) {
+                fpsDisplay.setText(String.format("FPS: %.2f", 1.0f / gameLoop.lastRenderDelta()));
+                upsDisplay.setText(String.format("UPS: %.2f", 1.0f / gameLoop.getUpdateDelta()));
+                last = System.nanoTime();
+            }
             if (window.getShouldClose()) {
                 exit();
             }
@@ -240,7 +252,7 @@ public final class Conquerer {
     }
     
     @SafeVarargs
-    public final int createObject(Class<? extends Component>... types) {
+    public final int createEntity(Class<? extends Component>... types) {
         ArchetypeBuilder builder = new ArchetypeBuilder();
         for (Class<? extends Component> type : types) {
             builder.add(type);
@@ -257,7 +269,7 @@ public final class Conquerer {
         debug("Text size: {}, {}", mutSize.x, mutSize.y);
         
         // Add the generated mesh onto a new entity
-        int textEntity = createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
+        int textEntity = createEntity(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
         Entity ent = world.getEntity(textEntity);
         ent.getComponent(ShaderRender.class).shader = shaderFont;
         ent.getComponent(MeshRender.class).mesh = meshBuilder.apply(new Mesh());

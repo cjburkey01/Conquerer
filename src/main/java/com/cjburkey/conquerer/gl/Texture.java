@@ -38,10 +38,10 @@ public class Texture {
     public void bufferImage(ByteBuffer rawData, int width, int height, int providedFormat, int internalFormat, boolean mipmap, boolean linear, boolean clamp) {
         if (isSub) return;
         bind();
-        apply(linear, clamp);
         if (rawData == null) {
             glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, providedFormat, GL_UNSIGNED_BYTE, 0L);
         } else {
+            apply(linear, clamp);
             glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, providedFormat, GL_UNSIGNED_BYTE, rawData);
             if (mipmap) generateMipmaps();
         }
@@ -60,11 +60,9 @@ public class Texture {
     }
     
     public void destroy() {
-        if (isValid()) {
-            glDeleteTextures(texture);
-            texture = 0;
-            isSub = false;
-        }
+        glDeleteTextures(texture);
+        texture = 0;
+        isSub = false;
     }
     
     public void bind() {
@@ -74,6 +72,7 @@ public class Texture {
         }
     }
     
+    @SuppressWarnings("unused")
     public boolean isValid() {
         return texture > 0;
     }

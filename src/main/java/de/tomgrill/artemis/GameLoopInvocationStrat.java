@@ -35,8 +35,9 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
     private final ObjectArrayList<BaseSystem> logicMarkedSystems;
     private final ObjectArrayList<BaseSystem> otherSystems;
     
-    private long nanosPerLogicTick; // ~ dt
+    private final long nanosPerLogicTick; // ~ dt
     private long currentTime = System.nanoTime();
+    private float lastRenderDelta = 0.0f;
     
     private long accumulator;
     
@@ -95,7 +96,7 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
         // added outside the main process loop
         updateEntityStates();
         
-		world.setDelta(nanosPerLogicTick * 0.000000001f);
+		world.setDelta(nanosPerLogicTick / 1000000000.0f);
         
 		/* LOGIC */
         
@@ -117,7 +118,8 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
         
         /* RENDER */
         
-        world.setDelta(frameTime * 0.000000001f);
+        lastRenderDelta = frameTime / 1000000000.0f;
+        world.setDelta(lastRenderDelta);
         
         INSTANCE.window().prepareFrame();
         // Process all NON ILogic inheriting entity systems
@@ -155,6 +157,14 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
                 break;
             }
         }
+    }
+    
+    public float getUpdateDelta() {
+        return nanosPerLogicTick / 1000000000.0f;
+    }
+    
+    public float lastRenderDelta() {
+        return lastRenderDelta;
     }
     
 }

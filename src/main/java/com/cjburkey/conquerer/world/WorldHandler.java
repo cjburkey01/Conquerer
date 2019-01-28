@@ -65,7 +65,7 @@ public final class WorldHandler {
         {
             final Mesh.Builder meshBuilder = Mesh.builder();
             territory.updateGraphics(meshBuilder);
-            final int worldTerritoryEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
+            final int worldTerritoryEntity = INSTANCE.createEntity(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
             territory.entities.add(worldTerritoryEntity);
             Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
             ent.getComponent(ShaderRender.class).shader = INSTANCE.shaderColored();
@@ -81,7 +81,7 @@ public final class WorldHandler {
             Vector2f textSize = new Vector2f();
             meshBuilder.addText(font, territory.name, 0.2f, textSize);
             textSize.mul(0.5f);
-            final int worldTerritoryEntity = INSTANCE.createObject(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
+            final int worldTerritoryEntity = INSTANCE.createEntity(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
             territory.entities.add(worldTerritoryEntity);
             final Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
             ent.getComponent(ShaderRender.class).shader = INSTANCE.shaderFont();

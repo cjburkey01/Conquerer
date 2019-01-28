@@ -192,7 +192,7 @@ public final class FontHelper {
         public final Texture texture;
         private final Char2ObjectOpenHashMap<Vector4fc> uvs;
         
-        public FontBitmap(int width, int lineHeight, Font font, Texture texture, Char2ObjectOpenHashMap<Vector4fc> uvs) {
+        private FontBitmap(int width, int lineHeight, Font font, Texture texture, Char2ObjectOpenHashMap<Vector4fc> uvs) {
             this.width = width;
             this.lineHeight = lineHeight;
             this.font = font;
@@ -200,7 +200,7 @@ public final class FontHelper {
             this.uvs = uvs;
         }
         
-        public Vector4fc getUvs(char character) {
+        public Vector4fc getUv(char character) {
             return uvs.get(character);
         }
         

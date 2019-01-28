@@ -176,8 +176,10 @@ public class Window {
         return vsync;
     }
     
+    private boolean firstVsync = true;
     public void setVsync(boolean vsync) {
-        if (this.vsync == vsync) return;
+        if (this.vsync == vsync && !firstVsync) return;
+        firstVsync = false;
         glfwSwapInterval(vsync ? 1 : 0);
         this.vsync = vsync;
     }

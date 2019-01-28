@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.Collections;
 import java.util.Objects;
 import jdk.internal.jline.internal.Nullable;
 import org.joml.Vector2f;
@@ -569,25 +570,47 @@ public final class Mesh {
             return this;
         }
         
-        public Builder addText(FontHelper.FontBitmap fontBitmap, String text, float size, @Nullable Vector2f mutSize) {
+        public Builder addText(FontHelper.FontBitmap fontBitmap, CharSequence text, float size, @Nullable Vector2f mutSize, boolean flipInds) {
+            if (text.length() < 1) return this;
+            
+            // Get basic global information about the font
             final float s = size / fontBitmap.lineHeight;
-            float x = 0.0f;
-            char[] characters = text.toCharArray();
-            FontHelper.Font font = fontBitmap.font;
+            final char[] characters = new char[text.length()];
+            for (int i = 0; i < characters.length; i ++) characters[i] = text.charAt(i);
+            final FontHelper.Font font = fontBitmap.font;
+            
+            // Keep track of x position for the next character
+            // Begin offset far enough for the next character not to intersect anything at 0,0
+            float x = font.getBoundingBox(characters[0], fontBitmap.lineHeight).minX * s;
+            
+            // Loop through all the characters and generate their quads
             for (int i = 0; i < characters.length; i++) {
-                // Generate the position for the character quad
+                // Get the bounds for this character and update the return size
                 final Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);
                 if (mutSize != null) mutSize.y = max(mutSize.y, bounds.height);
-                final Vector2f tl = new Vector2f(x, -font.ascent * (font.getScale(fontBitmap.lineHeight) * s) - bounds.minY * s);
+                
+                // Generate the position for the character
+                float y = (-font.ascent * font.getScale(fontBitmap.lineHeight) * s) - ((flipInds ? 0.0f : 1.0f) * (bounds.minY * s));
+                if (flipInds) {
+                    y *= -1.0f;
+                    y += bounds.maxY * s;
+                }
+                final Vector2f tl = new Vector2f(x, y);
+                final Vector2f br = tl.add(bounds.width * s, -bounds.height * s, new Vector2f());
+                
+                // If necessary, flip the y-coords of the quad to make it visible on inverted-y coordinate systems (such as screen coordinates)
+                if (flipInds) {
+                    float tmp = br.y;
+                    br.y = tl.y;
+                    tl.y = tmp;
+                }
                 
                 // Load the bounds of the UVs
-                final Vector4fc uvBounds = fontBitmap.getUvs(characters[i]);
+                final Vector4fc uvBounds = fontBitmap.getUv(characters[i]);
                 if (uvBounds == null) {
                     error("Failed to load character '{}' from provided font bitmap", characters[i]);
                     continue;
                 }
-                
-                Vector2f br = tl.add(bounds.width * s, -bounds.height * s, new Vector2f());
                 
                 // Add the quad (TopLeft to BottomRight) with the provided UVs from the font bitmap
                 addUvQuad(
@@ -603,10 +626,33 @@ public final class Mesh {
                 if (mutSize != null) mutSize.x += width + kern;
                 x += width + kern;
             }
-            if (mutSize != null) {
-                mutSize.y *= s;
+            
+            // Scale the y size because it's not accounted for
+            if (mutSize != null) mutSize.y *= s;
+            
+            return this;
+        }
+        
+        public Builder addText(FontHelper.FontBitmap fontBitmap, CharSequence text, float size, @Nullable Vector2f mutSize) {
+            return addText(fontBitmap, text, size, mutSize, false);
+        }
+        
+        public Builder translate(float x, float y, float z) {
+            for (int i = 0; i < vertexAppender.getPos(); i+= 3) {
+                vertexAppender.put(i, vertexAppender.at(i) + x);
+                vertexAppender.put(i + 1, vertexAppender.at(i + 1) + y);
+                vertexAppender.put(i + 2, vertexAppender.at(i + 2) + z);
             }
             return this;
+        }
+        
+        public Builder flipTris() {
+            Collections.reverse(indices);
+            return this;
+        }
+        
+        public Builder translate(Vector3fc offset) {
+            return translate(offset.x(), offset.y(), offset.z());
         }
         
         public Builder clearVertices() {
@@ -637,8 +683,8 @@ public final class Mesh {
         }
         
         public Mesh apply(Mesh mesh) {
-            mesh.setVertices(vertices.toArray(new float[0]));
-            mesh.setIndices(indices.toArray(new short[0]));
+            mesh.setVertices((vertices.size() > 0) ? vertices.toArray(new float[0]) : null);
+            mesh.setIndices((indices.size() > 0) ? indices.toArray(new short[0]) : null);
             if (colors.size() > 0) mesh.setColors(colors.toArray(new float[0]));
             if (uvs.size() > 0) mesh.setUvs(uvs.toArray(new float[0]));
             return mesh;

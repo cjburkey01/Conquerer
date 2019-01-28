@@ -2,6 +2,7 @@ package com.cjburkey.conquerer.ecs.component.render.ui;
 
 import com.artemis.Component;
 import com.cjburkey.conquerer.gl.Texture;
+import com.cjburkey.conquerer.ui.UiComponent;
 import org.joml.Vector4f;
 
 /**
@@ -12,5 +13,6 @@ public class UiElement extends Component {
     public Texture texture;
     public boolean isFont;
     public final Vector4f colorize = new Vector4f(1.0f);
+    public UiComponent uiComponent;
     
 }
