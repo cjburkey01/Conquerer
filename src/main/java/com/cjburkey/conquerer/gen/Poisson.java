@@ -3,7 +3,7 @@ package com.cjburkey.conquerer.gen;
 import com.cjburkey.conquerer.math.Rectf;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import org.joml.Random;
 import org.joml.Vector2f;
@@ -23,7 +23,7 @@ public final class Poisson {
     private static final float SQRT_2f = (float) sqrt(2.0d);
     private static final float PI2f = (float) PI * 2.0f;
     
-    public static List<Vector2fc> disc(final Random random, final float minDist, final int maxIterations, final int stopAfter, final Rectf bounds) {
+    public static Map<Vector2ic, Vector2fc> disc(final Random random, final float minDist, final int maxIterations, final int stopAfter, final Rectf bounds) {
         final Object2ObjectOpenHashMap<Vector2ic, Vector2fc> finalPoints = new Object2ObjectOpenHashMap<>();
         final ObjectArrayList<Vector2fc> activePoints = new ObjectArrayList<>();
         
@@ -72,14 +72,14 @@ public final class Poisson {
             }
         }
         
-        return new ObjectArrayList<>(finalPoints.values());
+        return new Object2ObjectOpenHashMap<>(finalPoints);
     }
     
-    public static List<Vector2fc> disc(final Random random, final float minDist, final int maxIterations, final int stopAfter) {
+    public static Map<Vector2ic, Vector2fc> disc(final Random random, final float minDist, final int maxIterations, final int stopAfter) {
         return disc(random, minDist, maxIterations, stopAfter, Rectf.infinite());
     }
     
-    public static List<Vector2fc> disc(final Random random, final float minDist, final int maxIterations, Rectf bounds) {
+    public static Map<Vector2ic, Vector2fc> disc(final Random random, final float minDist, final int maxIterations, Rectf bounds) {
         return disc(random, minDist, maxIterations, MAX_VALUE, bounds);
     }
     
@@ -89,7 +89,7 @@ public final class Poisson {
         return new Vector2f(center.x() + dist * (float) cos(angle), center.y() + dist * (float) sin(angle));
     }
     
-    private static Vector2ic getCell(Vector2fc point, float minDist) {
+    public static Vector2ic getCell(Vector2fc point, float minDist) {
         float cellSize = minDist / SQRT_2f;
         return new Vector2i((int) floor(point.x() / cellSize), (int) floor(point.y() / cellSize));
     }

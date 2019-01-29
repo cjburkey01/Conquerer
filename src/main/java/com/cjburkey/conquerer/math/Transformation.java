@@ -131,8 +131,8 @@ public final class Transformation {
         return glPosToWorldRay(camera, screenToGlPos(screenCoords));
     }
     
-    public static Vector3f cameraToPlane(Vector3fc position, Camera camera, Vector2fc screenCoords, Plane plane) {
-        return plane.getIntersectionPoint(position, screenToWorldRay(camera, screenCoords));
+    public static Vector3f cameraToPlane(Vector3fc originPos, Camera camera, Vector2fc screenCoords, Plane plane) {
+        return plane.getIntersectionPoint(originPos, screenToWorldRay(camera, screenCoords));
     }
     
 }

@@ -47,6 +47,11 @@ public final class Name {
             vowel = !vowel;
             builder.append(from[random.nextInt(from.length)]);
         }
+        
+        // Make the first letter capitalized
+        builder.setCharAt(0, Character.toUpperCase(builder.charAt(0)));
+        
+        // Return the name which must conform to the specified bounds
         return builder.substring(0, min(builder.length(), maxLengthInc));
     }
     

@@ -7,6 +7,7 @@ import com.cjburkey.conquerer.world.Territory;
 import com.cjburkey.conquerer.world.TerritoryEdge;
 import com.cjburkey.conquerer.world.WorldHandler;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Map;
 import org.ajwerner.voronoi.Voronoi;
@@ -37,7 +38,7 @@ public class BasicGenerator implements IGenerator {
         
         // Generate a poisson disc (random but evenly distributed) of points,
         //      then generate edges between them using Fortune's algorithm for a Voronoi graph
-        new Voronoi(Poisson.disc(random, minDistance, 30, genBounds)).getEdges().forEach(edge -> {
+        new Voronoi(new ObjectArrayList<>(Poisson.disc(random, minDistance, 30, genBounds).values())).getEdges().forEach(edge -> {
             // Check the first site of the edge
             tryEdge(random, territories, edge.getPoint1(), edge.getPoint2(), edge);
             

@@ -3,25 +3,20 @@ package com.cjburkey.conquerer;
 import com.artemis.ArchetypeBuilder;
 import com.artemis.BaseSystem;
 import com.artemis.Component;
-import com.artemis.Entity;
 import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.input.CameraMovement;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
-import com.cjburkey.conquerer.ecs.component.render.MeshRender;
-import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
-import com.cjburkey.conquerer.ecs.component.render.Textured;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
 import com.cjburkey.conquerer.ecs.component.transform.Rot;
-import com.cjburkey.conquerer.ecs.component.transform.Scale;
 import com.cjburkey.conquerer.ecs.system.CameraMovementSystem;
 import com.cjburkey.conquerer.ecs.system.CameraSystem;
 import com.cjburkey.conquerer.ecs.system.RenderSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
 import com.cjburkey.conquerer.ecs.system.UiElementSystem;
+import com.cjburkey.conquerer.gen.Terrain;
 import com.cjburkey.conquerer.gl.FontHelper;
-import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
 import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.glfw.Window;
@@ -30,6 +25,7 @@ import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.ui.UiSolidBox;
 import com.cjburkey.conquerer.ui.UiText;
 import com.cjburkey.conquerer.util.Util;
+import com.cjburkey.conquerer.world.Territory;
 import com.cjburkey.conquerer.world.WorldHandler;
 import de.tomgrill.artemis.GameLoopInvocationStrat;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -38,6 +34,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.math.Transformation.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -52,8 +49,9 @@ public final class Conquerer {
     }
     
     /*
-        This is my main area for TODO:
+        This is my main area for to-do items:
         
+        TODO: ADD ENTITY TRANSFORM PARENTS
         TODO: HIDE LINES BETWEEN TERRITORIES OWNED BY THE SAME EMPIRE
      */
     
@@ -111,6 +109,7 @@ public final class Conquerer {
     // Test UI
     private UiText fpsDisplay;
     private UiText upsDisplay;
+    private UiText territoryDisplay;
     
     private void startGame() {
         // Create and initialize both the window and the OpenGL context
@@ -140,7 +139,7 @@ public final class Conquerer {
         // UI Test
         {
             // Background
-            new UiSolidBox(new Vector2f(200.0f, 60.0f))
+            new UiSolidBox(new Vector2f(200.0f, 90.0f))
                     .setColor(new Vector3f(0.0f));
             
             // FPS
@@ -154,23 +153,13 @@ public final class Conquerer {
                     .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
                     .setSize(24.0f);
             upsDisplay.position().set(20.0f, 30.0f, 0.0f);
+            
+            // Current territory
+            territoryDisplay = new UiText("Territory: ", robotoAscii256)
+                    .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
+                    .setSize(24.0f);
+            territoryDisplay.position().set(20.0f, 54.0f, 0.0f);
         }
-        
-        // The below comment contains the debug code to display a given bitmap
-        // Just change "robotoAscii256" to a FontHelper.FontBitmap instance
-//        {
-//            Mesh.Builder meshBuilder = Mesh.builder();
-//            meshBuilder.addUvQuad(new Vector2f(), new Vector2f(5.0f, -5.0f), new Vector2f(0.0f, 0.0f), new Vector2f(1.0f, 1.0f));
-//            Mesh mesh = meshBuilder.apply(new Mesh());
-//            int test = INSTANCE.createEntity(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
-//            Entity ent = INSTANCE.world().getEntity(test);
-//            ent.getComponent(ShaderRender.class).shader = shaderTextured;
-//            shaderFont.setUniform("color", new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
-//            ent.getComponent(MeshRender.class).mesh = mesh;
-//            ent.getComponent(Pos.class).position.set(0.0f, 0.0f, 1.0f);
-//            
-//            ent.getComponent(Textured.class).texture = robotoAscii256.texture;
-//        }
         
         // Create starting main camera
         mainCamera = createEntity(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
@@ -183,14 +172,8 @@ public final class Conquerer {
         info("Initialized");
         
         // Go!
-        long last = System.nanoTime();
         while (running) {
             world.process();
-            if ((System.nanoTime() - last) >= 1000000000.0f / 10.0f) {
-                fpsDisplay.setText(String.format("FPS: %.2f", 1.0f / gameLoop.lastRenderDelta()));
-                upsDisplay.setText(String.format("UPS: %.2f", 1.0f / gameLoop.getUpdateDelta()));
-                last = System.nanoTime();
-            }
             if (window.getShouldClose()) {
                 exit();
             }
@@ -237,6 +220,7 @@ public final class Conquerer {
     }
     
     private boolean fill = true;
+    private long lastDebugTextUpdateTime = System.nanoTime();
     public void onFrameUpdate() {
         if (Input.getKeyPressed(GLFW_KEY_C)) {
             fill = !fill;
@@ -249,6 +233,21 @@ public final class Conquerer {
             info("Regenerating terrain");
             worldHandler.generateWorld(RANDOM);
         }
+        if ((System.nanoTime() - lastDebugTextUpdateTime) >= 1000000000.0f / 10.0f) {
+            fpsDisplay.setText(String.format("FPS: %.2f", 1.0f / gameLoop.lastRenderDelta()));
+            upsDisplay.setText(String.format("UPS: %.2f", 1.0f / gameLoop.getUpdateDelta()));
+            
+            Vector3f mousePos = cameraToPlane(world.getEntity(mainCamera).getComponent(Pos.class).position,
+                    world.getEntity(mainCamera).getComponent(Camera.class),
+                    Input.mousePos(),
+                    INSTANCE.worldPlane);
+            Territory at = worldHandler.terrain.getContainingTerritory(new Vector2f(mousePos.x, mousePos.y));
+            territoryDisplay.setText(String.format("Territory: %s", ((at == null) ? "None" : at.name)));
+            
+            lastDebugTextUpdateTime = System.nanoTime();
+        }
+        // TODO: TERRITORY NAME
+        
     }
     
     @SafeVarargs
@@ -258,32 +257,6 @@ public final class Conquerer {
             builder.add(type);
         }
         return world.create(builder.build(world));
-    }
-    
-    
-    public final int createWorldText(FontHelper.FontBitmap bitmap, String input, float size) {
-        // Generate the mesh for the text
-        Mesh.Builder meshBuilder = Mesh.builder();
-        Vector2f mutSize = new Vector2f();
-        meshBuilder.addText(bitmap, input, size, mutSize);
-        debug("Text size: {}, {}", mutSize.x, mutSize.y);
-        
-        // Add the generated mesh onto a new entity
-        int textEntity = createEntity(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
-        Entity ent = world.getEntity(textEntity);
-        ent.getComponent(ShaderRender.class).shader = shaderFont;
-        ent.getComponent(MeshRender.class).mesh = meshBuilder.apply(new Mesh());
-        ent.getComponent(Pos.class).position.zero();
-        ent.getComponent(Textured.class).texture = bitmap.texture;
-        
-        return textEntity;
-    }
-    
-    @SuppressWarnings("UnusedReturnValue")
-    public final int createWorldText(FontHelper.Font font, String input, int detail, float size) {
-        // Generate a bitmap for the given text
-        FontHelper.FontBitmap bitmap = font.generateBitmap(input, detail);
-        return createWorldText(bitmap, input, size);
     }
     
     // -- STATIC -- //
