@@ -360,6 +360,18 @@ public final class Util {
         return new Vector2f(cx / vertices.size(), cy / vertices.size());
     }
     
+    public static boolean containsPoint(Vector2fc point, Vector2fc... polygon) {
+        if (polygon.length < 3) return false;
+        for (int i = 0; i < polygon.length; i++) {
+            Vector2fc v1 = polygon[i].sub(point, new Vector2f());
+            Vector2fc v2 = polygon[(i + 1) % polygon.length].sub(point, new Vector2f());
+            Vector2fc edge = v1.sub(v2, new Vector2f());
+            float x = edge.y() * v1.x() - edge.x() * v1.y();    // Scalar cross product
+            if (x < 0) return false;
+        }
+        return true;
+    }
+    
     // -- NOISE SAMPLING -- //
     
     public static float simplexSample2f(float min, float max, float noiseScale, float x, float y, int seed) {

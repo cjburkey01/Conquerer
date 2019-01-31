@@ -1,22 +1,18 @@
 package com.cjburkey.conquerer.world;
 
-import com.cjburkey.conquerer.Conquerer;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.CounterClockwiseVec2;
 import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import java.util.List;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 import static com.cjburkey.conquerer.Conquerer.*;
-import static com.cjburkey.conquerer.Log.*;
 import static com.cjburkey.conquerer.util.Util.*;
 import static com.cjburkey.conquerer.world.TerritoryInitializer.*;
-import static java.util.Collections.*;
 
 /**
  * Created by CJ Burkey on 2019/01/15
@@ -29,7 +25,7 @@ public final class Territory {
     public final String name;
     public final Vector2fc location;
     public final Vector2fc center;
-    private final ObjectArrayList<Vector2fc> vertices = new ObjectArrayList<>();
+    public final Vector2fc[] vertices;
     public final TerritoryEdge[] edges;
     private BiomeHandler.Biome biome;
     public final boolean isWater;
@@ -43,19 +39,17 @@ public final class Territory {
         this.biome = biome;
         this.isWater = isWater;
         
+        final ObjectArrayList<Vector2fc> vertices = new ObjectArrayList<>();
         for (TerritoryEdge edge : edges) {
             if (!vertices.contains(edge.pointA)) vertices.add(edge.pointA);
             if (!vertices.contains(edge.pointB)) vertices.add(edge.pointB);
         }
         vertices.sort(new CounterClockwiseVec2(Util.center(vertices)));
+        this.vertices = vertices.toArray(new Vector2fc[0]);
         
         center = center(vertices);
         
         onExit.add(this::cleanupEntity);
-    }
-    
-    public List<Vector2fc> vertices() {
-        return unmodifiableList(vertices);
     }
     
     public void cleanupEntity() {
@@ -73,7 +67,6 @@ public final class Territory {
     public void updateGraphics(Mesh.Builder meshBuilder) {
         if (currentOwner != null) {
             float bthick = INSTANCE.worldHandler.borderThickness;
-            Vector2fc[] vertices = this.vertices.toArray(new Vector2fc[0]);
             for (int i = 0; i < vertices.length; i++) {
                 vertices[i] = moveVert(vertices[i],
                         vertices[(i - 1 + vertices.length) % vertices.length],
@@ -83,7 +76,7 @@ public final class Territory {
             meshBuilder.addLine(currentOwner.color, true, bthick, vertices);
         }
         if (biome != null) {
-            meshBuilder.addPolygon(isWater ? waterColor : biome.color, this.vertices.toArray(new Vector2fc[0]));
+            meshBuilder.addPolygon(isWater ? waterColor : biome.color, vertices);
         }
     }
     

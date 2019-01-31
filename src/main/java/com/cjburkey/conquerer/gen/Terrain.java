@@ -80,17 +80,21 @@ public final class Terrain {
             List<Territory> inRing = getContainingTerritoryRadius(center, ringSize++);  // Ringsize is incremented afterwards
             if (inRing.size() <= 0) continue;
             
-            // TODO: CHECK POLYGON CONTAINS INSTEAD OF NEARNESS CHECK
-            float minDistSq = Float.POSITIVE_INFINITY;
-            Territory closest = null;
+//            // TODO: CHECK POLYGON CONTAINS INSTEAD OF NEARNESS CHECK
+//            float minDistSq = Float.POSITIVE_INFINITY;
+//            Territory closest = null;
+//            for (Territory territory : inRing) {
+//                float distSq = territory.location.distanceSquared(point);
+//                if (distSq < minDistSq) {
+//                    minDistSq = distSq;
+//                    closest = territory;
+//                }
+//            }
+//            return closest;
+            
             for (Territory territory : inRing) {
-                float distSq = territory.location.distanceSquared(point);
-                if (distSq < minDistSq) {
-                    minDistSq = distSq;
-                    closest = territory;
-                }
+                if (containsPoint(point, territory.vertices)) return territory;
             }
-            return closest;
         } while(ringSize < 10);
         return null;
     }
