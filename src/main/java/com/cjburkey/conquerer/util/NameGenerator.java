@@ -1,4 +1,4 @@
-package com.cjburkey.conquerer.gen;
+package com.cjburkey.conquerer.util;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Arrays;

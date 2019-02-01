@@ -7,6 +7,7 @@ import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -104,6 +105,17 @@ public final class Territory {
     
     public static Builder builder() {
         return new Builder();
+    }
+    
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Territory territory = (Territory) o;
+        return name.equals(territory.name) && location.equals(territory.location);
+    }
+    
+    public int hashCode() {
+        return Objects.hash(name, location);
     }
     
     @SuppressWarnings({"unused", "UnusedReturnValue"})

@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.world;
 
-import com.cjburkey.conquerer.gen.NameGenerator;
+import com.cjburkey.conquerer.util.NameGenerator;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Collections;

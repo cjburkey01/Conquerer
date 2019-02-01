@@ -1,10 +1,7 @@
-package com.cjburkey.conquerer.gen;
+package com.cjburkey.conquerer.world;
 
 import com.cjburkey.conquerer.gen.generator.IGenerator;
 import com.cjburkey.conquerer.math.Rectf;
-import com.cjburkey.conquerer.world.BiomeHandler;
-import com.cjburkey.conquerer.world.Territory;
-import com.cjburkey.conquerer.world.WorldHandler;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Collections;
@@ -21,7 +18,7 @@ import static com.cjburkey.conquerer.util.Util.*;
 /**
  * Created by CJ Burkey on 2019/01/12
  */
-@SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
 public final class Terrain {
     
     public final IGenerator generator;

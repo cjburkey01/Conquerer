@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gen.generator;
 
-import com.cjburkey.conquerer.gen.NameGenerator;
+import com.cjburkey.conquerer.util.NameGenerator;
 import com.cjburkey.conquerer.gen.Poisson;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.world.Territory;

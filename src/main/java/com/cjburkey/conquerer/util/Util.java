@@ -326,6 +326,14 @@ public final class Util {
         return min(max(val, minInc), maxInc);
     }
     
+    public static int sign(float num) {
+        return Float.compare(num, 0.0f);
+    }
+    
+    public static int sign(double num) {
+        return Double.compare(num, 0.0f);
+    }
+    
     // -- VECTOR UTILS -- //
     
     public static Vector2f getTangent(Vector2fc vertex, Vector2fc previous, Vector2fc next) {
