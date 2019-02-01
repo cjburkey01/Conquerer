@@ -19,7 +19,13 @@ public final class ClockwiseVec2 implements Comparator<Vector2fc> {
     }
     
     public int compare(Vector2fc o1, Vector2fc o2) {
-        return (int) round(toDegrees(atan2(o2.x() - center.x(), o2.y() - center.y())) - toDegrees(atan2(o1.x() - center.x(), o1.y() - center.y())));
+        return (int) round(diff(o1, o2));
+    }
+    
+    private double diff(Vector2fc o1, Vector2fc o2) {
+        double theta1 = atan2(o1.y() - center.y(), o1.x() - center.x());
+        double theta2 = atan2(o2.y() - center.y(), o2.x() - center.x());
+        return toDegrees(theta1 - theta2);
     }
     
 }

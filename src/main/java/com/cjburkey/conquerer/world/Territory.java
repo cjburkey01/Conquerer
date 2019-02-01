@@ -69,7 +69,7 @@ public final class Territory {
         if (biome != null) {
             meshBuilder.addPolygon(isWater ? waterColor : biome.color, this.vertices);
         }
-//        if (currentOwner != null) {
+        if (currentOwner != null) {
             float bthick = INSTANCE.worldHandler.borderThickness;
             Vector2fc[] tmpVerts = Arrays.copyOf(vertices, vertices.length);
             for (int i = 0; i < tmpVerts.length; i++) {
@@ -80,7 +80,7 @@ public final class Territory {
             }
 //            meshBuilder.addLine(currentOwner.color, true, bthick, vertices);
             meshBuilder.addLine(new Vector3f(0.5f), true, bthick, tmpVerts);
-//        }
+        }
     }
     
     public void setCurrentOwner(EmpireHandler.Empire empire) {

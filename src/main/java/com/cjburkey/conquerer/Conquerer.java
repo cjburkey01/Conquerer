@@ -15,7 +15,6 @@ import com.cjburkey.conquerer.ecs.system.CameraSystem;
 import com.cjburkey.conquerer.ecs.system.RenderSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
 import com.cjburkey.conquerer.ecs.system.UiElementSystem;
-import com.cjburkey.conquerer.gen.Terrain;
 import com.cjburkey.conquerer.gl.FontHelper;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
 import com.cjburkey.conquerer.glfw.Input;
@@ -139,10 +138,10 @@ public final class Conquerer {
         // Generate and render the world
         worldHandler.generateWorld(RANDOM);
         
-        // UI Test
+        // Debug display
         {
             // Background
-            new UiSolidBox(new Vector2f(375.0f, 5 * 30.0f))
+            new UiSolidBox(new Vector2f(375.0f, 6 * 24.0f + 12.0f))
                     .setColor(new Vector3f(0.0f));
             
             // FPS

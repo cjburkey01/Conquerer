@@ -1,11 +1,10 @@
 package com.cjburkey.conquerer.gen;
 
-import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Arrays;
 import org.joml.Random;
 
-import static org.joml.Math.*;
+import static com.cjburkey.conquerer.util.Util.*;
 
 /**
  * Created by CJ Burkey on 2019/01/12
@@ -13,7 +12,7 @@ import static org.joml.Math.*;
  * NOTE: THIS FILE CONTAINS A LIST OF OFFENSIVE (RACIST, SLURS, SWEARS, etc) WORDS AT THE END
  * IF YOU DON'T WANT TO SEE IT, DON'T LOOK
  */
-@SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
 public final class NameGenerator {
     
     private final String[] consonants;
@@ -123,26 +122,28 @@ public final class NameGenerator {
     // Alternates between random monographic and digraphic consonants and vowels until the generated name reaches a length somewhere within [min, max]
     public String generate(Random random) {
         // Keep looking until the name is considered valid by the provided filter
-        // This is the second time I've use a "do...while" loop in this project and the third time EVER
+        // This is the second time I've used a "do...while" loop in this project and the third time EVER
         CharSequence output;
         do {
             // Allow string mutation with LESS reallocation (thus, it should be faster but less memory efficient)
             StringBuilder builder = new StringBuilder();
             
             // Randomly start on vowel or consonant
-            boolean vowel = (Util.nextInt(random, 0, 1) == 0);
+            boolean vowel = (nextInt(random, 0, 1) == 0);
             
             // Predetermine length in the range [min, max]
-            int length = Util.nextInt(random, minLengthInc, maxLengthInc);
+            int length = nextInt(random, minLengthInc, maxLengthInc);
             
             // Loop until the length of the name meets or exceeds the predetermined name length
             while (builder.length() < length) {
                 // Get a character from the correct array
-                String[] from = vowel ? vowels : consonants;
+                String[] from = (vowel ? vowels : consonants);
                 
-                // If this is the first character and "canFirstLetterBeDigraph" is true, make sure that the first "character" is a single character
-                String character = from[random.nextInt((canFirstLetterBeDigraph || (builder.length() > 0)) ? from.length
-                        : (vowel ? firstVowelDigraph : firstConsDigraph))];
+                // If this is the first character and "canFirstLetterBeDigraph" is true, make sure that the first "letter" is a single character
+                String character = from[random.nextInt(
+                        (canFirstLetterBeDigraph || (builder.length() > 0))
+                                ? from.length
+                                : (vowel ? firstVowelDigraph : firstConsDigraph))];
                 builder.append(character);
                 
                 // Make next character/digraph/etc the opposite type of the current type
