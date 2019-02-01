@@ -39,12 +39,15 @@ public final class RenderSystem extends BaseEntitySystem {
     }
     
     protected void inserted(int entityId) {
+        super.inserted(entityId);
+        
         entities.add(entityId);
         forceSort();
     }
     
     protected void removed(int entityId) {
         super.removed(entityId);
+        
         int at = entities.indexOf(entityId);
         if (at < 0) {
             debug("Failed to remove entity {}", entityId);

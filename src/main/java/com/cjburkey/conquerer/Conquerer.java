@@ -110,6 +110,9 @@ public final class Conquerer {
     private UiText fpsDisplay;
     private UiText upsDisplay;
     private UiText territoryDisplay;
+    private UiText territoryBiomeDisplay;
+    private UiText territoryLocDisplay;
+    private UiText territoryOceanDisplay;
     
     private void startGame() {
         // Create and initialize both the window and the OpenGL context
@@ -139,7 +142,7 @@ public final class Conquerer {
         // UI Test
         {
             // Background
-            new UiSolidBox(new Vector2f(200.0f, 90.0f))
+            new UiSolidBox(new Vector2f(375.0f, 5 * 30.0f))
                     .setColor(new Vector3f(0.0f));
             
             // FPS
@@ -159,6 +162,24 @@ public final class Conquerer {
                     .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
                     .setSize(24.0f);
             territoryDisplay.position().set(20.0f, 54.0f, 0.0f);
+            
+            // Current territory biome
+            territoryBiomeDisplay = new UiText("Biome: ", robotoAscii256)
+                    .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
+                    .setSize(24.0f);
+            territoryBiomeDisplay.position().set(20.0f, 78.0f, 0.0f);
+            
+            // Current territory location
+            territoryLocDisplay = new UiText("Location: ", robotoAscii256)
+                    .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
+                    .setSize(24.0f);
+            territoryLocDisplay.position().set(20.0f, 102.0f, 0.0f);
+            
+            // Current territory ocean
+            territoryOceanDisplay = new UiText("Ocean: ", robotoAscii256)
+                    .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
+                    .setSize(24.0f);
+            territoryOceanDisplay.position().set(20.0f, 126.0f, 0.0f);
         }
         
         // Create starting main camera
@@ -243,6 +264,9 @@ public final class Conquerer {
                     INSTANCE.worldPlane);
             Territory at = worldHandler.terrain.getContainingTerritory(new Vector2f(mousePos.x, mousePos.y));
             territoryDisplay.setText(String.format("Territory: %s", ((at == null) ? "None" : at.name)));
+            territoryBiomeDisplay.setText(String.format("Biome: %s", ((at == null) ? "None" : at.getBiome().name)));
+            territoryLocDisplay.setText(String.format("Location: %s", ((at == null) ? "None" : "(" + Util.format(at.location) + ")")));
+            territoryOceanDisplay.setText(String.format("Ocean: %s", ((at == null) ? "Talse" : (at.isWater ? "True" : "False"))));
             
             lastDebugTextUpdateTime = System.nanoTime();
         }

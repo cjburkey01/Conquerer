@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gen.generator;
 
-import com.cjburkey.conquerer.gen.Name;
+import com.cjburkey.conquerer.gen.NameGenerator;
 import com.cjburkey.conquerer.gen.Poisson;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.world.Territory;
@@ -131,7 +131,12 @@ public class BasicGenerator implements IGenerator {
     
     private static Territory.Builder newTerritory(Random random, Vector2fc point) {
         Territory.Builder builder = Territory.builder();
-        builder.setName(Name.generateName(random, 3, 7));
+        builder.setName(new NameGenerator()
+                            .setCanFirstLetterBeDigraph(false)
+                            .setShouldCapitalizeFirstCharacter(true)
+                            .setMinLength(3)
+                            .setMaxLength(7)
+                            .generate(random));
         builder.setLocation(point);
         return builder;
     }

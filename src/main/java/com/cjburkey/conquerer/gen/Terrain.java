@@ -42,6 +42,7 @@ public final class Terrain {
     public Terrain reset() {
         territories.values().forEach(Territory::cleanupEntity);
         territories.clear();
+        territoriesLocs.clear();
         min.set(Float.POSITIVE_INFINITY);
         max.set(Float.NEGATIVE_INFINITY);
         bounds = null;
@@ -77,23 +78,11 @@ public final class Terrain {
         Vector2ic center = getCell(point, generator.getMinDistance());
         int ringSize = 0;
         do {
-            List<Territory> inRing = getContainingTerritoryRadius(center, ringSize++);  // Ringsize is incremented afterwards
-            if (inRing.size() <= 0) continue;
-            
-//            // TODO: CHECK POLYGON CONTAINS INSTEAD OF NEARNESS CHECK
-//            float minDistSq = Float.POSITIVE_INFINITY;
-//            Territory closest = null;
-//            for (Territory territory : inRing) {
-//                float distSq = territory.location.distanceSquared(point);
-//                if (distSq < minDistSq) {
-//                    minDistSq = distSq;
-//                    closest = territory;
-//                }
-//            }
-//            return closest;
-            
-            for (Territory territory : inRing) {
-                if (containsPoint(point, territory.vertices)) return territory;
+            List<Territory> inRing = getContainingTerritoryRadius(center, ringSize++);  // Ringsize is postcremented
+            if (inRing.size() > 0) {
+                for (Territory territory : inRing) {
+                    if (containsPoint(point, territory.vertices)) return territory;
+                }
             }
         } while(ringSize < 10);
         return null;

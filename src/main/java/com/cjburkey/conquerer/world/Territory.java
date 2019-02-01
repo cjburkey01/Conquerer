@@ -6,6 +6,7 @@ import com.cjburkey.conquerer.math.CounterClockwiseVec2;
 import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.Arrays;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -65,19 +66,21 @@ public final class Territory {
     }
     
     public void updateGraphics(Mesh.Builder meshBuilder) {
-        if (currentOwner != null) {
+        if (biome != null) {
+            meshBuilder.addPolygon(isWater ? waterColor : biome.color, this.vertices);
+        }
+//        if (currentOwner != null) {
             float bthick = INSTANCE.worldHandler.borderThickness;
-            for (int i = 0; i < vertices.length; i++) {
-                vertices[i] = moveVert(vertices[i],
-                        vertices[(i - 1 + vertices.length) % vertices.length],
-                        vertices[(i + 1 + vertices.length) % vertices.length],
+            Vector2fc[] tmpVerts = Arrays.copyOf(vertices, vertices.length);
+            for (int i = 0; i < tmpVerts.length; i++) {
+                tmpVerts[i] = moveVert(tmpVerts[i],
+                        tmpVerts[(i - 1 + tmpVerts.length) % tmpVerts.length],
+                        tmpVerts[(i + 1 + tmpVerts.length) % tmpVerts.length],
                         -bthick * 1.5f);
             }
-            meshBuilder.addLine(currentOwner.color, true, bthick, vertices);
-        }
-        if (biome != null) {
-            meshBuilder.addPolygon(isWater ? waterColor : biome.color, vertices);
-        }
+//            meshBuilder.addLine(currentOwner.color, true, bthick, vertices);
+            meshBuilder.addLine(new Vector3f(0.5f), true, bthick, tmpVerts);
+//        }
     }
     
     public void setCurrentOwner(EmpireHandler.Empire empire) {

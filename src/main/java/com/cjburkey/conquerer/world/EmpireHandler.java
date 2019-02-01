@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.world;
 
+import com.cjburkey.conquerer.gen.NameGenerator;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Collections;
@@ -12,7 +13,6 @@ import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import static com.cjburkey.conquerer.gen.Name.*;
 import static com.cjburkey.conquerer.util.Util.*;
 
 /**
@@ -32,7 +32,13 @@ public final class EmpireHandler {
     }
     
     public Empire generate(Random random) {
-        return create(generateName(random, 3, 7), randomColor(random, brightnessMinMax.x(), brightnessMinMax.y()));
+        return create(new NameGenerator()
+                        .setCanFirstLetterBeDigraph(false)          // These four properties are the default values, I set them here only to be explicit
+                        .setShouldCapitalizeFirstCharacter(true)
+                        .setMinLength(3)
+                        .setMaxLength(7)
+                        .generate(random), 
+                randomColor(random, brightnessMinMax.x(), brightnessMinMax.y()));
     }
     
     public Set<Empire> generate(Random random, int count) {

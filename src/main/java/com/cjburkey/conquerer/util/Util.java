@@ -372,6 +372,10 @@ public final class Util {
         return true;
     }
     
+    public static String format(Vector2fc vec) {
+        return String.format("%.2f, %.2f", vec.x(), vec.y());
+    }
+    
     // -- NOISE SAMPLING -- //
     
     public static float simplexSample2f(float min, float max, float noiseScale, float x, float y, int seed) {
