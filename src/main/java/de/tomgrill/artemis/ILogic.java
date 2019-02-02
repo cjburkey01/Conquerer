@@ -19,6 +19,7 @@ package de.tomgrill.artemis;
 /**
  * Simple marker interface to declare a EntitySystem to be processed only in the logic part of the game loop
  */
-public interface ILogic {
+interface ILogic {
+
 }
 

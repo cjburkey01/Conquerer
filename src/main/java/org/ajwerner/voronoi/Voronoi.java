@@ -16,18 +16,18 @@ import org.joml.Vector2fc;
  * Created by ajwerner on 12/23/13.
  */
 public class Voronoi {
-    
+
     // Ghetto but just for drawing stuff
     private float sweepLoc;
     private final ArrayList<VoronoiEdge> edgeList;
     private Set<BreakPoint> breakPoints;
     private TreeMap<ArcKey, CircleEvent> arcs;
     private TreeSet<Event> events;
-    
+
     float getSweepLoc() {
         return sweepLoc;
     }
-    
+
     public Voronoi(List<Vector2fc> sites) {
         float minPoint = Float.POSITIVE_INFINITY;
         // initialize data structures
@@ -35,7 +35,7 @@ public class Voronoi {
         events = new TreeSet<>();
         breakPoints = new HashSet<>();
         arcs = new TreeMap<>();
-        
+
         for (Vector2fc site : sites) {
             minPoint = Math.min(minPoint, site.y() - 10.0f);
             events.add(new Event(new V2fw(site)));
@@ -46,29 +46,28 @@ public class Voronoi {
             sweepLoc = Objects.requireNonNull(cur).p.y();
             if (cur.getClass() == Event.class) {
                 handleSiteEvent(cur);
-            }
-            else {
+            } else {
                 CircleEvent ce = (CircleEvent) cur;
                 handleCircleEvent(ce);
             }
         } while ((events.size() > 0));
-        
+
         for (BreakPoint bp : breakPoints) {
             bp.finish();
         }
     }
-    
+
     private void handleSiteEvent(Event cur) {
         // Deal with first point case
         if (arcs.size() == 0) {
             arcs.put(new Arc(cur.p), null);
             return;
         }
-        
+
         // Find the arc above the site
         Map.Entry<ArcKey, CircleEvent> arcEntryAbove = arcs.floorEntry(new ArcQuery(cur.p));
         Arc arcAbove = (Arc) arcEntryAbove.getKey();
-        
+
         // Deal with the degenerate case where the first two points are at the same y value
         if (arcs.size() == 0 && arcAbove.site.y() == cur.p.y()) {
             VoronoiEdge newEdge = new VoronoiEdge(arcAbove.site, cur.p);
@@ -83,13 +82,13 @@ public class Voronoi {
             arcs.put(arcRight, null);
             return;
         }
-        
+
         // Remove the circle event associated with this arc if there is one
         CircleEvent falseCE = arcEntryAbove.getValue();
         if (falseCE != null) {
             events.remove(falseCE);
         }
-        
+
         BreakPoint breakL = arcAbove.left;
         BreakPoint breakR = arcAbove.right;
         VoronoiEdge newEdge = new VoronoiEdge(arcAbove.site, cur.p);
@@ -98,11 +97,11 @@ public class Voronoi {
         BreakPoint newBreakR = new BreakPoint(cur.p, arcAbove.site, newEdge, false, this);
         breakPoints.add(newBreakL);
         breakPoints.add(newBreakR);
-        
+
         Arc arcLeft = new Arc(breakL, newBreakL);
         Arc center = new Arc(newBreakL, newBreakR);
         Arc arcRight = new Arc(newBreakR, breakR);
-        
+
         arcs.remove(arcAbove);
         arcs.put(arcLeft, null);
         arcs.put(center, null);
@@ -111,7 +110,7 @@ public class Voronoi {
         checkForCircleEvent(arcLeft);
         checkForCircleEvent(arcRight);
     }
-    
+
     private void handleCircleEvent(CircleEvent ce) {
         arcs.remove(ce.arc);
         ce.arc.left.finish(ce.vert);
@@ -126,7 +125,7 @@ public class Voronoi {
 
         V2fw ceArcLeft = ce.arc.getLeft();
         boolean cocircularJunction = ce.arc.getRight().equals(ceArcLeft);
-        
+
         if (entryRight != null) {
             arcRight = (Arc) entryRight.getKey();
             while (cocircularJunction && arcRight.getRight().equals(ceArcLeft)) {
@@ -144,7 +143,7 @@ public class Voronoi {
                 entryRight = arcs.higherEntry(arcRight);
                 arcRight = (Arc) entryRight.getKey();
             }
-            
+
             CircleEvent falseCe = entryRight.getValue();
             if (falseCe != null) {
                 events.remove(falseCe);
@@ -159,26 +158,26 @@ public class Voronoi {
                 arcLeft.right.finish(ce.vert);
                 breakPoints.remove(arcLeft.left);
                 breakPoints.remove(arcLeft.right);
-                
+
                 CircleEvent falseCe = entryLeft.getValue();
                 if (falseCe != null) {
                     events.remove(falseCe);
                 }
-                
+
                 entryLeft = arcs.lowerEntry(arcLeft);
                 arcLeft = (Arc) entryLeft.getKey();
             }
-            
+
             CircleEvent falseCe = entryLeft.getValue();
             if (falseCe != null) {
                 events.remove(falseCe);
                 arcs.put(arcLeft, null);
             }
         }
-        
+
         VoronoiEdge e = new VoronoiEdge(Objects.requireNonNull(arcLeft).right.s1, Objects.requireNonNull(arcRight).left.s2);
         edgeList.add(e);
-        
+
         // Here we're trying to figure out if the org.ajwerner.voronoi.Voronoi vertex
         // we've found is the left
         // or right point of the new edge.
@@ -194,17 +193,17 @@ public class Voronoi {
         } else {
             e.p2 = ce.vert;
         }
-        
+
         BreakPoint newBP = new BreakPoint(arcLeft.right.s1, arcRight.left.s2, e, !isLeftPoint, this);
         breakPoints.add(newBP);
-        
+
         arcRight.left = newBP;
         arcLeft.right = newBP;
-        
+
         checkForCircleEvent(arcLeft);
         checkForCircleEvent(arcRight);
     }
-    
+
     private void checkForCircleEvent(Arc a) {
         V2fw circleCenter = a.checkCircle();
         if (circleCenter != null) {
@@ -215,11 +214,11 @@ public class Voronoi {
             events.add(ce);
         }
     }
-    
+
     @SuppressWarnings("unused")
     public List<VoronoiEdge> getEdges() {
         return Collections.unmodifiableList(edgeList);
     }
-    
+
 }
 

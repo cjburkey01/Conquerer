@@ -9,18 +9,18 @@ import org.joml.Vector3fc;
  */
 @SuppressWarnings("WeakerAccess")
 public class Ray {
-    
+
     public final Vector3f origin = new Vector3f();
     public final Vector3f vector = new Vector3f();
-    
+
     public Ray() {
     }
-    
+
     public Ray(Vector3fc origin, Vector3fc vector) {
         this.origin.set(origin);
         this.vector.set(vector);
     }
-    
+
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -31,9 +31,9 @@ public class Ray {
         Ray ray = (Ray) o;
         return origin.equals(ray.origin) && vector.equals(ray.vector);
     }
-    
+
     public int hashCode() {
         return Objects.hash(origin, vector);
     }
-    
+
 }

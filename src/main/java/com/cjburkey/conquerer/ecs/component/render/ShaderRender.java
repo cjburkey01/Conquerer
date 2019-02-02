@@ -10,15 +10,15 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
  */
 @PooledWeaver
 public final class ShaderRender extends Component {
-    
+
     public Shader shader;
     public Object2ObjectOpenHashMap<String, ShaderCallback> uniformCallbacks = new Object2ObjectOpenHashMap<>();
-    
+
     @FunctionalInterface
     public interface ShaderCallback {
-        
+
         void onCall(Shader shader);
-        
+
     }
-    
+
 }

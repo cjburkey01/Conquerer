@@ -20,22 +20,22 @@ import static com.cjburkey.conquerer.util.Util.*;
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
 public final class Terrain {
-    
+
     public final IGenerator generator;
     public final BiomeHandler biomeHandler;
-    
+
     private final Object2ObjectOpenHashMap<Vector2ic, Territory> territories = new Object2ObjectOpenHashMap<>();
     private final Object2ObjectOpenHashMap<Vector2fc, Territory> territoriesLocs = new Object2ObjectOpenHashMap<>();
     private final Vector2f min = new Vector2f();
     private final Vector2f max = new Vector2f();
     private Rectf bounds;
-    
+
     public Terrain(BiomeHandler biomeHandler, IGenerator generator) {
         this.biomeHandler = biomeHandler;
         this.generator = generator;
         reset();
     }
-    
+
     public Terrain reset() {
         territories.values().forEach(Territory::cleanupEntity);
         territories.clear();
@@ -45,13 +45,14 @@ public final class Terrain {
         bounds = null;
         return this;
     }
-    
+
     public Terrain generate(WorldHandler worldHandler) {
         // [Re]generate the terrain
         reset();
         territoriesLocs.putAll(generator.generateTerritories(worldHandler));
-        for (Territory territory : territoriesLocs.values()) territories.put(getCell(territory.location, generator.getMinDistance()), territory);
-        
+        for (Territory territory : territoriesLocs.values())
+            territories.put(getCell(territory.location, generator.getMinDistance()), territory);
+
         // Calculate the new bounds
         for (Territory territory : territories.values()) {
             min.x = min(min.x, territory.location.x());
@@ -62,15 +63,15 @@ public final class Terrain {
         bounds = new Rectf(min.x, min.y, max.x, max.y);
         return this;
     }
-    
+
     public Map<Vector2ic, Territory> getTerritories() {
         return Collections.unmodifiableMap(territories);
     }
-    
+
     public Map<Vector2fc, Territory> getTerritoriesLoc() {
         return Collections.unmodifiableMap(territoriesLocs);
     }
-    
+
     public Territory getContainingTerritory(Vector2fc point) {
         Vector2ic center = getCell(point, generator.getMinDistance());
         int ringSize = 0;
@@ -81,10 +82,10 @@ public final class Terrain {
                     if (containsPoint(point, territory.vertices)) return territory;
                 }
             }
-        } while(ringSize < 10);
+        } while (ringSize < 10);
         return null;
     }
-    
+
     private List<Territory> getContainingTerritoryRadius(Vector2ic center, int r) {
         ObjectArrayList<Territory> output = new ObjectArrayList<>();
         for (int x = -r; x <= r; x++) {
@@ -101,13 +102,13 @@ public final class Terrain {
         }
         return output;
     }
-    
+
     public int getTerritoryCount() {
         return territories.size();
     }
-    
+
     public Rectf bounds() {
         return bounds;
     }
-    
+
 }

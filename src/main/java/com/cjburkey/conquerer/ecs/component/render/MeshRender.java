@@ -9,7 +9,7 @@ import com.cjburkey.conquerer.gl.Mesh;
  */
 @PooledWeaver
 public final class MeshRender extends Component {
-    
+
     public Mesh mesh;
-    
+
 }

@@ -18,19 +18,19 @@ import static com.cjburkey.conquerer.Conquerer.*;
  */
 @SuppressWarnings({"WeakerAccess", "FieldCanBeLocal"})
 public abstract class UiComponent {
-    
+
     private Entity entity;
     private Pos pos;
     private Rot rot;
     private Scale scale;
     private MeshRender meshRender;
     private UiElement uiElement;
-    
+
     private Mesh mesh = new Mesh();
-    
+
     protected Texture texture = null;
     protected boolean isFont = false;
-    
+
     public UiComponent() {
         entity = INSTANCE.world().getEntity(INSTANCE.createEntity(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class));
         pos = entity.getComponent(Pos.class);
@@ -38,30 +38,30 @@ public abstract class UiComponent {
         scale = entity.getComponent(Scale.class);
         meshRender = entity.getComponent(MeshRender.class);
         uiElement = entity.getComponent(UiElement.class);
-        
+
         uiElement.uiComponent = this;
         meshRender.mesh = mesh;
-        
+
         onEntityCreated();
-        
+
         onExit.add(this::remove);
     }
-    
+
     public final void regenerateMesh() {
         uiElement.isFont = isFont;
         uiElement.texture = texture;
         generateMesh(mesh);
     }
-    
+
     public final void remove() {
         onEntityDestroy();
-        
+
         mesh.destroy();
         meshRender.mesh = null;
         uiElement.texture = null;
-        
+
         INSTANCE.world().deleteEntity(entity);
-        
+
         entity = null;
         pos = null;
         rot = null;
@@ -72,43 +72,43 @@ public abstract class UiComponent {
         texture = null;
         isFont = false;
     }
-    
+
     protected final Entity getEntity() {
         return entity;
     }
-    
+
     public final Vector3f position() {
         return pos.position;
     }
-    
+
     public final Quaternionf rotation() {
         return rot.rotation;
     }
-    
+
     public final Vector3f scale() {
         return scale.scale;
     }
-    
+
     protected UiElement uiElement() {
         return uiElement;
     }
-    
+
     protected static int screenWidth() {
         return INSTANCE.window().getWidth();
     }
-    
+
     protected static int screenHeight() {
         return INSTANCE.window().getHeight();
     }
-    
+
     // Override if necessary
     protected void onEntityCreated() {
     }
-    
+
     // Override if necessary
     protected void onEntityDestroy() {
     }
-    
+
     protected abstract void generateMesh(Mesh mesh);
-    
+
 }

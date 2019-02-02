@@ -15,10 +15,10 @@ import static com.cjburkey.conquerer.util.Util.*;
  */
 @SuppressWarnings({"UnusedReturnValue", "WeakerAccess"})
 public final class BiomeHandler {
-    
+
     private final ObjectOpenHashSet<Biome> biomes = new ObjectOpenHashSet<>();
     private Rectf bounds;
-    
+
     public BiomeHandler() {
         // Defaults based loosely upon the Whittaker Biome Diagram found at https://w3.marietta.edu/~biol/biomes/biome_main.htm
         create("Tropical Rainforest", 25.0f, 3.35f, 0.082f, 0.941f, 0.227f);
@@ -32,7 +32,7 @@ public final class BiomeHandler {
         create("Temperate Desert", 10.0f, 0.5f, 0.98f, 0.859f, 0.027f);
         create("Subtropical Desert", 15.0f, 0.25f, 0.98f, 0.58f, 0.094f);
     }
-    
+
     public Biome getBiome(float temperature, float precipitation) {
         Biome closest = null;
         float minDistSq = Float.POSITIVE_INFINITY;
@@ -45,7 +45,7 @@ public final class BiomeHandler {
         }
         return closest;
     }
-    
+
     public void calculateBounds() {
         final Vector2f min = new Vector2f(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
         final Vector2f max = new Vector2f(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
@@ -57,7 +57,7 @@ public final class BiomeHandler {
         }
         bounds = new Rectf(min.x, min.y, max.x, max.y);
     }
-    
+
     // Temperature in Celsius and anual precipitation in meters
     public Biome create(String name, float temperature, float precipitation, Vector3fc color) {
         Biome biome = new Biome(name, temperature, precipitation, color);
@@ -65,41 +65,41 @@ public final class BiomeHandler {
         calculateBounds();
         return biome;
     }
-    
+
     // Temperature in Celsius and anual precipitation in meters
     public Biome create(String name, float temperature, float precipitation, float cr, float cg, float cb) {
         return create(name, temperature, temperature, new Vector3f(cr, cg, cb));
     }
-    
+
     public Rectf getBounds() {
         return bounds;
     }
-    
+
     @SuppressWarnings("WeakerAccess")
     public final class Biome {
-        
+
         public final String name;
         private final Vector2fc biome;
         public final Vector3fc color;
-        
+
         private Biome(String name, float temperature, float precipitation, Vector3fc color) {
             this.name = name;
             biome = new Vector2f(temperature, precipitation);
             this.color = color;
         }
-        
+
         public float temperature() {
             return biome.x();
         }
-        
+
         public float precipitation() {
             return biome.y();
         }
-        
+
         public float distSq(float temperature, float precipitation) {
             return biome.distanceSquared(temperature, precipitation);
         }
-        
+
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -111,11 +111,11 @@ public final class BiomeHandler {
             return name.equals(biome1.name) &&
                     biome.equals(biome1.biome);
         }
-        
+
         public int hashCode() {
             return Objects.hash(name, biome);
         }
-        
+
     }
-    
+
 }

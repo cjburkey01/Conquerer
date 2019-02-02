@@ -11,51 +11,51 @@ import org.joml.Vector4f;
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
 public class UiText extends UiComponent {
-    
+
     private boolean ignoreRegen = true;
     private CharSequence text;
     private FontHelper.FontBitmap fontBitmap;
     private float size = 12.0f;
-    
+
     public UiText() {
         setColor(new Vector3f(1.0f));
         isFont = true;
     }
-    
+
     public UiText(CharSequence text, FontHelper.FontBitmap fontBitmap) {
         this();
         setText(text);
         setFontBitmap(fontBitmap);
-        
+
         ignoreRegen = false;
         regenerateMesh();
     }
-    
+
     public UiText setColor(Vector3fc color) {
         uiElement().colorize.set(new Vector4f(color, 1.0f));
         // Regeneration is not needed because the color (for textured meshes) is a uniform, not a mesh attribute
         return this;
     }
-    
+
     public UiText setText(CharSequence text) {
         this.text = text;
         regenerateMesh();
         return this;
     }
-    
+
     public UiText setFontBitmap(FontHelper.FontBitmap fontBitmap) {
         this.fontBitmap = fontBitmap;
         this.texture = fontBitmap.texture;
         regenerateMesh();
         return this;
     }
-    
+
     public UiText setSize(float size) {
         this.size = size;
         regenerateMesh();
         return this;
     }
-    
+
     @Override
     protected void generateMesh(Mesh mesh) {
         if (ignoreRegen) return;
@@ -68,5 +68,5 @@ public class UiText extends UiComponent {
                 .addText(fontBitmap, text, size, null, true)
                 .apply(mesh);
     }
-    
+
 }

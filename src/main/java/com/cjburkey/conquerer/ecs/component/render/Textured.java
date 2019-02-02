@@ -9,7 +9,7 @@ import com.cjburkey.conquerer.gl.Texture;
  */
 @PooledWeaver
 public final class Textured extends Component {
-    
+
     public Texture texture;
-    
+
 }

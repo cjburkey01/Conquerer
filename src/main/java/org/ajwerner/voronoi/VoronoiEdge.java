@@ -7,14 +7,14 @@ import org.joml.Vector2fc;
  * Created by ajwerner on 12/28/13.
  */
 public class VoronoiEdge {
-    
+
     private final V2fw site1;
     private final V2fw main;
     final float m;
     final float b;
     private final boolean isVertical;
     V2fw p1, p2;
-    
+
     VoronoiEdge(V2fw main, V2fw site1) {
         this.site1 = site1;
         this.main = main;
@@ -27,7 +27,7 @@ public class VoronoiEdge {
             b = midpoint.y() - m * midpoint.x();
         }
     }
-    
+
     V2fw intersection(VoronoiEdge that) {
         if (this.m == that.m && this.b != that.b && this.isVertical == that.isVertical) {
             return null; // no intersection
@@ -46,23 +46,23 @@ public class VoronoiEdge {
         }
         return new V2fw(x, y);
     }
-    
+
     public Vector2fc getPoint1() {
         return main.vector;
     }
-    
+
     public Vector2fc getPoint2() {
         return site1.vector;
     }
-    
+
     public Vector2fc getPointA() {
         return p1.vector;
     }
-    
+
     public Vector2fc getPointB() {
         return p2.vector;
     }
-    
+
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -73,9 +73,9 @@ public class VoronoiEdge {
         VoronoiEdge that = (VoronoiEdge) o;
         return isVertical == that.isVertical && site1.equals(that.site1) && main.equals(that.main);
     }
-    
+
     public int hashCode() {
         return Objects.hash(site1, main, isVertical);
     }
-    
+
 }

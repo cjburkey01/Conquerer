@@ -15,24 +15,24 @@ import com.cjburkey.conquerer.math.Transformation;
  */
 @SuppressWarnings("unused")
 public final class CameraSystem extends IteratingSystem {
-    
+
     private ComponentMapper<Pos> mPos;
     private ComponentMapper<Rot> mRot;
     private ComponentMapper<Camera> mCamera;
-    
+
     public CameraSystem() {
         super(Aspect.all(Pos.class, Rot.class, Camera.class));
     }
-    
+
     protected void process(int entityId) {
         // Cache the window for this cycle (keeping this out of the class scope because Window may be recreated at some point)
         Window w = Conquerer.INSTANCE.window();
-        
+
         // Components
         Pos pos = mPos.get(entityId);
         Rot rot = mRot.get(entityId);
         Camera camera = mCamera.get(entityId);
-        
+
         // Set up the matrices for the camera
         if (camera.perspective) {
             camera.projectionMatrix.set(Transformation.getProjectionMatrix(camera.fovDegrees, w.getWidth(), w.getHeight(), camera.nearPlane, camera.farPlane));
@@ -42,5 +42,5 @@ public final class CameraSystem extends IteratingSystem {
         camera.viewMatrix.set(Transformation.getViewMatrix(pos.position, rot.rotation));
         camera.windowMatrix.set(Transformation.getOrthographicMatrix(0.0f, w.getWidth(), w.getHeight(), 0.0f, camera.nearPlane, camera.farPlane));
     }
-    
+
 }

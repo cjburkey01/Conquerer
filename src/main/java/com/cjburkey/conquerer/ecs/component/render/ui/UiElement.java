@@ -9,10 +9,10 @@ import org.joml.Vector4f;
  * Created by CJ Burkey on 2019/01/27
  */
 public class UiElement extends Component {
-    
+
     public Texture texture;
     public boolean isFont;
     public final Vector4f colorize = new Vector4f(1.0f);
     public UiComponent uiComponent;
-    
+
 }

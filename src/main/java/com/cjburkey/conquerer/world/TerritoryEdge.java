@@ -10,7 +10,7 @@ import org.joml.Vector2fc;
  */
 @SuppressWarnings("WeakerAccess")
 public final class TerritoryEdge {
-    
+
     @SuppressWarnings("unused")
     public Territory territoryA;
     public Territory territoryB;
@@ -18,14 +18,14 @@ public final class TerritoryEdge {
     public final Vector2fc pointB;
     public final Vector2fc territoryLocA;
     public Vector2fc territoryLocB;
-    
+
     public TerritoryEdge(Vector2fc pointA, Vector2fc pointB, Vector2fc territoryLocA, Vector2fc territoryLocB) {
         this.pointA = new Vector2f(pointA);
         this.pointB = new Vector2f(pointB);
         this.territoryLocA = new Vector2f(territoryLocA);
         this.territoryLocB = new Vector2f(territoryLocB);
     }
-    
+
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -39,14 +39,15 @@ public final class TerritoryEdge {
                 territoryLocA.equals(that.territoryLocA) &&
                 territoryLocB.equals(that.territoryLocB);
     }
-    
+
     public int hashCode() {
         return Objects.hash(pointA, pointB, territoryLocA, territoryLocB);
     }
-    
+
     private static final String str1 = "Edge from (";
     private static final String str2 = ") to (";
     private static final String strf = "%.2f";
+
     public String toString() {
         StringBuilder out = new StringBuilder();
         out.append(str1);
@@ -61,5 +62,5 @@ public final class TerritoryEdge {
         new Formatter(out).format(strf, pointB.y());
         return out.append(')').toString();
     }
-    
+
 }

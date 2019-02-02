@@ -27,31 +27,31 @@ import static com.cjburkey.conquerer.Conquerer.*;
 /**
  * Implements a game loop based on this excellent blog post:
  * http://gafferongames.com/game-physics/fix-your-timestep/
- *
+ * <p>
  * To avoid floating point rounding errors we only use fixed point numbers for calculations.
  */
 public class GameLoopInvocationStrat extends SystemInvocationStrategy {
-    
+
     private final ObjectArrayList<BaseSystem> logicMarkedSystems;
     private final ObjectArrayList<BaseSystem> otherSystems;
-    
+
     private final long nanosPerLogicTick; // ~ dt
     private long currentTime = System.nanoTime();
     private float lastRenderDelta = 0.0f;
-    
+
     private long accumulator;
-    
+
     private boolean systemsSorted = false;
-    
+
     private final BitVector disabledlogicMarkedSystems = new BitVector();
     private final BitVector disabledOtherSystems = new BitVector();
-    
+
     public GameLoopInvocationStrat(int millisPerLogicTick) {
         this.nanosPerLogicTick = TimeUnit.MILLISECONDS.toNanos(millisPerLogicTick);
         logicMarkedSystems = new ObjectArrayList<>();
         otherSystems = new ObjectArrayList<>();
     }
-    
+
     @Override
     protected void initialize() {
         // Sort Sytems here in case setEnabled() is called prior to first process()
@@ -59,7 +59,7 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
             sortSystems();
         }
     }
-    
+
     private void sortSystems() {
         if (!systemsSorted) {
             Object[] systemsData = systems.getData();
@@ -74,32 +74,32 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
             systemsSorted = true;
         }
     }
-    
+
     @Override
     protected void process() {
         if (!systemsSorted) {
             sortSystems();
         }
-        
+
         long newTime = System.nanoTime();
         long frameTime = newTime - currentTime;
-        
+
         if (frameTime > 250000000) {
             frameTime = 250000000;    // Note: Avoid spiral of death
         }
-        
+
         currentTime = newTime;
         accumulator += frameTime;
-        
+
         // required since artemis-odb-2.0.0-RC4, updateEntityStates() must be called
         // before processing the first system - in case any entities are
         // added outside the main process loop
         updateEntityStates();
-        
-		world.setDelta(nanosPerLogicTick / 1000000000.0f);
-        
-		/* LOGIC */
-        
+
+        world.setDelta(nanosPerLogicTick / 1000000000.0f);
+
+        /* LOGIC */
+
         INSTANCE.window().prepareUpdate();
         while (accumulator >= nanosPerLogicTick) {
             // Process all entity systems inheriting from ILogic
@@ -112,15 +112,15 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
                 logicMarkedSystems.get(i).process();
                 updateEntityStates();
             }
-            
+
             accumulator -= nanosPerLogicTick;
         }
-        
+
         /* RENDER */
-        
+
         lastRenderDelta = frameTime / 1000000000.0f;
         world.setDelta(lastRenderDelta);
-        
+
         INSTANCE.window().prepareFrame();
         // Process all NON ILogic inheriting entity systems
         for (int i = 0; i < otherSystems.size(); i++) {
@@ -133,7 +133,7 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
         INSTANCE.onFrameUpdate();
         INSTANCE.window().finishFrame();
     }
-    
+
     @Override
     public boolean isEnabled(BaseSystem target) {
         ObjectArrayList<BaseSystem> systems = (target instanceof ILogic) ? logicMarkedSystems : otherSystems;
@@ -145,7 +145,7 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
         }
         throw new RuntimeException("System not found in this world");
     }
-    
+
     @Override
     public void setEnabled(BaseSystem target, boolean value) {
         ObjectArrayList<BaseSystem> systems = (target instanceof ILogic) ? logicMarkedSystems : otherSystems;
@@ -158,14 +158,14 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
             }
         }
     }
-    
+
     public float getUpdateDelta() {
         return nanosPerLogicTick / 1000000000.0f;
     }
-    
+
     public float lastRenderDelta() {
         return lastRenderDelta;
     }
-    
+
 }
 
