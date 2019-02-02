@@ -19,17 +19,15 @@ import static com.cjburkey.conquerer.Conquerer.*;
 @SuppressWarnings({"WeakerAccess", "FieldCanBeLocal"})
 public abstract class UiComponent {
 
+    protected Texture texture = null;
+    protected boolean isFont = false;
     private Entity entity;
     private Pos pos;
     private Rot rot;
     private Scale scale;
     private MeshRender meshRender;
     private UiElement uiElement;
-
     private Mesh mesh = new Mesh();
-
-    protected Texture texture = null;
-    protected boolean isFont = false;
 
     public UiComponent() {
         entity = INSTANCE.world().getEntity(INSTANCE.createEntity(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class));
@@ -45,6 +43,14 @@ public abstract class UiComponent {
         onEntityCreated();
 
         onExit.add(this::remove);
+    }
+
+    protected static int screenWidth() {
+        return INSTANCE.window().getWidth();
+    }
+
+    protected static int screenHeight() {
+        return INSTANCE.window().getHeight();
     }
 
     public final void regenerateMesh() {
@@ -91,14 +97,6 @@ public abstract class UiComponent {
 
     protected UiElement uiElement() {
         return uiElement;
-    }
-
-    protected static int screenWidth() {
-        return INSTANCE.window().getWidth();
-    }
-
-    protected static int screenHeight() {
-        return INSTANCE.window().getHeight();
     }
 
     // Override if necessary

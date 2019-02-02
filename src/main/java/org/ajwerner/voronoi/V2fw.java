@@ -20,6 +20,39 @@ public class V2fw implements Comparable<V2fw> {
         this(vector.x(), vector.y());
     }
 
+    private static boolean equals(double a, double b) {
+        return a == b || (Math.abs(a - b) < (0.0000001d * Math.max(Math.abs(a), Math.abs(b))));
+    }
+
+    static int ccw(V2fw a, V2fw b, V2fw c) {
+        double area2 = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
+        if (area2 < 0) {
+            return -1;
+        } else if (area2 > 0) {
+            return 1;
+        }
+        return 0;
+    }
+
+    static int minYOrderedCompareTo(V2fw p1, V2fw p2) {
+        if (p1.y() < p2.y()) {
+            return 1;
+        }
+        if (p1.y() > p2.y()) {
+            return -1;
+        }
+        if (p1.x() == p2.x()) {
+            return 0;
+        }
+        return (p1.x() < p2.x()) ? -1 : 1;
+    }
+
+    static V2fw midpoint(V2fw p1, V2fw p2) {
+        float x = (p1.x() + p2.x()) / 2.0f;
+        float y = (p1.y() + p2.y()) / 2.0f;
+        return new V2fw(x, y);
+    }
+
     float x() {
         return vector.x();
     }
@@ -59,39 +92,6 @@ public class V2fw implements Comparable<V2fw> {
 
     double distanceTo(V2fw that) {
         return vector.distance(that.vector);
-    }
-
-    private static boolean equals(double a, double b) {
-        return a == b || (Math.abs(a - b) < (0.0000001d * Math.max(Math.abs(a), Math.abs(b))));
-    }
-
-    static int ccw(V2fw a, V2fw b, V2fw c) {
-        double area2 = (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x());
-        if (area2 < 0) {
-            return -1;
-        } else if (area2 > 0) {
-            return 1;
-        }
-        return 0;
-    }
-
-    static int minYOrderedCompareTo(V2fw p1, V2fw p2) {
-        if (p1.y() < p2.y()) {
-            return 1;
-        }
-        if (p1.y() > p2.y()) {
-            return -1;
-        }
-        if (p1.x() == p2.x()) {
-            return 0;
-        }
-        return (p1.x() < p2.x()) ? -1 : 1;
-    }
-
-    static V2fw midpoint(V2fw p1, V2fw p2) {
-        float x = (p1.x() + p2.x()) / 2.0f;
-        float y = (p1.y() + p2.y()) / 2.0f;
-        return new V2fw(x, y);
     }
 
 }

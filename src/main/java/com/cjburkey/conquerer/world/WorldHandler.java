@@ -25,17 +25,16 @@ import static com.cjburkey.conquerer.Log.*;
 @SuppressWarnings("WeakerAccess")
 public final class WorldHandler {
 
-    // Properties
-    private int seed = 0;
     public final float minTerritoryDistance;
     public final Rectf terrainBounds;
     public final float borderThickness = 0.05f;
-    private Rectf worldBounds;
-
     // Handlers
     public final EmpireHandler empireHandler = new EmpireHandler();
     public final BiomeHandler biomeHandler = new BiomeHandler();
     public final Terrain terrain = new Terrain(biomeHandler, new BasicGenerator());
+    // Properties
+    private int seed = 0;
+    private Rectf worldBounds;
 
     public WorldHandler(float minTerritoryDistance, Rectf terrainBounds) {
         this.minTerritoryDistance = minTerritoryDistance;

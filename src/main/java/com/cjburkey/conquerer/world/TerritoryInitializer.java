@@ -14,11 +14,9 @@ final class TerritoryInitializer {
     private static final float tempScale = 20.0f;
     private static final float precipScale = 20.0f;
     private static final float altitudeScale = 20.0f;
-
+    private static final float oceanLevel = 0.25f;
     private static int precipOffset = 4835;
     private static int altitudeOffset = 2867;
-
-    private static final float oceanLevel = 0.25f;
 
     static void generateTerritoryBiome(WorldHandler worldHandler, Territory.Builder territoryBuilder) {
         final BiomeHandler biomeHandler = worldHandler.terrain.biomeHandler;

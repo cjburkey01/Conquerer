@@ -5,13 +5,12 @@ package org.ajwerner.voronoi;
  */
 class BreakPoint {
 
-    private final Voronoi v;
     final V2fw s1;
     final V2fw s2;
+    final V2fw edgeBegin;
+    private final Voronoi v;
     private VoronoiEdge e;
     private boolean isEdgeLeft;
-    final V2fw edgeBegin;
-
     private float cacheSweepLoc;
     private V2fw cachePoint;
 

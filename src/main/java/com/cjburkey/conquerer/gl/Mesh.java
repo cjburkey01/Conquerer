@@ -50,155 +50,6 @@ public final class Mesh {
         Conquerer.onExit.add(this::destroy);
     }
 
-    public Mesh setVertices(FloatBuffer vertices) {
-        bufferData(GL_ARRAY_BUFFER, vbo, vertices, 3, GL_FLOAT, 0);
-        return this;
-    }
-
-    public Mesh setVertices(final float[] vertices) {
-        try (final MemoryStack stack = stackPush()) {
-            return setVertices(Util.bufferFloat(stack, vertices));
-        }
-    }
-
-    public Mesh setIndices(ShortBuffer indices) {
-        triangleVerts = indices == null ? 0 : indices.limit();
-        bufferData(GL_ELEMENT_ARRAY_BUFFER, ebo, indices);
-        return this;
-    }
-
-    public Mesh setIndices(final short[] indices) {
-        try (final MemoryStack stack = stackPush()) {
-            return setIndices(Util.bufferShort(stack, indices));
-        }
-    }
-
-    public Mesh setColors(FloatBuffer colors) {
-        bufferData(GL_ARRAY_BUFFER, cbo, colors, 3, GL_FLOAT, 1);
-        return this;
-    }
-
-    public Mesh setColors(final float[] indices) {
-        try (final MemoryStack stack = stackPush()) {
-            return setColors(Util.bufferFloat(stack, indices));
-        }
-    }
-
-    public Mesh setUvs(FloatBuffer uvs) {
-        bufferData(GL_ARRAY_BUFFER, cbo, uvs, 2, GL_FLOAT, 2);
-        return this;
-    }
-
-    public Mesh setUvs(final float[] uvs) {
-        try (final MemoryStack stack = stackPush()) {
-            return setUvs(Util.bufferFloat(stack, uvs));
-        }
-    }
-
-    // Methods below here should not need to be changed when new attributes are added to meshes.
-    // They use dynamic buffers allocated above when buffering data and automatically keep track
-    //      of active attrbute ids
-
-    public void destroy() {
-        // Delete all the buffers
-        for (int buffer : buffers) glDeleteBuffers(buffer);
-        buffers.clear();
-
-        // Delete vertex array
-        glDeleteVertexArrays(vao);
-
-        // Unbind this mesh if it was bound
-        if (currentVao == vao) {
-            glBindVertexArray(0);
-            currentVao = 0;
-        }
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public final boolean bind() {
-        if (isBound()) {
-            return true;
-        }
-        currentVao = vao;
-        if (currentVao > 0) {
-            glBindVertexArray(vao);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isBound() {
-        return vao == currentVao;
-    }
-
-    public int getTriangleCount() {
-        return triangleVerts;
-    }
-
-    private boolean preBuff(int buffer, int[] pointer, boolean hasData, int attribId) {
-        if (!bind()) {
-            return false;
-        }
-        if (!hasData && pointer[0] > 0) {
-            glDeleteBuffers(pointer[0]);
-            buffers.remove(pointer[0]);
-            pointer[0] = 0;
-            if (attribId >= 0) {
-                attributes.remove(attribId);
-            }
-            return false;
-        } else if (!hasData) {
-            return false;
-        }
-        if (pointer[0] <= 0) {
-            pointer[0] = glGenBuffers();
-            buffers.add(pointer[0]);
-        }
-        glBindBuffer(buffer, pointer[0]);
-        return true;
-    }
-
-    private void postBuff(int buffer, int attribSize, int attribType, int attribId) {
-        if (attribSize > 0 && attribId >= 0) {
-            glVertexAttribPointer(attribId, attribSize, attribType, false, 0, 0L);
-            attributes.add(attribId);
-        }
-        glBindBuffer(buffer, 0);
-    }
-
-    private void bufferData(int buffer, int[] pointer, FloatBuffer data, int attribSize, int attribType, int attribId) {
-        if (preBuff(buffer, pointer, data != null, attribId)) {
-            glBufferData(buffer, Objects.requireNonNull(data), GL_STATIC_DRAW);
-            postBuff(buffer, attribSize, attribType, attribId);
-        }
-    }
-
-    private void bufferData(int buffer, int[] pointer, FloatBuffer data) {
-        bufferData(buffer, pointer, data, -1, -1, -1);
-    }
-
-    private void bufferData(int buffer, int[] pointer, ShortBuffer data, int attribSize, int attribType, int attribId) {
-        if (preBuff(buffer, pointer, data != null, attribId)) {
-            glBufferData(buffer, Objects.requireNonNull(data), GL_STATIC_DRAW);
-            postBuff(buffer, attribSize, attribType, attribId);
-        }
-    }
-
-    private void bufferData(int buffer, int[] pointer, ShortBuffer data) {
-        bufferData(buffer, pointer, data, -1, -1, -1);
-    }
-
-    public void render() {
-        if (!bind() || vbo[0] <= 0 || ebo[0] <= 0) {
-            return;
-        }
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
-        for (int attribute : attributes) glEnableVertexAttribArray(attribute);
-        glDrawElements(GL_TRIANGLES, triangleVerts, GL_UNSIGNED_SHORT, 0L);
-        for (int attribute : attributes) glDisableVertexAttribArray(attribute);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    }
-
     private static void addLineSegment(IAppender<Float> vertices,
                                        IAppender<Short> indices,
                                        float thickness,
@@ -408,6 +259,155 @@ public final class Mesh {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public Mesh setVertices(FloatBuffer vertices) {
+        bufferData(GL_ARRAY_BUFFER, vbo, vertices, 3, GL_FLOAT, 0);
+        return this;
+    }
+
+    public Mesh setVertices(final float[] vertices) {
+        try (final MemoryStack stack = stackPush()) {
+            return setVertices(Util.bufferFloat(stack, vertices));
+        }
+    }
+
+    // Methods below here should not need to be changed when new attributes are added to meshes.
+    // They use dynamic buffers allocated above when buffering data and automatically keep track
+    //      of active attrbute ids
+
+    public Mesh setIndices(ShortBuffer indices) {
+        triangleVerts = indices == null ? 0 : indices.limit();
+        bufferData(GL_ELEMENT_ARRAY_BUFFER, ebo, indices);
+        return this;
+    }
+
+    public Mesh setIndices(final short[] indices) {
+        try (final MemoryStack stack = stackPush()) {
+            return setIndices(Util.bufferShort(stack, indices));
+        }
+    }
+
+    public Mesh setColors(FloatBuffer colors) {
+        bufferData(GL_ARRAY_BUFFER, cbo, colors, 3, GL_FLOAT, 1);
+        return this;
+    }
+
+    public Mesh setColors(final float[] indices) {
+        try (final MemoryStack stack = stackPush()) {
+            return setColors(Util.bufferFloat(stack, indices));
+        }
+    }
+
+    public Mesh setUvs(FloatBuffer uvs) {
+        bufferData(GL_ARRAY_BUFFER, cbo, uvs, 2, GL_FLOAT, 2);
+        return this;
+    }
+
+    public Mesh setUvs(final float[] uvs) {
+        try (final MemoryStack stack = stackPush()) {
+            return setUvs(Util.bufferFloat(stack, uvs));
+        }
+    }
+
+    public void destroy() {
+        // Delete all the buffers
+        for (int buffer : buffers) glDeleteBuffers(buffer);
+        buffers.clear();
+
+        // Delete vertex array
+        glDeleteVertexArrays(vao);
+
+        // Unbind this mesh if it was bound
+        if (currentVao == vao) {
+            glBindVertexArray(0);
+            currentVao = 0;
+        }
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public final boolean bind() {
+        if (isBound()) {
+            return true;
+        }
+        currentVao = vao;
+        if (currentVao > 0) {
+            glBindVertexArray(vao);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isBound() {
+        return vao == currentVao;
+    }
+
+    public int getTriangleCount() {
+        return triangleVerts;
+    }
+
+    private boolean preBuff(int buffer, int[] pointer, boolean hasData, int attribId) {
+        if (!bind()) {
+            return false;
+        }
+        if (!hasData && pointer[0] > 0) {
+            glDeleteBuffers(pointer[0]);
+            buffers.remove(pointer[0]);
+            pointer[0] = 0;
+            if (attribId >= 0) {
+                attributes.remove(attribId);
+            }
+            return false;
+        } else if (!hasData) {
+            return false;
+        }
+        if (pointer[0] <= 0) {
+            pointer[0] = glGenBuffers();
+            buffers.add(pointer[0]);
+        }
+        glBindBuffer(buffer, pointer[0]);
+        return true;
+    }
+
+    private void postBuff(int buffer, int attribSize, int attribType, int attribId) {
+        if (attribSize > 0 && attribId >= 0) {
+            glVertexAttribPointer(attribId, attribSize, attribType, false, 0, 0L);
+            attributes.add(attribId);
+        }
+        glBindBuffer(buffer, 0);
+    }
+
+    private void bufferData(int buffer, int[] pointer, FloatBuffer data, int attribSize, int attribType, int attribId) {
+        if (preBuff(buffer, pointer, data != null, attribId)) {
+            glBufferData(buffer, Objects.requireNonNull(data), GL_STATIC_DRAW);
+            postBuff(buffer, attribSize, attribType, attribId);
+        }
+    }
+
+    private void bufferData(int buffer, int[] pointer, FloatBuffer data) {
+        bufferData(buffer, pointer, data, -1, -1, -1);
+    }
+
+    private void bufferData(int buffer, int[] pointer, ShortBuffer data, int attribSize, int attribType, int attribId) {
+        if (preBuff(buffer, pointer, data != null, attribId)) {
+            glBufferData(buffer, Objects.requireNonNull(data), GL_STATIC_DRAW);
+            postBuff(buffer, attribSize, attribType, attribId);
+        }
+    }
+
+    private void bufferData(int buffer, int[] pointer, ShortBuffer data) {
+        bufferData(buffer, pointer, data, -1, -1, -1);
+    }
+
+    public void render() {
+        if (!bind() || vbo[0] <= 0 || ebo[0] <= 0) {
+            return;
+        }
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
+        for (int attribute : attributes) glEnableVertexAttribArray(attribute);
+        glDrawElements(GL_TRIANGLES, triangleVerts, GL_UNSIGNED_SHORT, 0L);
+        for (int attribute : attributes) glDisableVertexAttribArray(attribute);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     @SuppressWarnings("UnusedReturnValue")

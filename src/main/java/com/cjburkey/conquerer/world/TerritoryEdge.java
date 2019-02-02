@@ -11,12 +11,15 @@ import org.joml.Vector2fc;
 @SuppressWarnings("WeakerAccess")
 public final class TerritoryEdge {
 
-    @SuppressWarnings("unused")
-    public Territory territoryA;
-    public Territory territoryB;
+    private static final String str1 = "Edge from (";
+    private static final String str2 = ") to (";
+    private static final String strf = "%.2f";
     public final Vector2fc pointA;
     public final Vector2fc pointB;
     public final Vector2fc territoryLocA;
+    @SuppressWarnings("unused")
+    public Territory territoryA;
+    public Territory territoryB;
     public Vector2fc territoryLocB;
 
     public TerritoryEdge(Vector2fc pointA, Vector2fc pointB, Vector2fc territoryLocA, Vector2fc territoryLocB) {
@@ -43,10 +46,6 @@ public final class TerritoryEdge {
     public int hashCode() {
         return Objects.hash(pointA, pointB, territoryLocA, territoryLocB);
     }
-
-    private static final String str1 = "Edge from (";
-    private static final String str2 = ") to (";
-    private static final String strf = "%.2f";
 
     public String toString() {
         StringBuilder out = new StringBuilder();

@@ -33,6 +33,14 @@ public final class UiElementSystem extends IteratingSystem {
         super(Aspect.all(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class));
     }
 
+    public static void initShader(Shader newShader) {
+        if (shader == null) shader = newShader;
+    }
+
+    public static Shader shader() {
+        return shader;
+    }
+
     protected void process(int entityId) {
         // Only render if the UI shader has been created
         if (shader == null) return;
@@ -57,14 +65,6 @@ public final class UiElementSystem extends IteratingSystem {
         shader.setUniform("colorize", uiElement.colorize);
         if (textured) uiElement.texture.bind();
         meshRender.mesh.render();
-    }
-
-    public static void initShader(Shader newShader) {
-        if (shader == null) shader = newShader;
-    }
-
-    public static Shader shader() {
-        return shader;
     }
 
 }

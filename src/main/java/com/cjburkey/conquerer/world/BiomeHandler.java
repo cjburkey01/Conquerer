@@ -79,8 +79,8 @@ public final class BiomeHandler {
     public final class Biome {
 
         public final String name;
-        private final Vector2fc biome;
         public final Vector3fc color;
+        private final Vector2fc biome;
 
         private Biome(String name, float temperature, float precipitation, Vector3fc color) {
             this.name = name;

@@ -14,17 +14,17 @@ public interface IGenerator {
 
     Map<Vector2fc, Territory> generateTerritories(WorldHandler worldHandler);
 
-    IGenerator setBounds(Rectf bounds);
-
-    IGenerator setMinDistance(float minDistance);
-
-    IGenerator setMaxTerritories(int maxTerritories);
-
     Rectf getBounds();
+
+    IGenerator setBounds(Rectf bounds);
 
     float getMinDistance();
 
+    IGenerator setMinDistance(float minDistance);
+
     int getMaxTerritories();
+
+    IGenerator setMaxTerritories(int maxTerritories);
 
     boolean getUsesBounds();
 

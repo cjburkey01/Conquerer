@@ -92,17 +92,12 @@ public final class NameGenerator {
         return shouldCapitalizeFirstCharacter;
     }
 
-    public NameGenerator setMinLength(int minLengthInc) {
-        this.minLengthInc = minLengthInc;
-        return this;
-    }
-
     public int getMinLength() {
         return minLengthInc;
     }
 
-    public NameGenerator setMaxLength(int maxLengthInc) {
-        this.maxLengthInc = maxLengthInc;
+    public NameGenerator setMinLength(int minLengthInc) {
+        this.minLengthInc = minLengthInc;
         return this;
     }
 
@@ -110,13 +105,18 @@ public final class NameGenerator {
         return maxLengthInc;
     }
 
-    public NameGenerator setNameFilter(NameFilter nameFilter) {
-        this.nameFilter = nameFilter;
+    public NameGenerator setMaxLength(int maxLengthInc) {
+        this.maxLengthInc = maxLengthInc;
         return this;
     }
 
     public NameFilter getNameFilter() {
         return nameFilter;
+    }
+
+    public NameGenerator setNameFilter(NameFilter nameFilter) {
+        this.nameFilter = nameFilter;
+        return this;
     }
 
     // Alternates between random monographic and digraphic consonants and vowels until the generated name reaches a length somewhere within [min, max]
@@ -170,36 +170,6 @@ public final class NameGenerator {
         return names;
     }
 
-    @FunctionalInterface
-    public interface NameFilter {
-
-        boolean isValid(CharSequence name);
-    }
-
-    public class BasicNameFilter implements NameFilter {
-
-        private final ObjectOpenHashSet<String> illegal = new ObjectOpenHashSet<>();
-
-        public BasicNameFilter addCensor(String value) {
-            illegal.add(value);
-            return this;
-        }
-
-        public BasicNameFilter addCensor(String... values) {
-            illegal.addAll(Arrays.asList(values));
-            return this;
-        }
-
-        public BasicNameFilter clearCensor() {
-            illegal.clear();
-            return this;
-        }
-
-        public boolean isValid(CharSequence name) {
-            return !illegal.contains(name.toString());
-        }
-    }
-
     // OFFENSIVE WORDS ALERT!
     // I had to type all this out and it physically hurt, but I did it to prevent anything bad from coming up in-game
     // If you're easily offended by things like this, I apologize :(
@@ -235,6 +205,36 @@ public final class NameGenerator {
                         "fag",
                         "faggot"
                 );
+    }
+
+    @FunctionalInterface
+    public interface NameFilter {
+
+        boolean isValid(CharSequence name);
+    }
+
+    public class BasicNameFilter implements NameFilter {
+
+        private final ObjectOpenHashSet<String> illegal = new ObjectOpenHashSet<>();
+
+        public BasicNameFilter addCensor(String value) {
+            illegal.add(value);
+            return this;
+        }
+
+        public BasicNameFilter addCensor(String... values) {
+            illegal.addAll(Arrays.asList(values));
+            return this;
+        }
+
+        public BasicNameFilter clearCensor() {
+            illegal.clear();
+            return this;
+        }
+
+        public boolean isValid(CharSequence name) {
+            return !illegal.contains(name.toString());
+        }
     }
 
 }

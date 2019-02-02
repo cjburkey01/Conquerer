@@ -17,16 +17,12 @@ import org.joml.Vector2fc;
  */
 public class Voronoi {
 
+    private final ArrayList<VoronoiEdge> edgeList;
     // Ghetto but just for drawing stuff
     private float sweepLoc;
-    private final ArrayList<VoronoiEdge> edgeList;
     private Set<BreakPoint> breakPoints;
     private TreeMap<ArcKey, CircleEvent> arcs;
     private TreeSet<Event> events;
-
-    float getSweepLoc() {
-        return sweepLoc;
-    }
 
     public Voronoi(List<Vector2fc> sites) {
         float minPoint = Float.POSITIVE_INFINITY;
@@ -55,6 +51,10 @@ public class Voronoi {
         for (BreakPoint bp : breakPoints) {
             bp.finish();
         }
+    }
+
+    float getSweepLoc() {
+        return sweepLoc;
     }
 
     private void handleSiteEvent(Event cur) {

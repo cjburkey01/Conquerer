@@ -43,42 +43,22 @@ import static org.lwjgl.opengl.GL11.*;
 @SuppressWarnings({"WeakerAccess", "unused", "FieldCanBeLocal"})
 public final class Conquerer {
 
-    private Conquerer() {
-        debug("Running in JVM {}", System.getProperty("java.version"));
-    }
-    
+    public static final Random RANDOM = new Random(System.nanoTime());
+
     /*
         This is my main area for to-do items:
         
         TODO: ADD ENTITY TRANSFORM PARENTS
         TODO: HIDE LINES BETWEEN TERRITORIES OWNED BY THE SAME EMPIRE
      */
-
-    // Util
-    private static final int UPS = 60;
-    public static final Random RANDOM = new Random(System.nanoTime());
-
     // Keep list of things that may not be perfectly cleaned up to be automatically reclaimed on exit
     public static final ObjectArrayList<Runnable> onExit = new ObjectArrayList<>();
-
     // Fonts
     public static final FontHelper.Font roboto = FontHelper.loadFont(Util.getStreanForResource("font/Roboto/Roboto-Regular.ttf").orElse(null));
     public static final FontHelper.Font aleo = FontHelper.loadFont(Util.getStreanForResource("font/Aleo/Aleo-Regular.ttf").orElse(null));
-
-    // Pre-baked font bitmaps
-    private static FontHelper.FontBitmap robotoAscii256;
-    private static FontHelper.FontBitmap aleoAscii256;
-
-    // The current main camera entity
-    public int mainCamera = -1;
-
-    // Game engine
-    private boolean running = false;
-    private Window window;
-    private BasicShader shaderColored;
-    private BasicShader shaderTextured;
-    private BasicShader shaderFont;
-
+    public static final Conquerer INSTANCE = new Conquerer();
+    // Util
+    private static final int UPS = 60;
     // List of systems to be used with the world
     private static final BaseSystem[] ARTEMIS_SYSTEMS = new BaseSystem[]{
             new SmoothMovementSystem(),
@@ -87,24 +67,30 @@ public final class Conquerer {
             new RenderSystem(),
             new UiElementSystem(),
     };
-
+    // Pre-baked font bitmaps
+    private static FontHelper.FontBitmap robotoAscii256;
+    private static FontHelper.FontBitmap aleoAscii256;
+    // Game world
+    public final WorldHandler worldHandler = new WorldHandler(1.0f, Rectf.fromCenter(0.0f, 0.0f, 30.0f, 30.0f));
+    // The plane to be flat with the world to allow calculating rays against the "playing field"
+    public final Plane worldPlane = new Plane(new Vector3f(), new Vector3f(0.0f, 0.0f, 1.0f));
+    // The current main camera entity
+    public int mainCamera = -1;
+    // Game engine
+    private boolean running = false;
+    private Window window;
+    private BasicShader shaderColored;
+    private BasicShader shaderTextured;
+    private BasicShader shaderFont;
     // This is the game loop we use
     // It allows separation of render and update/logic tasks.
     // It creates a constant world update rate and a variable render rate
     private GameLoopInvocationStrat gameLoop = new GameLoopInvocationStrat((int) (1000.0f / UPS));
-
     // Artemis ECS world
     private World world = new World(new WorldConfigurationBuilder()
             .with(ARTEMIS_SYSTEMS)
             .register(gameLoop)
             .build());
-
-    // Game world
-    public final WorldHandler worldHandler = new WorldHandler(1.0f, Rectf.fromCenter(0.0f, 0.0f, 30.0f, 30.0f));
-
-    // The plane to be flat with the world to allow calculating rays against the "playing field"
-    public final Plane worldPlane = new Plane(new Vector3f(), new Vector3f(0.0f, 0.0f, 1.0f));
-
     // Test UI
     private UiText fpsDisplay;
     private UiText upsDisplay;
@@ -112,6 +98,16 @@ public final class Conquerer {
     private UiText territoryBiomeDisplay;
     private UiText territoryLocDisplay;
     private UiText territoryOceanDisplay;
+    private boolean fill = true;
+    private long lastDebugTextUpdateTime = System.nanoTime();
+
+    private Conquerer() {
+        debug("Running in JVM {}", System.getProperty("java.version"));
+    }
+
+    public static void main(String[] args) {
+        INSTANCE.startGame();
+    }
 
     private void startGame() {
         // Create and initialize both the window and the OpenGL context
@@ -198,7 +194,7 @@ public final class Conquerer {
                 exit();
             }
         }
-        
+
         // Cleanup :)
         info("Exiting");
         onExit.forEach(Runnable::run);
@@ -240,8 +236,7 @@ public final class Conquerer {
         return shaderFont;
     }
 
-    private boolean fill = true;
-    private long lastDebugTextUpdateTime = System.nanoTime();
+    // -- STATIC -- //
 
     public void onFrameUpdate() {
         if (Input.getKeyPressed(GLFW_KEY_C)) {
@@ -282,14 +277,6 @@ public final class Conquerer {
             builder.add(type);
         }
         return world.create(builder.build(world));
-    }
-
-    // -- STATIC -- //
-
-    public static final Conquerer INSTANCE = new Conquerer();
-
-    public static void main(String[] args) {
-        INSTANCE.startGame();
     }
 
 }

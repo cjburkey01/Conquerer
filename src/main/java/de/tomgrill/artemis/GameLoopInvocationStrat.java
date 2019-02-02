@@ -36,15 +36,12 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
     private final ObjectArrayList<BaseSystem> otherSystems;
 
     private final long nanosPerLogicTick; // ~ dt
-    private long currentTime = System.nanoTime();
-    private float lastRenderDelta = 0.0f;
-
-    private long accumulator;
-
-    private boolean systemsSorted = false;
-
     private final BitVector disabledlogicMarkedSystems = new BitVector();
     private final BitVector disabledOtherSystems = new BitVector();
+    private long currentTime = System.nanoTime();
+    private float lastRenderDelta = 0.0f;
+    private long accumulator;
+    private boolean systemsSorted = false;
 
     public GameLoopInvocationStrat(int millisPerLogicTick) {
         this.nanosPerLogicTick = TimeUnit.MILLISECONDS.toNanos(millisPerLogicTick);

@@ -40,11 +40,11 @@ public final class FontHelper {
     @SuppressWarnings("WeakerAccess")
     public static final class Font {
 
-        private final ByteBuffer rawFontBytes;
-        private final STBTTFontinfo fontInfo;
         public final int ascent;
         public final int decent;
         public final int lineGap;
+        private final ByteBuffer rawFontBytes;
+        private final STBTTFontinfo fontInfo;
 
         private Font(ByteBuffer rawFontBytes, STBTTFontinfo fontInfo) {
             this.rawFontBytes = rawFontBytes;

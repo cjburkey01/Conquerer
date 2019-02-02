@@ -8,10 +8,10 @@ import org.joml.Vector2fc;
  */
 public class VoronoiEdge {
 
-    private final V2fw site1;
-    private final V2fw main;
     final float m;
     final float b;
+    private final V2fw site1;
+    private final V2fw main;
     private final boolean isVertical;
     V2fw p1, p2;
 

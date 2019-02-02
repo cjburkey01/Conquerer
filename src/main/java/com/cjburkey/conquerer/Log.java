@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class Log {
 
-    public static boolean debug = true;
     public static final Logger logger = LogManager.getLogger("conquerer");
+    public static boolean debug = true;
 
     public static void debug(Object msg, Object... data) {
         if (debug) {

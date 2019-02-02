@@ -5,9 +5,9 @@ package org.ajwerner.voronoi;
  */
 public class Arc extends ArcKey {
 
+    final V2fw site;
     BreakPoint left;
     BreakPoint right;
-    final V2fw site;
 
     Arc(BreakPoint left, BreakPoint right) {
         if (left == null && right == null) {

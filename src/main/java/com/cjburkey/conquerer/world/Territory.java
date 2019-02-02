@@ -29,9 +29,9 @@ public final class Territory {
     public final Vector2fc center;
     public final Vector2fc[] vertices;
     public final TerritoryEdge[] edges;
-    private BiomeHandler.Biome biome;
     public final boolean isWater;
     public final IntArrayList entities = new IntArrayList();
+    private BiomeHandler.Biome biome;
     private EmpireHandler.Empire currentOwner;
 
     private Territory(String name, Vector2fc location, TerritoryEdge[] edges, BiomeHandler.Biome biome, boolean isWater) {
@@ -52,6 +52,10 @@ public final class Territory {
         center = center(vertices);
 
         onExit.add(this::cleanupEntity);
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public void cleanupEntity() {
@@ -84,18 +88,12 @@ public final class Territory {
         }
     }
 
-    public void setCurrentOwner(EmpireHandler.Empire empire) {
-        currentOwner = empire;
-        refreshGraphics();
-    }
-
     public EmpireHandler.Empire getCurrentOwner() {
         return currentOwner;
     }
 
-    public void setBiome(BiomeHandler.Biome biome) {
-        if (biome == null) return;
-        this.biome = biome;
+    public void setCurrentOwner(EmpireHandler.Empire empire) {
+        currentOwner = empire;
         refreshGraphics();
     }
 
@@ -103,8 +101,10 @@ public final class Territory {
         return biome;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public void setBiome(BiomeHandler.Biome biome) {
+        if (biome == null) return;
+        this.biome = biome;
+        refreshGraphics();
     }
 
     public boolean equals(Object o) {
@@ -121,13 +121,17 @@ public final class Territory {
     @SuppressWarnings({"unused", "UnusedReturnValue"})
     public static class Builder {
 
+        private final ObjectArrayList<TerritoryEdge> edges = new ObjectArrayList<>();
         private String name;
         private Vector2fc location;
-        private final ObjectArrayList<TerritoryEdge> edges = new ObjectArrayList<>();
         private BiomeHandler.Biome biome;
         private boolean isWater;
 
         private Builder() {
+        }
+
+        public String getName() {
+            return name;
         }
 
         public Builder setName(String name) {
@@ -135,8 +139,8 @@ public final class Territory {
             return this;
         }
 
-        public String getName() {
-            return name;
+        public Vector2fc getLocation() {
+            return location;
         }
 
         public Builder setLocation(Vector2fc location) {
@@ -144,12 +148,12 @@ public final class Territory {
             return this;
         }
 
-        public Vector2fc getLocation() {
-            return location;
-        }
-
         public ObjectArrayList<TerritoryEdge> getEdges() {
             return edges;
+        }
+
+        public boolean isWater() {
+            return isWater;
         }
 
         public Builder setWater(boolean isWater) {
@@ -157,17 +161,13 @@ public final class Territory {
             return this;
         }
 
-        public boolean isWater() {
-            return isWater;
+        public BiomeHandler.Biome getBiome() {
+            return biome;
         }
 
         public Builder setBiome(BiomeHandler.Biome biome) {
             this.biome = biome;
             return this;
-        }
-
-        public BiomeHandler.Biome getBiome() {
-            return biome;
         }
 
         public Territory build(WorldHandler worldHandler) {

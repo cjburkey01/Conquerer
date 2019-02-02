@@ -28,12 +28,11 @@ public abstract class Shader {
 
     private final Int2IntOpenHashMap shaders = new Int2IntOpenHashMap();
     private final Object2IntOpenHashMap<String> uniforms = new Object2IntOpenHashMap<>();
-    private int program;
-    private boolean done = false;
-
     protected boolean transformsProjection = false;
     protected boolean transformsView = false;
     protected boolean transformsModel = false;
+    private int program;
+    private boolean done = false;
 
     public Shader() {
         program = glCreateProgram();

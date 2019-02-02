@@ -19,16 +19,16 @@ import static org.lwjgl.system.MemoryUtil.*;
 public class Window {
 
     private static boolean init;
-
+    private final Vector3f clearColor = new Vector3f();
     private long window;
     private String title;
     private int width;
     private int height;
-    private final Vector3f clearColor = new Vector3f();
     private boolean shouldClose = false;
     private boolean vsync = false;
     private int cursor = GLFW_ARROW_CURSOR;
     private long currentCursor = -1L;
+    private boolean firstVsync = true;
 
     public Window(String title, int width, int height, int multisample) {
         this.title = title;
@@ -123,13 +123,17 @@ public class Window {
         }
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public void setTitle(String title) {
         this.title = title;
         glfwSetWindowTitle(window, title);
     }
 
-    public String getTitle() {
-        return title;
+    public int getWidth() {
+        return width;
     }
 
     public void setWidth(int width) {
@@ -137,17 +141,13 @@ public class Window {
         this.width = width;
     }
 
-    public int getWidth() {
-        return width;
+    public int getHeight() {
+        return height;
     }
 
     public void setHeight(int height) {
         glfwSetWindowSize(window, width, height);
         this.height = height;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     public void setHalfMonitorSize() {
@@ -182,8 +182,6 @@ public class Window {
         return vsync;
     }
 
-    private boolean firstVsync = true;
-
     public void setVsync(boolean vsync) {
         if (this.vsync == vsync && !firstVsync) return;
         firstVsync = false;
@@ -199,6 +197,10 @@ public class Window {
         return getMonitor(glfwGetPrimaryMonitor());
     }
 
+    public int getCursor() {
+        return cursor;
+    }
+
     public void setCursor(int cursor) {
         if (this.cursor != cursor) {
             if (currentCursor != -1) glfwDestroyCursor(currentCursor);
@@ -210,10 +212,6 @@ public class Window {
                 glfwSetCursor(window, currentCursor);
             }
         }
-    }
-
-    public int getCursor() {
-        return cursor;
     }
 
 }

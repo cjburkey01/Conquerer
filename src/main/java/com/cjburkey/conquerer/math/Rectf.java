@@ -16,11 +16,14 @@ import static org.joml.Math.*;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class Rectf {
 
+    // Cache these strings for a TINY amount of efficiency and abstraction :)
+    private static final String str1 = "Rect (";
+    private static final String str2 = ") to (";
+    private static final String strf = "%.2f";
     public final float minX;
     public final float minY;
     public final float maxX;
     public final float maxY;
-
     // Calculated values
     public final float width;
     public final float height;
@@ -38,6 +41,30 @@ public class Rectf {
 
         this.centerX = (minX + maxX) / 2.0f;
         this.centerY = (minY + maxY) / 2.0f;
+    }
+
+    public static Rectf fromCenter(float centerX, float centerY, float width, float height) {
+        float w2 = width / 2.0f;
+        float h2 = height / 2.0f;
+        return new Rectf(centerX - w2, centerY - w2, centerX + w2, centerY + w2);
+    }
+
+    public static Rectf infinite() {
+        return new Rectf(NEGATIVE_INFINITY, NEGATIVE_INFINITY, POSITIVE_INFINITY, POSITIVE_INFINITY);
+    }
+
+    public static Rectf containing(Rectf... containAll) {
+        float minX = POSITIVE_INFINITY;
+        float minY = POSITIVE_INFINITY;
+        float maxX = NEGATIVE_INFINITY;
+        float maxY = NEGATIVE_INFINITY;
+        for (Rectf contained : containAll) {
+            minX = Util.min(minX, contained.minX);
+            minY = Util.min(minY, contained.minY);
+            maxX = Util.max(maxX, contained.maxX);
+            maxY = Util.max(maxY, contained.maxY);
+        }
+        return new Rectf(minX, minY, maxX, maxY);
     }
 
     public int minXi() {
@@ -145,11 +172,6 @@ public class Rectf {
         return Objects.hash(minX, minY, maxX, maxY);
     }
 
-    // Cache these strings for a TINY amount of efficiency and abstraction :)
-    private static final String str1 = "Rect (";
-    private static final String str2 = ") to (";
-    private static final String strf = "%.2f";
-
     public String toString() {
         StringBuilder out = new StringBuilder();
         out.append(str1);
@@ -163,30 +185,6 @@ public class Rectf {
         out.append(' ');
         new Formatter(out).format(strf, maxY);
         return out.append(')').toString();
-    }
-
-    public static Rectf fromCenter(float centerX, float centerY, float width, float height) {
-        float w2 = width / 2.0f;
-        float h2 = height / 2.0f;
-        return new Rectf(centerX - w2, centerY - w2, centerX + w2, centerY + w2);
-    }
-
-    public static Rectf infinite() {
-        return new Rectf(NEGATIVE_INFINITY, NEGATIVE_INFINITY, POSITIVE_INFINITY, POSITIVE_INFINITY);
-    }
-
-    public static Rectf containing(Rectf... containAll) {
-        float minX = POSITIVE_INFINITY;
-        float minY = POSITIVE_INFINITY;
-        float maxX = NEGATIVE_INFINITY;
-        float maxY = NEGATIVE_INFINITY;
-        for (Rectf contained : containAll) {
-            minX = Util.min(minX, contained.minX);
-            minY = Util.min(minY, contained.minY);
-            maxX = Util.max(maxX, contained.maxX);
-            maxY = Util.max(maxY, contained.maxY);
-        }
-        return new Rectf(minX, minY, maxX, maxY);
     }
 
 }

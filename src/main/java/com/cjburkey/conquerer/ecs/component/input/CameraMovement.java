@@ -12,26 +12,22 @@ import static org.lwjgl.glfw.GLFW.*;
  */
 public final class CameraMovement extends Component {
 
-    public float goalZoom = 0.0f;
-    public float[] zoomVelocity = new float[]{0.0f};
-
-    public float speed = 50.0f;
-    public float zoomSpeed = 1.0f;
-    public float zoomMoveRatio = 0.5f;
-    public float zoomClose = 1.0f;
-    public float zoomFar = 50.0f;
-
-    public Rectf bounds = Rectf.infinite();
-
     public final Vector2f previousMousePos = new Vector2f();
-
-    // Input
-    public int startedDragBtn;
     public final IntOpenHashSet activatingMouseForDrag = new IntOpenHashSet();
     public final IntOpenHashSet leftKeys = new IntOpenHashSet();
     public final IntOpenHashSet rightKeys = new IntOpenHashSet();
     public final IntOpenHashSet upKeys = new IntOpenHashSet();
     public final IntOpenHashSet downKeys = new IntOpenHashSet();
+    public float goalZoom = 0.0f;
+    public float[] zoomVelocity = new float[]{0.0f};
+    public float speed = 50.0f;
+    public float zoomSpeed = 1.0f;
+    public float zoomMoveRatio = 0.5f;
+    public float zoomClose = 1.0f;
+    public float zoomFar = 50.0f;
+    public Rectf bounds = Rectf.infinite();
+    // Input
+    public int startedDragBtn;
 
     public CameraMovement() {
         activatingMouseForDrag.add(GLFW_MOUSE_BUTTON_MIDDLE);

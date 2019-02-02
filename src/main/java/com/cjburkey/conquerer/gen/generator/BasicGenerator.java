@@ -27,6 +27,18 @@ public class BasicGenerator implements IGenerator {
     private Rectf genBounds = Rectf.fromCenter(0.0f, 0.0f, 25.0f, 25.0f);
     private float minDistance = 1.0f;
 
+    private static Territory.Builder newTerritory(Random random, Vector2fc point) {
+        Territory.Builder builder = Territory.builder();
+        builder.setName(new NameGenerator()
+                .setCanFirstLetterBeDigraph(false)
+                .setShouldCapitalizeFirstCharacter(true)
+                .setMinLength(3)
+                .setMaxLength(7)
+                .generate(random));
+        builder.setLocation(point);
+        return builder;
+    }
+
     public Map<Vector2fc, Territory> generateTerritories(WorldHandler worldHandler) {
         // DEBUG
         debug("Generating (seed: {}) territories within {}", worldHandler.seed(), genBounds);
@@ -97,6 +109,10 @@ public class BasicGenerator implements IGenerator {
         territoryBuilder.getEdges().add(new TerritoryEdge(edge.getPointA(), edge.getPointB(), site, otherSite));
     }
 
+    public Rectf getBounds() {
+        return trueBounds;
+    }
+
     public BasicGenerator setBounds(Rectf bounds) {
         float f = 2.5f * minDistance;
         this.trueBounds = bounds;
@@ -104,41 +120,25 @@ public class BasicGenerator implements IGenerator {
         return this;
     }
 
+    public float getMinDistance() {
+        return minDistance;
+    }
+
     public BasicGenerator setMinDistance(float minDistance) {
         this.minDistance = max(minDistance, 0.01f);
         return this;
-    }
-
-    public BasicGenerator setMaxTerritories(int maxTerritories) {
-        return this;
-    }
-
-    public Rectf getBounds() {
-        return trueBounds;
-    }
-
-    public float getMinDistance() {
-        return minDistance;
     }
 
     public int getMaxTerritories() {
         return Integer.MAX_VALUE;
     }
 
-    public boolean getUsesBounds() {
-        return true;
+    public BasicGenerator setMaxTerritories(int maxTerritories) {
+        return this;
     }
 
-    private static Territory.Builder newTerritory(Random random, Vector2fc point) {
-        Territory.Builder builder = Territory.builder();
-        builder.setName(new NameGenerator()
-                .setCanFirstLetterBeDigraph(false)
-                .setShouldCapitalizeFirstCharacter(true)
-                .setMinLength(3)
-                .setMaxLength(7)
-                .generate(random));
-        builder.setLocation(point);
-        return builder;
+    public boolean getUsesBounds() {
+        return true;
     }
 
 }
