@@ -1,6 +1,6 @@
 # Idea and Gradle
 .idea/
-build/
+build/*
 .gradle/
 gradle/
 
