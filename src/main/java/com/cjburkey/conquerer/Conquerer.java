@@ -92,7 +92,15 @@ public final class Conquerer {
     private UiText territoryOceanDisplay;
     private boolean fill = true;
     private long lastDebugTextUpdateTime = System.nanoTime();
-    
+
+    private Conquerer() {
+        debug("Running in JVM {}", System.getProperty("java.version"));
+    }
+
+    public static void main(String[] args) {
+        INSTANCE.startGame();
+    }
+
     private static BaseSystem[] getSystems() {
         return new BaseSystem[]{
                 new SmoothMovementSystem(),
@@ -101,14 +109,6 @@ public final class Conquerer {
                 new RenderSystem(),
                 new UiElementSystem(),
         };
-    }
-
-    private Conquerer() {
-        debug("Running in JVM {}", System.getProperty("java.version"));
-    }
-
-    public static void main(String[] args) {
-        INSTANCE.startGame();
     }
 
     private void startGame() {
@@ -238,8 +238,6 @@ public final class Conquerer {
         return shaderFont;
     }
 
-    // -- STATIC -- //
-
     public void onFrameUpdate() {
         if (Input.getKeyPressed(GLFW_KEY_C)) {
             fill = !fill;
@@ -271,6 +269,8 @@ public final class Conquerer {
         // TODO: TERRITORY NAME
 
     }
+
+    // -- STATIC -- //
 
     @SafeVarargs
     public final int createEntity(Class<? extends Component>... types) {

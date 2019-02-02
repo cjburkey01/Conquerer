@@ -197,6 +197,7 @@ public final class NameGenerator {
                         "damned",
                         "dammit",
                         "ass",
+                        "cuck",
 
                         // It gets racist, I'm sorry again D: D:
                         "nigger",
