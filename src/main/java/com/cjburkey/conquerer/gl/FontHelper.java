@@ -34,18 +34,20 @@ public final class FontHelper {
         if (!stbtt_InitFont(fontInfo, rawFontBytes, 0)) {
             throw new IllegalStateException("Failed to initialize font");
         }
-        return new Font(fontInfo);
+        return new Font(rawFontBytes, fontInfo);
     }
     
     @SuppressWarnings("WeakerAccess")
     public static final class Font {
         
-        public final STBTTFontinfo fontInfo;
+        private final ByteBuffer rawFontBytes;
+        private final STBTTFontinfo fontInfo;
         public final int ascent;
         public final int decent;
         public final int lineGap;
         
-        private Font(STBTTFontinfo fontInfo) {
+        private Font(ByteBuffer rawFontBytes, STBTTFontinfo fontInfo) {
+            this.rawFontBytes = rawFontBytes;
             this.fontInfo = fontInfo;
             try (MemoryStack stack = stackPush()) {
                 IntBuffer ascent = stack.mallocInt(1);
@@ -56,7 +58,7 @@ public final class FontHelper {
                 this.decent = ascent.get(0);
                 this.lineGap = ascent.get(0);
             }
-            Conquerer.onExit.add(fontInfo::close);
+            Conquerer.onExit.add(() -> memFree(rawFontBytes));  // We can't call "close()" on fontInfo because it causes a crash in Java 8 (for some reason?)
         }
         
         public float getScale(int lineHeight) {

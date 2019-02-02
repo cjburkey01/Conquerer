@@ -191,7 +191,7 @@ public final class Conquerer {
         running = true;
         info("Initialized");
         
-        // Go!
+        // Start the game loop!
         while (running) {
             world.process();
             if (window.getShouldClose()) {
@@ -200,14 +200,15 @@ public final class Conquerer {
         }
         
         // Cleanup :)
+        info("Exiting");
         onExit.forEach(Runnable::run);
         
+        // Exit JVM cleanly
         info("Exited");
         System.exit(0);
     }
     
     public void exit() {
-        info("Exiting");
         running = false;
     }
     

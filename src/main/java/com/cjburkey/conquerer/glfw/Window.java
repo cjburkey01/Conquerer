@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.glfw;
 
+import com.cjburkey.conquerer.Conquerer;
 import java.util.Objects;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.Callbacks;
@@ -78,6 +79,11 @@ public class Window {
         // Ignore the back of faces on the meshes to reduce drawing
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+        
+        Conquerer.onExit.add(() -> {
+            glfwDestroyWindow(window);
+            if (currentCursor > NULL) glfwDestroyCursor(currentCursor);
+        });
     }
     
     public void prepareUpdate() {

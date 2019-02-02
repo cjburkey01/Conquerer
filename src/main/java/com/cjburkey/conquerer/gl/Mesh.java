@@ -11,7 +11,6 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.Collections;
 import java.util.Objects;
-import jdk.internal.jline.internal.Nullable;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3fc;
@@ -51,7 +50,7 @@ public final class Mesh {
         Conquerer.onExit.add(this::destroy);
     }
     
-    public Mesh setVertices(@Nullable FloatBuffer vertices) {
+    public Mesh setVertices(FloatBuffer vertices) {
         bufferData(GL_ARRAY_BUFFER, vbo, vertices, 3, GL_FLOAT, 0);
         return this;
     }
@@ -62,7 +61,7 @@ public final class Mesh {
         }
     }
     
-    public Mesh setIndices(@Nullable ShortBuffer indices) {
+    public Mesh setIndices(ShortBuffer indices) {
         triangleVerts = indices == null ? 0 : indices.limit();
         bufferData(GL_ELEMENT_ARRAY_BUFFER, ebo, indices);
         return this;
@@ -74,7 +73,7 @@ public final class Mesh {
         }
     }
     
-    public Mesh setColors(@Nullable FloatBuffer colors) {
+    public Mesh setColors(FloatBuffer colors) {
         bufferData(GL_ARRAY_BUFFER, cbo, colors, 3, GL_FLOAT, 1);
         return this;
     }
@@ -85,7 +84,7 @@ public final class Mesh {
         }
     }
     
-    public Mesh setUvs(@Nullable FloatBuffer uvs) {
+    public Mesh setUvs(FloatBuffer uvs) {
         bufferData(GL_ARRAY_BUFFER, cbo, uvs, 2, GL_FLOAT, 2);
         return this;
     }
@@ -167,14 +166,14 @@ public final class Mesh {
         glBindBuffer(buffer, 0);
     }
     
-    private void bufferData(int buffer, int[] pointer, @Nullable FloatBuffer data, int attribSize, int attribType, int attribId) {
+    private void bufferData(int buffer, int[] pointer, FloatBuffer data, int attribSize, int attribType, int attribId) {
         if (preBuff(buffer, pointer, data != null, attribId)) {
             glBufferData(buffer, Objects.requireNonNull(data), GL_STATIC_DRAW);
             postBuff(buffer, attribSize, attribType, attribId);
         }
     }
     
-    private void bufferData(int buffer, int[] pointer, @Nullable FloatBuffer data) {
+    private void bufferData(int buffer, int[] pointer, FloatBuffer data) {
         bufferData(buffer, pointer, data, -1, -1, -1);
     }
     
@@ -570,7 +569,7 @@ public final class Mesh {
             return this;
         }
         
-        public Builder addText(FontHelper.FontBitmap fontBitmap, CharSequence text, float size, @Nullable Vector2f mutSize, boolean flipInds) {
+        public Builder addText(FontHelper.FontBitmap fontBitmap, CharSequence text, float size, Vector2f mutSize, boolean flipInds) {
             if (text.length() < 1) return this;
             
             // Get basic global information about the font
@@ -633,7 +632,7 @@ public final class Mesh {
             return this;
         }
         
-        public Builder addText(FontHelper.FontBitmap fontBitmap, CharSequence text, float size, @Nullable Vector2f mutSize) {
+        public Builder addText(FontHelper.FontBitmap fontBitmap, CharSequence text, float size, Vector2f mutSize) {
             return addText(fontBitmap, text, size, mutSize, false);
         }
         
