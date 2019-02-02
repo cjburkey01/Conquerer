@@ -2,8 +2,6 @@
 .idea/
 build/*
 .gradle/
-gradle/
 
 # Java
 *.class
-*.jar
