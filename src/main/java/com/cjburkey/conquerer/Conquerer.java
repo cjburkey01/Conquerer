@@ -59,14 +59,6 @@ public final class Conquerer {
     public static final Conquerer INSTANCE = new Conquerer();
     // Util
     private static final int UPS = 60;
-    // List of systems to be used with the world
-    private static final BaseSystem[] ARTEMIS_SYSTEMS = new BaseSystem[]{
-            new SmoothMovementSystem(),
-            new CameraSystem(),
-            new CameraMovementSystem(),
-            new RenderSystem(),
-            new UiElementSystem(),
-    };
     // Pre-baked font bitmaps
     private static FontHelper.FontBitmap robotoAscii256;
     private static FontHelper.FontBitmap aleoAscii256;
@@ -88,7 +80,7 @@ public final class Conquerer {
     private GameLoopInvocationStrat gameLoop = new GameLoopInvocationStrat((int) (1000.0f / UPS));
     // Artemis ECS world
     private World world = new World(new WorldConfigurationBuilder()
-            .with(ARTEMIS_SYSTEMS)
+            .with(getSystems())
             .register(gameLoop)
             .build());
     // Test UI
@@ -100,6 +92,16 @@ public final class Conquerer {
     private UiText territoryOceanDisplay;
     private boolean fill = true;
     private long lastDebugTextUpdateTime = System.nanoTime();
+    
+    private static BaseSystem[] getSystems() {
+        return new BaseSystem[]{
+                new SmoothMovementSystem(),
+                new CameraSystem(),
+                new CameraMovementSystem(),
+                new RenderSystem(),
+                new UiElementSystem(),
+        };
+    }
 
     private Conquerer() {
         debug("Running in JVM {}", System.getProperty("java.version"));
