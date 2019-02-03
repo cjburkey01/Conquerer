@@ -9,6 +9,7 @@ import com.cjburkey.conquerer.ecs.component.transform.Rot;
 import com.cjburkey.conquerer.ecs.component.transform.Scale;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.gl.Texture;
+import com.cjburkey.conquerer.util.property.BoolProperty;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -18,6 +19,7 @@ import org.joml.Vector3f;
 @SuppressWarnings({"WeakerAccess", "FieldCanBeLocal"})
 public abstract class UiComponent {
 
+    public final BoolProperty visible = new BoolProperty(true);
     protected Texture texture = null;
     protected boolean isFont = false;
     private Entity entity;
@@ -41,6 +43,8 @@ public abstract class UiComponent {
         meshRender.mesh = mesh;
 
         onEntityCreated();
+
+        visible.listen((o, n) -> meshRender.mesh = (n ? mesh : null));
 
         GameEngine.onExit(this::remove);
     }

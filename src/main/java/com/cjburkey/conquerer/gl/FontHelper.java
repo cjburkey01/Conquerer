@@ -134,7 +134,7 @@ public final class FontHelper {
                 // Cleanup!
                 memFree(rawTexture);
 
-                // Add to the list of uvs so we can generate the text mesh
+                // Add to the list of uvs so we can build the text mesh
                 uvs.put(character, new Vector4f((float) x / bitmapSize,
                         (float) y / bitmapSize,
                         (float) (x + w) / bitmapSize,

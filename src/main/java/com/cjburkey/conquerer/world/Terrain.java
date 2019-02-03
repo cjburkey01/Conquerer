@@ -47,7 +47,7 @@ public final class Terrain {
     }
 
     public Terrain generate(WorldHandler worldHandler) {
-        // [Re]generate the terrain
+        // [Re]build the terrain
         reset();
         territoriesLocs.putAll(generator.generateTerritories(worldHandler));
         for (Territory territory : territoriesLocs.values())

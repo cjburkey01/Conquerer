@@ -86,8 +86,7 @@ public final class Territory {
                         tmpVerts[(i + 1 + tmpVerts.length) % tmpVerts.length],
                         -bthick * 1.5f);
             }
-//            meshBuilder.addLine(currentOwner.color, true, bthick, vertices);
-            meshBuilder.addLine(new Vector3f(0.5f), true, bthick, tmpVerts);
+            meshBuilder.addLine(currentOwner.color, true, bthick, vertices);
         }
     }
 
@@ -95,6 +94,14 @@ public final class Territory {
         return currentOwner;
     }
 
+    /**
+     * @deprecated Use {@link com.cjburkey.conquerer.world.EmpireHandler.Empire#claimTerritory(com.cjburkey.conquerer.world.Territory)
+     * Empire.claimTerritory}
+     * or {@link com.cjburkey.conquerer.world.EmpireHandler.Empire#unclaimTerritory(com.cjburkey.conquerer.world.Territory)
+     * Empire.unclaimTerritory} methods
+     */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated()
     public void setCurrentOwner(EmpireHandler.Empire empire) {
         currentOwner = empire;
         refreshGraphics();

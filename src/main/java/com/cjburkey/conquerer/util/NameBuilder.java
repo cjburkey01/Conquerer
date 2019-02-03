@@ -13,7 +13,7 @@ import static com.cjburkey.conquerer.util.Util.*;
  * IF YOU DON'T WANT TO SEE IT, DON'T LOOK
  */
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "unused"})
-public final class NameGenerator {
+public final class NameBuilder {
 
     private final String[] consonants;
     private final String[] vowels;
@@ -27,7 +27,7 @@ public final class NameGenerator {
     private NameFilter nameFilter = null;
 
     // Ensure that all single character letters preceed multi-character letters in the vowels and consonants arrays
-    public NameGenerator(String[] consonants, String[] vowels) {
+    public NameBuilder(String[] consonants, String[] vowels) {
         this.consonants = consonants;
         this.vowels = vowels;
 
@@ -47,7 +47,7 @@ public final class NameGenerator {
         setNameFilter(generateDefaultBadWordsFilter());
     }
 
-    public NameGenerator() {
+    public NameBuilder() {
         this(new String[] {
                 // Monographs
                 "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z",
@@ -74,7 +74,7 @@ public final class NameGenerator {
         });
     }
 
-    public NameGenerator setCanFirstLetterBeDigraph(boolean canFirstLetterBeDigraph) {
+    public NameBuilder setCanFirstLetterBeDigraph(boolean canFirstLetterBeDigraph) {
         this.canFirstLetterBeDigraph = canFirstLetterBeDigraph;
         return this;
     }
@@ -83,7 +83,7 @@ public final class NameGenerator {
         return canFirstLetterBeDigraph;
     }
 
-    public NameGenerator setShouldCapitalizeFirstCharacter(boolean shouldCapitalizeFirstCharacter) {
+    public NameBuilder setShouldCapitalizeFirstCharacter(boolean shouldCapitalizeFirstCharacter) {
         this.shouldCapitalizeFirstCharacter = shouldCapitalizeFirstCharacter;
         return this;
     }
@@ -96,8 +96,8 @@ public final class NameGenerator {
         return minLengthInc;
     }
 
-    public NameGenerator setMinLength(int minLengthInc) {
-        this.minLengthInc = minLengthInc;
+    public NameBuilder setMinLength(int minLengthInc) {
+        this.minLengthInc = max(minLengthInc, 1);
         return this;
     }
 
@@ -105,8 +105,8 @@ public final class NameGenerator {
         return maxLengthInc;
     }
 
-    public NameGenerator setMaxLength(int maxLengthInc) {
-        this.maxLengthInc = maxLengthInc;
+    public NameBuilder setMaxLength(int maxLengthInc) {
+        this.maxLengthInc = max(maxLengthInc, 1);
         return this;
     }
 
@@ -114,13 +114,13 @@ public final class NameGenerator {
         return nameFilter;
     }
 
-    public NameGenerator setNameFilter(NameFilter nameFilter) {
+    public NameBuilder setNameFilter(NameFilter nameFilter) {
         this.nameFilter = nameFilter;
         return this;
     }
 
     // Alternates between random monographic and digraphic consonants and vowels until the generated name reaches a length somewhere within [min, max]
-    public String generate(Random random) {
+    public String build(Random random) {
         // Keep looking until the name is considered valid by the provided filter
         // This is the second time I've used a "do...while" loop in this project and the third time EVER
         CharSequence output;
@@ -163,10 +163,10 @@ public final class NameGenerator {
     }
 
     // Generates <COUNT> names and returns in an array for faster bulk name generation
-    public String[] generate(int count, Random random) {
+    public String[] build(int count, Random random) {
         if (count <= 0) return new String[0];
         String[] names = new String[count];
-        for (int i = 0; i < count; i++) names[i] = generate(random);
+        for (int i = 0; i < count; i++) names[i] = build(random);
         return names;
     }
 

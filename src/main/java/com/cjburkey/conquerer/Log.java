@@ -13,9 +13,7 @@ public final class Log {
     public static boolean debug = true;
 
     public static void debug(Object msg, Object... data) {
-        if (debug) {
-            logger.debug(sanitize(msg), data);
-        }
+        if (debug) logger.debug(sanitize(msg), data);
     }
 
     public static void info(Object msg, Object... data) {

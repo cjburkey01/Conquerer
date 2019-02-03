@@ -583,7 +583,7 @@ public final class Mesh {
             // Begin offset far enough for the next character not to intersect anything at 0,0
             float x = font.getBoundingBox(characters[0], fontBitmap.lineHeight).minX * s;
 
-            // Loop through all the characters and generate their quads
+            // Loop through all the characters and build their quads
             for (int i = 0; i < characters.length; i++) {
                 // Get the bounds for this character and update the return size
                 final Rectf bounds = font.getBoundingBox(characters[i], fontBitmap.lineHeight);

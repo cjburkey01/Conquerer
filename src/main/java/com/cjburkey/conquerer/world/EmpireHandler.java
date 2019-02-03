@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.world;
 
-import com.cjburkey.conquerer.util.NameGenerator;
+import com.cjburkey.conquerer.util.NameBuilder;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import java.util.Collections;
@@ -32,12 +32,12 @@ public final class EmpireHandler {
     }
 
     public Empire generate(Random random) {
-        return create(new NameGenerator()
+        return create(new NameBuilder()
                         .setCanFirstLetterBeDigraph(false)          // These four properties are the default values, I set them here only to be explicit
                         .setShouldCapitalizeFirstCharacter(true)
                         .setMinLength(3)
                         .setMaxLength(7)
-                        .generate(random),
+                        .build(random),
                 randomColor(random, brightnessMinMax.x(), brightnessMinMax.y()));
     }
 
@@ -90,6 +90,7 @@ public final class EmpireHandler {
             return Objects.hash(name, color);
         }
 
+        @SuppressWarnings("deprecation")
         public void claimTerritory(Territory territory) {
             if (!containsTerritory(territory)) {
                 territories.add(territory);
@@ -97,6 +98,7 @@ public final class EmpireHandler {
             }
         }
 
+        @SuppressWarnings("deprecation")
         public void unclaimTerritory(Territory territory) {
             if (containsTerritory(territory)) {
                 territory.setCurrentOwner(null);

@@ -2,7 +2,7 @@ package com.cjburkey.conquerer.gen.generator;
 
 import com.cjburkey.conquerer.gen.Poisson;
 import com.cjburkey.conquerer.math.Rectf;
-import com.cjburkey.conquerer.util.NameGenerator;
+import com.cjburkey.conquerer.util.NameBuilder;
 import com.cjburkey.conquerer.world.Territory;
 import com.cjburkey.conquerer.world.TerritoryEdge;
 import com.cjburkey.conquerer.world.WorldHandler;
@@ -29,12 +29,12 @@ public class BasicGenerator implements IGenerator {
 
     private static Territory.Builder newTerritory(Random random, Vector2fc point) {
         Territory.Builder builder = Territory.builder();
-        builder.setName(new NameGenerator()
+        builder.setName(new NameBuilder()
                 .setCanFirstLetterBeDigraph(false)
                 .setShouldCapitalizeFirstCharacter(true)
                 .setMinLength(3)
                 .setMaxLength(7)
-                .generate(random));
+                .build(random));
         builder.setLocation(point);
         return builder;
     }
@@ -49,7 +49,7 @@ public class BasicGenerator implements IGenerator {
         final Object2ObjectOpenHashMap<Vector2fc, Territory.Builder> territories = new Object2ObjectOpenHashMap<>();
 
         // Generate a poisson disc (random but evenly distributed) of points,
-        //      then generate edges between them using Fortune's algorithm for a Voronoi graph
+        //      then build edges between them using Fortune's algorithm for a Voronoi graph
         new Voronoi(new ObjectArrayList<>(Poisson.disc(random, minDistance, 30, genBounds).values())).getEdges().forEach(edge -> {
             // Check the first site of the edge
             tryEdge(random, territories, edge.getPoint1(), edge.getPoint2(), edge);

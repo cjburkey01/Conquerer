@@ -51,7 +51,7 @@ public final class UiElementSystem extends IteratingSystem {
 
         UiElement uiElement = mUiElement.get(entityId);
 
-        // Locate the main camera and generate a model matrix for the position of the element
+        // Locate the main camera and build a model matrix for the position of the element
         Camera mainCamera = GameEngine.getMainCamera().getComponent(Camera.class);
         Matrix4fc modelMatrix = getModelMatrix(mPos.get(entityId).position, mRot.get(entityId).rotation, mScale.get(entityId).scale, -1.0f);
 

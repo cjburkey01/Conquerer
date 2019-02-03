@@ -45,11 +45,10 @@ public final class WorldHandler {
     public void generateWorld(int seed) {
         this.seed = seed;
         terrain.generator.setMinDistance(minTerritoryDistance).setBounds(terrainBounds);
+        deleteTerrainGraphics();
         terrain.generate(this);
         worldBounds = terrain.bounds().grow(minTerritoryDistance);
         info("Generated territories: {}", terrain.getTerritoryCount());
-
-        terrain.getTerritories().values().forEach(this::generateTerritoryEdges);
     }
 
     public void generateWorld(Random random) {
@@ -57,6 +56,14 @@ public final class WorldHandler {
         // The simplex noise implementation we use is fast, but not perfect with higher inputs (it becomes very grid-like).
         // 2000000 around zero allows for a total possible number of 4000000 worlds, which should be plenty.
         generateWorld(Util.nextInt(random, -2000000, 2000000));
+    }
+
+    public void deleteTerrainGraphics() {
+        terrain.getTerritories().values().forEach(Territory::cleanupEntity);
+    }
+
+    public void generateTerrainGraphics() {
+        terrain.getTerritories().values().forEach(this::generateTerritoryEdges);
     }
 
     private void generateTerritoryEdges(Territory territory) {

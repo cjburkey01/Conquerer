@@ -117,6 +117,7 @@ public final class Util {
     }
 
     public static ShortBuffer bufferShort(MemoryStack stack, short[] shorts) {
+        if (shorts == null) return null;
         ShortBuffer buffer = stack.mallocShort(shorts.length);
         for (short s : shorts) buffer.put(s);
         buffer.flip();
@@ -131,6 +132,7 @@ public final class Util {
     }
 
     public static FloatBuffer bufferFloat(MemoryStack stack, float[] floats) {
+        if (floats == null) return null;
         FloatBuffer buffer = stack.mallocFloat(floats.length);
         for (float f : floats) buffer.put(f);
         buffer.flip();
