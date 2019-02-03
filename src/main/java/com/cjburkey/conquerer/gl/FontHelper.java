@@ -164,7 +164,7 @@ public final class FontHelper {
             }
 
             // Find the next-highest power-of-two width that gives us at least the required area.
-            int size = (int) ceil(Math.log(ceil(sqrt(totalArea))) / Math.log(2.0f));
+            int size = (int) Util.ceil(Math.log(Util.ceil(sqrt(totalArea))) / Math.log(2.0f));
             debug("Generating font bitmap of size {} for {} characters with a total area of {} pixels", (int) Math.pow(2.0f, size), input.length(), totalArea);
             return generateBitmap(input, size, lineHeight);
         }

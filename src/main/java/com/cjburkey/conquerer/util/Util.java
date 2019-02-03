@@ -334,6 +334,30 @@ public final class Util {
         return Double.compare(num, 0.0f);
     }
 
+    public static int floor(float num) {
+        int a = (int) num;
+        if (num < a) return a - 1;
+        return a;
+    }
+
+    public static long floor(double num) {
+        long a = (long) num;
+        if (num < a) return a - 1;
+        return a;
+    }
+
+    public static int ceil(float num) {
+        int a = (int) num;
+        if (num > a) return a + 1;
+        return a;
+    }
+
+    public static long ceil(double num) {
+        long a = (long) num;
+        if (num > a) return a + 1;
+        return a;
+    }
+
     // -- VECTOR UTILS -- //
 
     public static Vector2f getTangent(Vector2fc vertex, Vector2fc previous, Vector2fc next) {
