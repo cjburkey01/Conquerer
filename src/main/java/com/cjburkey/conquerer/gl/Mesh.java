@@ -33,11 +33,11 @@ public final class Mesh {
 
     // Buffers
     private final int vao;
+    public boolean canBeWireframe = true;
     private int[] vbo = new int[1];     // Vertices
     private int[] ebo = new int[1];     // Triangles
     private int[] cbo = new int[1];     // Colors
     private int[] uvbo = new int[1];    // Texture coordinates
-
     // Lists of buffers and vertex attributes used by this mesh
     private IntOpenHashSet buffers = new IntOpenHashSet();
     private IntOpenHashSet attributes = new IntOpenHashSet();
@@ -403,6 +403,7 @@ public final class Mesh {
         if (!bind() || vbo[0] <= 0 || ebo[0] <= 0) {
             return;
         }
+        glPolygonMode(GL_FRONT_AND_BACK, ((Conquerer.INSTANCE.isWireframe() && canBeWireframe) ? GL_LINE : GL_FILL));
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
         for (int attribute : attributes) glEnableVertexAttribArray(attribute);
         glDrawElements(GL_TRIANGLES, triangleVerts, GL_UNSIGNED_SHORT, 0L);

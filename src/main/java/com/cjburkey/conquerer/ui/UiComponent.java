@@ -38,6 +38,7 @@ public abstract class UiComponent {
         uiElement = entity.getComponent(UiElement.class);
 
         uiElement.uiComponent = this;
+        mesh.canBeWireframe = false;
         meshRender.mesh = mesh;
 
         onEntityCreated();

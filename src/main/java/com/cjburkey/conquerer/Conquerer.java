@@ -35,7 +35,6 @@ import org.joml.Vector3f;
 import static com.cjburkey.conquerer.Log.*;
 import static com.cjburkey.conquerer.math.Transformation.*;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
 
 /**
  * Created by CJ Burkey on 2019/01/10
@@ -90,7 +89,7 @@ public final class Conquerer {
     private UiText territoryBiomeDisplay;
     private UiText territoryLocDisplay;
     private UiText territoryOceanDisplay;
-    private boolean fill = true;
+    private boolean isWireframe = false;
     private long lastDebugTextUpdateTime = System.nanoTime();
 
     private Conquerer() {
@@ -238,10 +237,17 @@ public final class Conquerer {
         return shaderFont;
     }
 
+    public boolean isWireframe() {
+        return isWireframe;
+    }
+
+    public void toggleWireframe() {
+        isWireframe = !isWireframe;
+    }
+
     public void onFrameUpdate() {
         if (Input.getKeyPressed(GLFW_KEY_C)) {
-            fill = !fill;
-            glPolygonMode(GL_FRONT_AND_BACK, fill ? GL_FILL : GL_LINE);
+            toggleWireframe();
         }
         if (Input.getKeyPressed(GLFW_KEY_ESCAPE)) {
             exit();

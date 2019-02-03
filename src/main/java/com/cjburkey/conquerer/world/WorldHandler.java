@@ -74,7 +74,7 @@ public final class WorldHandler {
         // Generate territory name mesh
         {
             if (!territory.isWater) {
-                FontHelper.FontBitmap font = INSTANCE.robotoAscii256();
+                FontHelper.FontBitmap font = INSTANCE.aleoAscii256();
 
                 final Mesh.Builder meshBuilder = Mesh.builder();
                 Vector2f textSize = new Vector2f();
@@ -85,7 +85,9 @@ public final class WorldHandler {
                 final Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
                 ent.getComponent(ShaderRender.class).shader = INSTANCE.shaderFont();
                 ent.getComponent(ShaderRender.class).uniformCallbacks.put("color", s -> s.setUniform("color", new Vector4f(1.0f)));
-                ent.getComponent(MeshRender.class).mesh = meshBuilder.apply(new Mesh());
+                Mesh m = new Mesh();
+                m.canBeWireframe = false;
+                ent.getComponent(MeshRender.class).mesh = meshBuilder.apply(m);
                 ent.getComponent(Pos.class).position.set(territory.location.sub(textSize.x, -textSize.y, new Vector2f()), 1.0f);
                 ent.getComponent(Textured.class).texture = font.texture;
             }
