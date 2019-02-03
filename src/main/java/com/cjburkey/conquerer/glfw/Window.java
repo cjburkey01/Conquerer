@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.glfw;
 
-import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.GameEngine;
 import java.util.Objects;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.Callbacks;
@@ -80,7 +80,7 @@ public class Window {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
-        Conquerer.onExit.add(() -> {
+        GameEngine.onExit(() -> {
             glfwDestroyWindow(window);
             if (currentCursor > NULL) glfwDestroyCursor(currentCursor);
         });

@@ -19,8 +19,4 @@ public class BasicShader extends Shader {
         this.transformsModel = transformsModel;
     }
 
-    public BasicShader(String name) {
-        this(name, false, false, false);
-    }
-
 }

@@ -19,10 +19,9 @@ package de.tomgrill.artemis;
 import com.artemis.BaseSystem;
 import com.artemis.SystemInvocationStrategy;
 import com.artemis.utils.BitVector;
+import com.cjburkey.conquerer.GameEngine;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.concurrent.TimeUnit;
-
-import static com.cjburkey.conquerer.Conquerer.*;
 
 /**
  * Implements a game loop based on this excellent blog post:
@@ -97,7 +96,7 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
 
         /* LOGIC */
 
-        INSTANCE.window().prepareUpdate();
+        GameEngine.window().prepareUpdate();
         while (accumulator >= nanosPerLogicTick) {
             // Process all entity systems inheriting from ILogic
             for (int i = 0; i < logicMarkedSystems.size(); i++) {
@@ -118,7 +117,7 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
         lastRenderDelta = frameTime / 1000000000.0f;
         world.setDelta(lastRenderDelta);
 
-        INSTANCE.window().prepareFrame();
+        GameEngine.window().prepareFrame();
         // Process all NON ILogic inheriting entity systems
         for (int i = 0; i < otherSystems.size(); i++) {
             if (disabledOtherSystems.get(i)) {
@@ -127,8 +126,8 @@ public class GameLoopInvocationStrat extends SystemInvocationStrategy {
             otherSystems.get(i).process();
             updateEntityStates();
         }
-        INSTANCE.onFrameUpdate();
-        INSTANCE.window().finishFrame();
+        GameEngine.INSTANCE().onUpdate();
+        GameEngine.window().finishFrame();
     }
 
     @Override

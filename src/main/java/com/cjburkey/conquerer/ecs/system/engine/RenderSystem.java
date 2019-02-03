@@ -1,9 +1,9 @@
-package com.cjburkey.conquerer.ecs.system;
+package com.cjburkey.conquerer.ecs.system.engine;
 
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
-import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
@@ -77,8 +77,8 @@ public final class RenderSystem extends BaseEntitySystem {
         // Get the main camera for which to render the mesh
         Camera camera = null;
         if (shaderRender.shader.getTransformsProjection() || shaderRender.shader.getTransformsView()) {
-            if (!mCamera.has(Conquerer.INSTANCE.mainCamera)) return;
-            camera = mCamera.get(Conquerer.INSTANCE.mainCamera);
+            if (!mCamera.has(GameEngine.mainCamera)) return;
+            camera = mCamera.get(GameEngine.mainCamera);
         }
 
         Matrix4fc modelMatrix = null;

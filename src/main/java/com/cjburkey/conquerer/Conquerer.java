@@ -1,24 +1,18 @@
 package com.cjburkey.conquerer;
 
-import com.artemis.ArchetypeBuilder;
 import com.artemis.BaseSystem;
-import com.artemis.Component;
-import com.artemis.World;
-import com.artemis.WorldConfigurationBuilder;
+import com.artemis.Entity;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.input.CameraMovement;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
 import com.cjburkey.conquerer.ecs.component.transform.Rot;
 import com.cjburkey.conquerer.ecs.system.CameraMovementSystem;
-import com.cjburkey.conquerer.ecs.system.CameraSystem;
-import com.cjburkey.conquerer.ecs.system.RenderSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
-import com.cjburkey.conquerer.ecs.system.UiElementSystem;
+import com.cjburkey.conquerer.ecs.system.engine.UiElementSystem;
 import com.cjburkey.conquerer.gl.FontHelper;
 import com.cjburkey.conquerer.gl.shader.BasicShader;
 import com.cjburkey.conquerer.glfw.Input;
-import com.cjburkey.conquerer.glfw.Window;
 import com.cjburkey.conquerer.math.Plane;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.ui.UiSolidBox;
@@ -26,9 +20,6 @@ import com.cjburkey.conquerer.ui.UiText;
 import com.cjburkey.conquerer.util.Util;
 import com.cjburkey.conquerer.world.Territory;
 import com.cjburkey.conquerer.world.WorldHandler;
-import de.tomgrill.artemis.GameLoopInvocationStrat;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import org.joml.Random;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -40,9 +31,7 @@ import static org.lwjgl.glfw.GLFW.*;
  * Created by CJ Burkey on 2019/01/10
  */
 @SuppressWarnings({"WeakerAccess", "unused", "FieldCanBeLocal"})
-public final class Conquerer {
-
-    public static final Random RANDOM = new Random(System.nanoTime());
+public final class Conquerer implements IGame {
 
     /*
         This is my main area for to-do items:
@@ -50,14 +39,10 @@ public final class Conquerer {
         TODO: ADD ENTITY TRANSFORM PARENTS
         TODO: HIDE LINES BETWEEN TERRITORIES OWNED BY THE SAME EMPIRE
      */
-    // Keep list of things that may not be perfectly cleaned up to be automatically reclaimed on exit
-    public static final ObjectArrayList<Runnable> onExit = new ObjectArrayList<>();
+
     // Fonts
     public static final FontHelper.Font roboto = FontHelper.loadFont(Util.getStreanForResource("font/Roboto/Roboto-Regular.ttf").orElse(null));
     public static final FontHelper.Font aleo = FontHelper.loadFont(Util.getStreanForResource("font/Aleo/Aleo-Regular.ttf").orElse(null));
-    public static final Conquerer INSTANCE = new Conquerer();
-    // Util
-    private static final int UPS = 60;
     // Pre-baked font bitmaps
     private static FontHelper.FontBitmap robotoAscii256;
     private static FontHelper.FontBitmap aleoAscii256;
@@ -65,23 +50,10 @@ public final class Conquerer {
     public final WorldHandler worldHandler = new WorldHandler(1.0f, Rectf.fromCenter(0.0f, 0.0f, 30.0f, 30.0f));
     // The plane to be flat with the world to allow calculating rays against the "playing field"
     public final Plane worldPlane = new Plane(new Vector3f(), new Vector3f(0.0f, 0.0f, 1.0f));
-    // The current main camera entity
-    public int mainCamera = -1;
-    // Game engine
-    private boolean running = false;
-    private Window window;
+    // Render engine necessities
     private BasicShader shaderColored;
     private BasicShader shaderTextured;
     private BasicShader shaderFont;
-    // This is the game loop we use
-    // It allows separation of render and update/logic tasks.
-    // It creates a constant world update rate and a variable render rate
-    private GameLoopInvocationStrat gameLoop = new GameLoopInvocationStrat((int) (1000.0f / UPS));
-    // Artemis ECS world
-    private World world = new World(new WorldConfigurationBuilder()
-            .with(getSystems())
-            .register(gameLoop)
-            .build());
     // Test UI
     private UiText fpsDisplay;
     private UiText upsDisplay;
@@ -89,7 +61,6 @@ public final class Conquerer {
     private UiText territoryBiomeDisplay;
     private UiText territoryLocDisplay;
     private UiText territoryOceanDisplay;
-    private boolean isWireframe = false;
     private long lastDebugTextUpdateTime = System.nanoTime();
 
     private Conquerer() {
@@ -97,28 +68,21 @@ public final class Conquerer {
     }
 
     public static void main(String[] args) {
-        INSTANCE.startGame();
+        GameEngine.start(new Conquerer());
     }
 
-    private static BaseSystem[] getSystems() {
+    public BaseSystem[] getInitialSystems() {
         return new BaseSystem[]{
                 new SmoothMovementSystem(),
-                new CameraSystem(),
                 new CameraMovementSystem(),
-                new RenderSystem(),
-                new UiElementSystem(),
         };
     }
 
-    private void startGame() {
-        // Create and initialize both the window and the OpenGL context
-        window = new Window("Conquerer v0.0.1", 300, 300, 4);
-        window.setHalfMonitorSize();
-        window.setCenter();
-        window.setVsync(true);
-        window.setClearColor(0.1f, 0.1f, 0.1f);
-        window.show();
+    public int getTargetUps() {
+        return 60;
+    }
 
+    public void onInit() {
         // Prebuild font bitmaps
         robotoAscii256 = roboto.generateAsciiBitmap(256);
         aleoAscii256 = aleo.generateAsciiBitmap(256);
@@ -133,7 +97,7 @@ public final class Conquerer {
         UiElementSystem.initShader(new BasicShader("ui/ui", true, false, true));
 
         // Generate and render the world
-        worldHandler.generateWorld(RANDOM);
+        worldHandler.generateWorld(GameEngine.RAND);
 
         // Debug display
         {
@@ -179,42 +143,14 @@ public final class Conquerer {
         }
 
         // Create starting main camera
-        mainCamera = createEntity(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
-        world.getEntity(mainCamera).getComponent(CameraMovement.class).bounds = worldHandler.terrainBounds;
-        world.getEntity(mainCamera).getComponent(Pos.class).position.z = 3.0f;
-        world.getEntity(mainCamera).getComponent(SmoothMovement.class).goalPosition.set(0.0f, 0.0f, 3.0f);
-
-        // Get ready
-        running = true;
-        info("Initialized");
-
-        // Start the game loop!
-        while (running) {
-            world.process();
-            if (window.getShouldClose()) {
-                exit();
-            }
-        }
-
-        // Cleanup :)
-        info("Exiting");
-        onExit.forEach(Runnable::run);
-
-        // Exit JVM cleanly
-        info("Exited");
-        System.exit(0);
+        GameEngine.mainCamera = GameEngine.instantiate(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
+        Entity mainCameraEntity = GameEngine.getEntity(GameEngine.mainCamera);
+        mainCameraEntity.getComponent(CameraMovement.class).bounds = worldHandler.terrainBounds;
+        mainCameraEntity.getComponent(Pos.class).position.z = 3.0f;
+        mainCameraEntity.getComponent(SmoothMovement.class).goalPosition.set(0.0f, 0.0f, 3.0f);
     }
 
-    public void exit() {
-        running = false;
-    }
-
-    public Window window() {
-        return window;
-    }
-
-    public World world() {
-        return world;
+    public void onExit() {
     }
 
     public FontHelper.FontBitmap robotoAscii256() {
@@ -237,33 +173,25 @@ public final class Conquerer {
         return shaderFont;
     }
 
-    public boolean isWireframe() {
-        return isWireframe;
-    }
-
-    public void toggleWireframe() {
-        isWireframe = !isWireframe;
-    }
-
-    public void onFrameUpdate() {
+    public void onUpdate() {
         if (Input.getKeyPressed(GLFW_KEY_C)) {
-            toggleWireframe();
+            GameEngine.toggleWireframe();
         }
         if (Input.getKeyPressed(GLFW_KEY_ESCAPE)) {
-            exit();
+            GameEngine.exit();
         }
         if (Input.getKeyPressed(GLFW_KEY_R)) {
             info("Regenerating terrain");
-            worldHandler.generateWorld(RANDOM);
+            worldHandler.generateWorld(GameEngine.RAND);
         }
         if ((System.nanoTime() - lastDebugTextUpdateTime) >= 1000000000.0f / 10.0f) {
-            fpsDisplay.setText(String.format("FPS: %.2f", 1.0f / gameLoop.lastRenderDelta()));
-            upsDisplay.setText(String.format("UPS: %.2f", 1.0f / gameLoop.getUpdateDelta()));
+            fpsDisplay.setText(String.format("FPS: %.2f", 1.0f / GameEngine.gameLoop().lastRenderDelta()));
+            upsDisplay.setText(String.format("UPS: %.2f", 1.0f / GameEngine.gameLoop().getUpdateDelta()));
 
-            Vector3f mousePos = cameraToPlane(world.getEntity(mainCamera).getComponent(Pos.class).position,
-                    world.getEntity(mainCamera).getComponent(Camera.class),
+            Vector3f mousePos = cameraToPlane(GameEngine.getEntity(GameEngine.mainCamera).getComponent(Pos.class).position,
+                    GameEngine.getEntity(GameEngine.mainCamera).getComponent(Camera.class),
                     Input.mousePos(),
-                    INSTANCE.worldPlane);
+                    worldPlane);
             Territory at = worldHandler.terrain.getContainingTerritory(new Vector2f(mousePos.x, mousePos.y));
             territoryDisplay.setText(String.format("Territory: %s", ((at == null) ? "None" : at.name)));
             territoryBiomeDisplay.setText(String.format("Biome: %s", ((at == null) ? "None" : at.getBiome().name)));
@@ -272,19 +200,6 @@ public final class Conquerer {
 
             lastDebugTextUpdateTime = System.nanoTime();
         }
-        // TODO: TERRITORY NAME
-
-    }
-
-    // -- STATIC -- //
-
-    @SafeVarargs
-    public final int createEntity(Class<? extends Component>... types) {
-        ArchetypeBuilder builder = new ArchetypeBuilder();
-        for (Class<? extends Component> type : types) {
-            builder.add(type);
-        }
-        return world.create(builder.build(world));
     }
 
 }

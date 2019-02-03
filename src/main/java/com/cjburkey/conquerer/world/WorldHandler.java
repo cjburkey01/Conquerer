@@ -1,6 +1,8 @@
 package com.cjburkey.conquerer.world;
 
 import com.artemis.Entity;
+import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
 import com.cjburkey.conquerer.ecs.component.render.Textured;
@@ -16,7 +18,6 @@ import org.joml.Random;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
-import static com.cjburkey.conquerer.Conquerer.*;
 import static com.cjburkey.conquerer.Log.*;
 
 /**
@@ -63,10 +64,10 @@ public final class WorldHandler {
         {
             final Mesh.Builder meshBuilder = Mesh.builder();
             territory.updateGraphics(meshBuilder);
-            final int worldTerritoryEntity = INSTANCE.createEntity(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
+            final int worldTerritoryEntity = GameEngine.instantiate(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
             territory.entities.add(worldTerritoryEntity);
-            Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
-            ent.getComponent(ShaderRender.class).shader = INSTANCE.shaderColored();
+            Entity ent = GameEngine.getEntity(worldTerritoryEntity);
+            ent.getComponent(ShaderRender.class).shader = GameEngine.INSTANCE(Conquerer.class).shaderColored();
             ent.getComponent(MeshRender.class).mesh = meshBuilder.apply(new Mesh());
             ent.getComponent(Pos.class).position.zero();
         }
@@ -74,16 +75,16 @@ public final class WorldHandler {
         // Generate territory name mesh
         {
             if (!territory.isWater) {
-                FontHelper.FontBitmap font = INSTANCE.aleoAscii256();
+                FontHelper.FontBitmap font = GameEngine.INSTANCE(Conquerer.class).aleoAscii256();
 
                 final Mesh.Builder meshBuilder = Mesh.builder();
                 Vector2f textSize = new Vector2f();
                 meshBuilder.addText(font, territory.name, 0.2f, textSize);
                 textSize.mul(0.5f);
-                final int worldTerritoryEntity = INSTANCE.createEntity(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
+                final int worldTerritoryEntity = GameEngine.instantiate(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
                 territory.entities.add(worldTerritoryEntity);
-                final Entity ent = INSTANCE.world().getEntity(worldTerritoryEntity);
-                ent.getComponent(ShaderRender.class).shader = INSTANCE.shaderFont();
+                final Entity ent = GameEngine.getEntity(worldTerritoryEntity);
+                ent.getComponent(ShaderRender.class).shader = GameEngine.INSTANCE(Conquerer.class).shaderFont();
                 ent.getComponent(ShaderRender.class).uniformCallbacks.put("color", s -> s.setUniform("color", new Vector4f(1.0f)));
                 Mesh m = new Mesh();
                 m.canBeWireframe = false;

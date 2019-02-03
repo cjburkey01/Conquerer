@@ -1,8 +1,9 @@
-package com.cjburkey.conquerer.ecs.system;
+package com.cjburkey.conquerer.ecs.system.engine;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.ecs.component.render.ui.UiElement;
@@ -12,7 +13,6 @@ import com.cjburkey.conquerer.ecs.component.transform.Scale;
 import com.cjburkey.conquerer.gl.shader.Shader;
 import org.joml.Matrix4fc;
 
-import static com.cjburkey.conquerer.Conquerer.*;
 import static com.cjburkey.conquerer.math.Transformation.*;
 
 /**
@@ -52,7 +52,7 @@ public final class UiElementSystem extends IteratingSystem {
         UiElement uiElement = mUiElement.get(entityId);
 
         // Locate the main camera and generate a model matrix for the position of the element
-        Camera mainCamera = INSTANCE.world().getEntity(INSTANCE.mainCamera).getComponent(Camera.class);
+        Camera mainCamera = GameEngine.getMainCamera().getComponent(Camera.class);
         Matrix4fc modelMatrix = getModelMatrix(mPos.get(entityId).position, mRot.get(entityId).rotation, mScale.get(entityId).scale, -1.0f);
 
         // Render the mesh

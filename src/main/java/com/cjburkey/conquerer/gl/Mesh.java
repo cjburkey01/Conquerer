@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
-import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.IAppender;
 import com.cjburkey.conquerer.util.Util;
@@ -47,7 +47,7 @@ public final class Mesh {
 
     public Mesh() {
         vao = glGenVertexArrays();
-        Conquerer.onExit.add(this::destroy);
+        GameEngine.onExit(this::destroy);
     }
 
     private static void addLineSegment(IAppender<Float> vertices,
@@ -403,7 +403,7 @@ public final class Mesh {
         if (!bind() || vbo[0] <= 0 || ebo[0] <= 0) {
             return;
         }
-        glPolygonMode(GL_FRONT_AND_BACK, ((Conquerer.INSTANCE.isWireframe() && canBeWireframe) ? GL_LINE : GL_FILL));
+        glPolygonMode(GL_FRONT_AND_BACK, ((GameEngine.isWireframe() && canBeWireframe) ? GL_LINE : GL_FILL));
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo[0]);
         for (int attribute : attributes) glEnableVertexAttribArray(attribute);
         glDrawElements(GL_TRIANGLES, triangleVerts, GL_UNSIGNED_SHORT, 0L);

@@ -1,5 +1,7 @@
 package com.cjburkey.conquerer.world;
 
+import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.CounterClockwiseVec2;
@@ -8,11 +10,11 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.IntConsumer;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
-import static com.cjburkey.conquerer.Conquerer.*;
 import static com.cjburkey.conquerer.util.Util.*;
 import static com.cjburkey.conquerer.world.TerritoryInitializer.*;
 
@@ -51,7 +53,7 @@ public final class Territory {
 
         center = center(vertices);
 
-        onExit.add(this::cleanupEntity);
+        GameEngine.onExit(this::cleanupEntity);
     }
 
     public static Builder builder() {
@@ -59,7 +61,7 @@ public final class Territory {
     }
 
     public void cleanupEntity() {
-        entities.forEach((int entity) -> INSTANCE.world().delete(entity));
+        entities.forEach((IntConsumer) GameEngine::delete);
         entities.clear();
     }
 
@@ -67,7 +69,7 @@ public final class Territory {
         if (entities.size() < 1) return;
         Mesh.Builder meshBuilder = Mesh.builder();
         updateGraphics(meshBuilder);
-        meshBuilder.apply(INSTANCE.world().getEntity(entities.getInt(0)).getComponent(MeshRender.class).mesh);
+        meshBuilder.apply(GameEngine.getEntity(entities.getInt(0)).getComponent(MeshRender.class).mesh);
     }
 
     public void updateGraphics(Mesh.Builder meshBuilder) {
@@ -76,7 +78,7 @@ public final class Territory {
         }
 
         if (currentOwner != null) {
-            float bthick = INSTANCE.worldHandler.borderThickness;
+            float bthick = GameEngine.INSTANCE(Conquerer.class).worldHandler.borderThickness;
             Vector2fc[] tmpVerts = Arrays.copyOf(vertices, vertices.length);
             for (int i = 0; i < tmpVerts.length; i++) {
                 tmpVerts[i] = moveVert(tmpVerts[i],

@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
-import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.GameEngine;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL30.*;
@@ -18,7 +18,7 @@ public class Texture {
 
     public Texture() {
         texture = glGenTextures();
-        Conquerer.onExit.add(this::destroy);
+        GameEngine.onExit(this::destroy);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      // Stop alignment checks by OpenGL
         glEnable(GL_TEXTURE);
         glActiveTexture(GL_TEXTURE0);

@@ -1,6 +1,7 @@
 package com.cjburkey.conquerer.ui;
 
 import com.artemis.Entity;
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.ecs.component.render.ui.UiElement;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
@@ -10,8 +11,6 @@ import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.gl.Texture;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-
-import static com.cjburkey.conquerer.Conquerer.*;
 
 /**
  * Created by CJ Burkey on 2019/01/27
@@ -30,7 +29,7 @@ public abstract class UiComponent {
     private Mesh mesh = new Mesh();
 
     public UiComponent() {
-        entity = INSTANCE.world().getEntity(INSTANCE.createEntity(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class));
+        entity = GameEngine.instantiateEntity(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class);
         pos = entity.getComponent(Pos.class);
         rot = entity.getComponent(Rot.class);
         scale = entity.getComponent(Scale.class);
@@ -43,15 +42,15 @@ public abstract class UiComponent {
 
         onEntityCreated();
 
-        onExit.add(this::remove);
+        GameEngine.onExit(this::remove);
     }
 
     protected static int screenWidth() {
-        return INSTANCE.window().getWidth();
+        return GameEngine.window().getWidth();
     }
 
     protected static int screenHeight() {
-        return INSTANCE.window().getHeight();
+        return GameEngine.window().getHeight();
     }
 
     public final void regenerateMesh() {
@@ -67,7 +66,7 @@ public abstract class UiComponent {
         meshRender.mesh = null;
         uiElement.texture = null;
 
-        INSTANCE.world().deleteEntity(entity);
+        GameEngine.delete(entity);
 
         entity = null;
         pos = null;

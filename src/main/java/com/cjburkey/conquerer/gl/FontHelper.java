@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
-import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
@@ -58,7 +58,7 @@ public final class FontHelper {
                 this.decent = ascent.get(0);
                 this.lineGap = ascent.get(0);
             }
-            Conquerer.onExit.add(() -> memFree(rawFontBytes));  // We can't call "close()" on fontInfo because it causes a crash in Java 8 (for some reason?)
+            GameEngine.onExit(() -> memFree(rawFontBytes));  // We can't call "close()" on fontInfo because it causes a crash in Java 8 (for some reason?)
         }
 
         public float getScale(int lineHeight) {

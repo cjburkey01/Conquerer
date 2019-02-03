@@ -1,9 +1,9 @@
-package com.cjburkey.conquerer.ecs.system;
+package com.cjburkey.conquerer.ecs.system.engine;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.cjburkey.conquerer.Conquerer;
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.transform.Pos;
 import com.cjburkey.conquerer.ecs.component.transform.Rot;
@@ -26,7 +26,7 @@ public final class CameraSystem extends IteratingSystem {
 
     protected void process(int entityId) {
         // Cache the window for this cycle (keeping this out of the class scope because Window may be recreated at some point)
-        Window w = Conquerer.INSTANCE.window();
+        Window w = GameEngine.window();
 
         // Components
         Pos pos = mPos.get(entityId);

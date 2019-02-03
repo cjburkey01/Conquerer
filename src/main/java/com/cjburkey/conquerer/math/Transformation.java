@@ -1,5 +1,6 @@
 package com.cjburkey.conquerer.math;
 
+import com.cjburkey.conquerer.GameEngine;
 import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.glfw.Window;
 import org.joml.Matrix4f;
@@ -10,7 +11,6 @@ import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector4f;
 
-import static com.cjburkey.conquerer.Conquerer.*;
 import static org.joml.Math.*;
 
 /**
@@ -95,7 +95,7 @@ public final class Transformation {
     }
 
     public static Vector3f screenToGlPos(Vector2fc screenCoords) {
-        Window w = INSTANCE.window();
+        Window w = GameEngine.window();
         return new Vector3f(screenCoords.x() / w.getWidth() * 2.0f - 1.0f, 1.0f - screenCoords.y() / w.getHeight() * 2.0f, 0.0f);
     }
 
@@ -110,7 +110,7 @@ public final class Transformation {
         } else {
             // Idk why this works, but trial and error got me here :/
             // Logically, the perspective matrix should transform the normal ray vector correctly, but it gives a wrong value.
-            float sa = camera.orthographicSize * (float) INSTANCE.window().getWidth() / INSTANCE.window().getHeight();
+            float sa = camera.orthographicSize * (float) GameEngine.window().getWidth() / GameEngine.window().getHeight();
             ray = new Vector4f();
             ray.x = 2.0f * sa * ((glScreenPos.x() / 3.0f + 1.0f) / 2.0f) - sa;
             ray.y = 2.0f * camera.orthographicSize * ((glScreenPos.y() / 3.0f + 1.0f) / 2.0f) - camera.orthographicSize;
