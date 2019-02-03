@@ -212,6 +212,7 @@ public final class NameGenerator {
     public interface NameFilter {
 
         boolean isValid(CharSequence name);
+
     }
 
     public class BasicNameFilter implements NameFilter {
@@ -236,6 +237,7 @@ public final class NameGenerator {
         public boolean isValid(CharSequence name) {
             return !illegal.contains(name.toString());
         }
+
     }
 
 }
