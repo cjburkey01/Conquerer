@@ -15,6 +15,6 @@ public interface IGame {
 
     BaseSystem[] getInitialSystems();
 
-    int getTargetUps();
+    int getTargetUpdateRate();
 
 }

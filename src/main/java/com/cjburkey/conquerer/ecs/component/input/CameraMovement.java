@@ -19,7 +19,7 @@ public final class CameraMovement extends Component {
     public final IntOpenHashSet upKeys = new IntOpenHashSet();
     public final IntOpenHashSet downKeys = new IntOpenHashSet();
     public float goalZoom = 0.0f;
-    public float[] zoomVelocity = new float[]{0.0f};
+    public float[] zoomVelocity = new float[] {0.0f};
     public float speed = 50.0f;
     public float zoomSpeed = 1.0f;
     public float zoomMoveRatio = 0.5f;

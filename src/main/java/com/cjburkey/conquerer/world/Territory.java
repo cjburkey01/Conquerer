@@ -78,7 +78,7 @@ public final class Territory {
         }
 
         if (currentOwner != null) {
-            float bthick = GameEngine.INSTANCE(Conquerer.class).worldHandler.borderThickness;
+            float bthick = Conquerer.SELF.worldHandler.borderThickness;
             Vector2fc[] tmpVerts = Arrays.copyOf(vertices, vertices.length);
             for (int i = 0; i < tmpVerts.length; i++) {
                 tmpVerts[i] = moveVert(tmpVerts[i],

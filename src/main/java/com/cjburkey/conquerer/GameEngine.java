@@ -45,7 +45,7 @@ public final class GameEngine {
         INSTANCE = instance;
 
         initWindow();
-        initGameLoop(instance.getTargetUps());
+        initGameLoop(instance.getTargetUpdateRate());
         initWorld();
         startGameLoop();
     }
@@ -96,10 +96,6 @@ public final class GameEngine {
 
     public static IGame INSTANCE() {
         return INSTANCE;
-    }
-
-    public static <T extends IGame> T INSTANCE(Class<T> gameEngineType) {
-        return gameEngineType.cast(INSTANCE);
     }
 
     public static Window window() {

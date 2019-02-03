@@ -55,7 +55,7 @@ public final class CameraMovementSystem extends IteratingSystem {
         }
 
         // Mouse move
-        final Plane worldPlane = GameEngine.INSTANCE(Conquerer.class).worldPlane;
+        final Plane worldPlane = Conquerer.SELF.worldPlane;
         Vector2fc currMousePos = Input.mousePos();
         Vector3f mouseWorldPos = cameraToPlane(pos.position, camera, currMousePos, worldPlane);
 

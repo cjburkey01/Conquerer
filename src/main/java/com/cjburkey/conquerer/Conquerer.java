@@ -33,6 +33,8 @@ import static org.lwjgl.glfw.GLFW.*;
 @SuppressWarnings({"WeakerAccess", "unused", "FieldCanBeLocal"})
 public final class Conquerer implements IGame {
 
+    public static final Conquerer SELF = new Conquerer();
+
     /*
         This is my main area for to-do items:
         
@@ -68,17 +70,17 @@ public final class Conquerer implements IGame {
     }
 
     public static void main(String[] args) {
-        GameEngine.start(new Conquerer());
+        GameEngine.start(SELF);
     }
 
     public BaseSystem[] getInitialSystems() {
-        return new BaseSystem[]{
+        return new BaseSystem[] {
                 new SmoothMovementSystem(),
                 new CameraMovementSystem(),
         };
     }
 
-    public int getTargetUps() {
+    public int getTargetUpdateRate() {
         return 60;
     }
 

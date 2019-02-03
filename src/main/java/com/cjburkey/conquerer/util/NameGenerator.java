@@ -48,7 +48,7 @@ public final class NameGenerator {
     }
 
     public NameGenerator() {
-        this(new String[]{
+        this(new String[] {
                 // Monographs
                 "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z",
 
@@ -58,7 +58,7 @@ public final class NameGenerator {
 
                 // Trigraphs
                 "sch", "sck",
-        }, new String[]{
+        }, new String[] {
                 // Monographs
                 "a", "e", "i", "o", "u",
 
