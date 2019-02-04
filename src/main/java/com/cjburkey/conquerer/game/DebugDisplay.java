@@ -22,7 +22,7 @@ public class DebugDisplay {
     private final ObjectArrayList<UiText> text = new ObjectArrayList<>();
 
     public DebugDisplay() {
-        FontHelper.FontBitmap font = Conquerer.SELF.robotoAscii256();
+        FontHelper.FontBitmap font = Conquerer.Q.robotoAscii256();
 
         final int count = 8;
         final float size = 24.0f;
@@ -31,8 +31,8 @@ public class DebugDisplay {
         UiSolidBox background = new UiSolidBox().setColor(new Vector3f(0.0f));
         for (int i = 0; i < count; ) {
             text.add(new UiText(null, font)
-                    .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
-                    .setSize(size));
+                .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
+                .setSize(size));
             text.get(i).position().set(20.0f, i++ * size + 6.0f, 0.0f);
         }
         background.setSize(new Vector2f(375.0f, count * size + 12.0f));
@@ -54,7 +54,7 @@ public class DebugDisplay {
         text.get(i++).setText(String.format("FPS: %.2f", 1.0f / GameEngine.gameLoop().lastRenderDelta()));
         text.get(i++).setText(String.format("UPS: %.2f", 1.0f / GameEngine.gameLoop().getUpdateDelta()));
 
-        Territory at = Conquerer.SELF.worldHandler.getTerritoryUnderMouse();
+        Territory at = Conquerer.Q.worldHandler.getTerritoryUnderMouse();
         text.get(i++).setText(String.format("Territory: %s", ((at == null) ? "None" : at.name)));
         text.get(i++).setText(String.format("Biome: %s", ((at == null) ? "None" : at.getBiome().name)));
         text.get(i++).setText(String.format("Location: %s", ((at == null) ? "None" : "(" + Util.format(at.location) + ")")));

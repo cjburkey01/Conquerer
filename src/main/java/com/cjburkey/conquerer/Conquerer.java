@@ -32,7 +32,7 @@ import static org.lwjgl.glfw.GLFW.*;
 @SuppressWarnings({"WeakerAccess", "unused", "FieldCanBeLocal"})
 public final class Conquerer implements IGame {
 
-    public static final Conquerer SELF = new Conquerer();
+    public static final Conquerer Q = new Conquerer();
 
     /*
         This is my main area for to-do items:
@@ -64,7 +64,7 @@ public final class Conquerer implements IGame {
     }
 
     public static void main(String[] args) {
-        GameEngine.start(SELF);
+        GameEngine.start(Q);
     }
 
     public BaseSystem[] getInitialSystems() {
@@ -153,14 +153,14 @@ public final class Conquerer implements IGame {
         }
         // Click to claim territories (as test)
         if (Input.getMouseDown(GLFW_MOUSE_BUTTON_1)) {
-            Territory territory = Conquerer.SELF.worldHandler.getTerritoryUnderMouse();
+            Territory territory = Conquerer.Q.worldHandler.getTerritoryUnderMouse();
             if (territory == null) return;
             EmpireHandler.Empire playerEmpire = ConquererHandler.playerEmpire.get();
             if (playerEmpire != null) playerEmpire.claimTerritory(territory);
         }
         // Right click to unclaim territories (as test)
         if (Input.getMouseDown(GLFW_MOUSE_BUTTON_2)) {
-            Territory territory = Conquerer.SELF.worldHandler.getTerritoryUnderMouse();
+            Territory territory = Conquerer.Q.worldHandler.getTerritoryUnderMouse();
             if (territory == null) return;
             EmpireHandler.Empire currentEmpire = territory.getCurrentOwner();
             if (currentEmpire != null) currentEmpire.unclaimTerritory(territory);

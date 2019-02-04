@@ -38,9 +38,9 @@ public final class TerritoryEdge {
         }
         TerritoryEdge that = (TerritoryEdge) o;
         return pointA.equals(that.pointA) &&
-                pointB.equals(that.pointB) &&
-                territoryLocA.equals(that.territoryLocA) &&
-                territoryLocB.equals(that.territoryLocB);
+            pointB.equals(that.pointB) &&
+            territoryLocA.equals(that.territoryLocA) &&
+            territoryLocB.equals(that.territoryLocB);
     }
 
     public int hashCode() {

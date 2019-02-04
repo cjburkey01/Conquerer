@@ -80,13 +80,13 @@ public final class Territory {
 
         // Outline territory
         if (currentOwner != null) {
-            float bthick = Conquerer.SELF.worldHandler.borderThickness;
+            float bthick = Conquerer.Q.worldHandler.borderThickness;
             Vector2fc[] tmpVerts = Arrays.copyOf(vertices, vertices.length);
             for (int i = 0; i < tmpVerts.length; i++) {
                 tmpVerts[i] = moveVert(tmpVerts[i],
-                        tmpVerts[(i - 1 + tmpVerts.length) % tmpVerts.length],
-                        tmpVerts[(i + 1 + tmpVerts.length) % tmpVerts.length],
-                        -bthick * 1.5f);
+                    tmpVerts[(i - 1 + tmpVerts.length) % tmpVerts.length],
+                    tmpVerts[(i + 1 + tmpVerts.length) % tmpVerts.length],
+                    -bthick * 1.5f);
             }
             meshBuilder.addLine(currentOwner.color, true, bthick, tmpVerts);
         }

@@ -55,7 +55,7 @@ public final class CameraMovementSystem extends IteratingSystem {
         }
 
         // Mouse move
-        final Plane worldPlane = Conquerer.SELF.worldPlane;
+        final Plane worldPlane = Conquerer.Q.worldPlane;
         Vector2fc currMousePos = Input.mousePos();
         Vector3f mouseWorldPos = cameraToPlane(pos.position, camera, currMousePos, worldPlane);
 
@@ -91,10 +91,10 @@ public final class CameraMovementSystem extends IteratingSystem {
             // Zoom smooth movement is handled separately from the smooth movement system
             cameraMovement.goalZoom = zoom;
             camera.orthographicSize = dampSpringCrit(cameraMovement.goalZoom,
-                    camera.orthographicSize,
-                    cameraMovement.zoomVelocity,
-                    smoothMovement.smoothing,
-                    delta);
+                camera.orthographicSize,
+                cameraMovement.zoomVelocity,
+                smoothMovement.smoothing,
+                delta);
         } else {
             // Move the camera without the smooth movement
             pos.position.add(deltaPosition.x, deltaPosition.y, 0.0f);

@@ -136,9 +136,9 @@ public final class FontHelper {
 
                 // Add to the list of uvs so we can build the text mesh
                 uvs.put(character, new Vector4f((float) x / bitmapSize,
-                        (float) y / bitmapSize,
-                        (float) (x + w) / bitmapSize,
-                        (float) (y + h) / bitmapSize));
+                    (float) y / bitmapSize,
+                    (float) (x + w) / bitmapSize,
+                    (float) (y + h) / bitmapSize));
 
                 // The next y position should be clear of all previous lines' characters
                 nextY = Util.max(nextY, y + h);
