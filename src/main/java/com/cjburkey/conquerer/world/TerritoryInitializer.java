@@ -26,22 +26,22 @@ final class TerritoryInitializer {
         // Bound X = Temperature
         // Bound Y = Precipitation
         float temp = simplexSample2f(biomeHandler.getBounds().minX,
-                biomeHandler.getBounds().maxX,
-                tempScale,
-                location,
-                worldHandler.seed());
+            biomeHandler.getBounds().maxX,
+            tempScale,
+            location,
+            worldHandler.seed());
 
         float precip = simplexSample2f(biomeHandler.getBounds().minY,
-                biomeHandler.getBounds().maxY,
-                precipScale,
-                location.add(precipOffset, precipOffset, new Vector2f()),
-                worldHandler.seed());
+            biomeHandler.getBounds().maxY,
+            precipScale,
+            location.add(precipOffset, precipOffset, new Vector2f()),
+            worldHandler.seed());
 
         float altitude = simplexSample2f(0.0f,
-                1.0f,
-                altitudeScale,
-                location.add(altitudeOffset, altitudeOffset, new Vector2f()),
-                worldHandler.seed());
+            1.0f,
+            altitudeScale,
+            location.add(altitudeOffset, altitudeOffset, new Vector2f()),
+            worldHandler.seed());
 
         territoryBuilder.setBiome(biomeHandler.getBiome(temp, precip));
         if (altitude <= oceanLevel) territoryBuilder.setWater(true);

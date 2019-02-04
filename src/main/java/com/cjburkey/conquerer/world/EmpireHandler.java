@@ -33,12 +33,12 @@ public final class EmpireHandler {
 
     public Empire generate(Random random) {
         return create(new NameBuilder()
-                        .setCanFirstLetterBeDigraph(false)          // These four properties are the default values, I set them here only to be explicit
-                        .setShouldCapitalizeFirstCharacter(true)
-                        .setMinLength(3)
-                        .setMaxLength(7)
-                        .build(random),
-                randomColor(random, brightnessMinMax.x(), brightnessMinMax.y()));
+                .setCanFirstLetterBeDigraph(false)          // These four properties are the default values, I set them here only to be explicit
+                .setShouldCapitalizeFirstCharacter(true)
+                .setMinLength(3)
+                .setMaxLength(7)
+                .build(random),
+            randomColor(random, brightnessMinMax.x(), brightnessMinMax.y()));
     }
 
     public Set<Empire> generate(Random random, int count) {
@@ -78,18 +78,6 @@ public final class EmpireHandler {
             this.color.set(color);
         }
 
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Empire empire = (Empire) o;
-            return name.equals(empire.name)
-                    && color.equals(empire.color);
-        }
-
-        public int hashCode() {
-            return Objects.hash(name, color);
-        }
-
         @SuppressWarnings("deprecation")
         public void claimTerritory(Territory territory) {
             if (!containsTerritory(territory)) {
@@ -125,6 +113,18 @@ public final class EmpireHandler {
 
         public boolean containsTerritory(Territory territory) {
             return territories.contains(territory);
+        }
+
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Empire empire = (Empire) o;
+            return name.equals(empire.name)
+                && color.equals(empire.color);
+        }
+
+        public int hashCode() {
+            return Objects.hash(name, color);
         }
 
     }

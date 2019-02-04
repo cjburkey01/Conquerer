@@ -48,7 +48,7 @@ public final class Util {
 
     public static Optional<String> readResource(String path) {
         Optional<InputStream> stream = getStreanForResource(path);
-        if (!stream.isPresent()) return Optional.empty();
+        if (stream.isEmpty()) return Optional.empty();
         return readStream(stream.get());
     }
 
@@ -165,7 +165,7 @@ public final class Util {
 
     // -- SMOOTH DAMPING -- //
 
-    // Stolen (translated) from Unity C# (shhh)
+    // Stolen (translated) from Unity Q# (shhh)
     public static float dampSpringCrit(float target, float current, float[] velocity, float smoothTime, float deltaTime) {
         smoothTime = Math.max(0.0001f, smoothTime);
         float num = 2.0f / smoothTime;

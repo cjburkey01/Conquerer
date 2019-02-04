@@ -109,7 +109,7 @@ public final class BiomeHandler {
             }
             Biome biome1 = (Biome) o;
             return name.equals(biome1.name) &&
-                    biome.equals(biome1.biome);
+                biome.equals(biome1.biome);
         }
 
         public int hashCode() {

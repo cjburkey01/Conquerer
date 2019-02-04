@@ -127,31 +127,31 @@ public class Rectf {
 
     public boolean contains(float x, float y, boolean incMax) {
         return x >= minX
-                && y >= minY
-                && (incMax && x <= maxX || !incMax && x < maxX)
-                && (incMax && y <= maxY || !incMax && y < maxY);
+            && y >= minY
+            && (incMax && x <= maxX || !incMax && x < maxX)
+            && (incMax && y <= maxY || !incMax && y < maxY);
     }
 
     public boolean contains(Vector2fc point, boolean incMax) {
         return point.x() >= minX
-                && point.y() >= minY
-                && (incMax && point.x() <= maxX || !incMax && point.x() < maxX)
-                && (incMax && point.y() <= maxY || !incMax && point.y() < maxY);
+            && point.y() >= minY
+            && (incMax && point.x() <= maxX || !incMax && point.x() < maxX)
+            && (incMax && point.y() <= maxY || !incMax && point.y() < maxY);
     }
 
     public boolean contains(float x, float y) {
         return x >= minX
-                && y >= minY
-                && x <= maxX
-                && y <= maxY;
+            && y >= minY
+            && x <= maxX
+            && y <= maxY;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean contains(Vector2fc point) {
         return point.x() >= minX
-                && point.y() >= minY
-                && point.x() <= maxX
-                && point.y() <= maxY;
+            && point.y() >= minY
+            && point.x() <= maxX
+            && point.y() <= maxY;
     }
 
     public boolean equals(Object o) {
@@ -163,9 +163,9 @@ public class Rectf {
         }
         Rectf rectf = (Rectf) o;
         return Float.compare(rectf.minX, minX) == 0 &&
-                Float.compare(rectf.minY, minY) == 0 &&
-                Float.compare(rectf.maxX, maxX) == 0 &&
-                Float.compare(rectf.maxY, maxY) == 0;
+            Float.compare(rectf.minY, minY) == 0 &&
+            Float.compare(rectf.maxX, maxX) == 0 &&
+            Float.compare(rectf.maxY, maxY) == 0;
     }
 
     public int hashCode() {

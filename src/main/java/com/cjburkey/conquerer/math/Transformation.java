@@ -28,8 +28,8 @@ public final class Transformation {
 
     public static Matrix4fc getProjectionMatrix(float fovDeg, float aspect, float near, float far) {
         return projectionMatrix
-                .identity()
-                .setPerspective(fovDeg * DEG2RAD, aspect, near, far);
+            .identity()
+            .setPerspective(fovDeg * DEG2RAD, aspect, near, far);
     }
 
     public static Matrix4fc getProjectionMatrix(float fovDeg, float screenWidth, float screenHeight, float near, float far) {
@@ -38,8 +38,8 @@ public final class Transformation {
 
     public static Matrix4fc getOrthographicMatrix(float left, float right, float bottom, float top, float near, float far) {
         return projectionMatrix
-                .identity()
-                .setOrtho(left, right, bottom, top, near, far);
+            .identity()
+            .setOrtho(left, right, bottom, top, near, far);
     }
 
     public static Matrix4fc getOrthographicMatrix(float screenWidth, float screenHeight, float size, float near, float far) {
@@ -49,25 +49,25 @@ public final class Transformation {
 
     public static Matrix4fc getViewMatrix(Vector3fc cameraPosition, Quaternionfc cameraRotation) {
         return viewMatrix
-                .identity()
-                .rotate(cameraRotation)
-                .translate(cameraPosition.mul(-1.0f, new Vector3f()));
+            .identity()
+            .rotate(cameraRotation)
+            .translate(cameraPosition.mul(-1.0f, new Vector3f()));
     }
 
     public static Matrix4fc getModelMatrix(Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale) {
         return modelMatrix
-                .identity()
-                .translate(modelPosition.x(), modelPosition.y(), modelPosition.z())
-                .rotate(modelRotation)
-                .scale(modelScale);
+            .identity()
+            .translate(modelPosition.x(), modelPosition.y(), modelPosition.z())
+            .rotate(modelRotation)
+            .scale(modelScale);
     }
 
     public static Matrix4fc getModelMatrix(Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale, float overrideZ) {
         return modelMatrix
-                .identity()
-                .translate(modelPosition.x(), modelPosition.y(), overrideZ)
-                .rotate(modelRotation)
-                .scale(modelScale);
+            .identity()
+            .translate(modelPosition.x(), modelPosition.y(), overrideZ)
+            .rotate(modelRotation)
+            .scale(modelScale);
     }
 
     public static Matrix4fc getCompleteMatrix(Matrix4fc projectionViewMatrix, Matrix4fc modelMatrix) {
@@ -84,14 +84,14 @@ public final class Transformation {
 
     public static Vector3fc transformMatPoint(Matrix4fc mat, Vector3fc point) {
         return mat
-                .invert(new Matrix4f())
-                .transformPosition(point, new Vector3f());
+            .invert(new Matrix4f())
+            .transformPosition(point, new Vector3f());
     }
 
     public static Vector3fc transformMatDirection(Matrix4fc mat, Vector3fc direction) {
         return mat
-                .invert(new Matrix4f())
-                .transformDirection(direction, new Vector3f());
+            .invert(new Matrix4f())
+            .transformDirection(direction, new Vector3f());
     }
 
     public static Vector3f screenToGlPos(Vector2fc screenCoords) {
@@ -105,8 +105,8 @@ public final class Transformation {
         if (camera.perspective) {
             // We need to enter homogeneous coordinates, so w is set to 1.
             ray = camera.projectionMatrix
-                    .invert(new Matrix4f())
-                    .transform(new Vector4f(glScreenPos.x(), glScreenPos.y(), -1.0f, 1.0f));
+                .invert(new Matrix4f())
+                .transform(new Vector4f(glScreenPos.x(), glScreenPos.y(), -1.0f, 1.0f));
         } else {
             // Idk why this works, but trial and error got me here :/
             // Logically, the perspective matrix should transform the normal ray vector correctly, but it gives a wrong value.
@@ -120,8 +120,8 @@ public final class Transformation {
         ray.z = -1.0f;
         ray.w = 0.0f;
         camera.viewMatrix
-                .invert(new Matrix4f())
-                .transform(ray);
+            .invert(new Matrix4f())
+            .transform(ray);
         return new Vector3f(ray.x, ray.y, ray.z).normalize();
     }
 

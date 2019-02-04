@@ -63,7 +63,7 @@ public final class WorldHandler {
         Vector3f mousePos = cameraToPlane(mainCamera.getComponent(Pos.class).position,
                 mainCamera.getComponent(Camera.class),
                 Input.mousePos(),
-                Conquerer.SELF.worldPlane);
+                Conquerer.Q.worldPlane);
         return terrain.getContainingTerritory(new Vector2f(mousePos.x, mousePos.y));
     }
 
@@ -90,7 +90,7 @@ public final class WorldHandler {
             final int worldTerritoryEntity = GameEngine.instantiate(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class);
             territory.entities.add(worldTerritoryEntity);
             Entity ent = GameEngine.getEntity(worldTerritoryEntity);
-            ent.getComponent(ShaderRender.class).shader = Conquerer.SELF.shaderColored();
+            ent.getComponent(ShaderRender.class).shader = Conquerer.Q.shaderColored();
             ent.getComponent(MeshRender.class).mesh = meshBuilder.apply(new Mesh());
             ent.getComponent(Pos.class).position.zero();
         }
@@ -98,7 +98,7 @@ public final class WorldHandler {
         // Generate territory name mesh
         {
             if (!territory.isWater) {
-                FontHelper.FontBitmap font = Conquerer.SELF.aleoAscii256();
+                FontHelper.FontBitmap font = Conquerer.Q.aleoAscii256();
 
                 final Mesh.Builder meshBuilder = Mesh.builder();
                 Vector2f textSize = new Vector2f();
@@ -107,7 +107,7 @@ public final class WorldHandler {
                 final int worldTerritoryEntity = GameEngine.instantiate(ShaderRender.class, MeshRender.class, Pos.class, Rot.class, Scale.class, Textured.class);
                 territory.entities.add(worldTerritoryEntity);
                 final Entity ent = GameEngine.getEntity(worldTerritoryEntity);
-                ent.getComponent(ShaderRender.class).shader = Conquerer.SELF.shaderFont();
+                ent.getComponent(ShaderRender.class).shader = Conquerer.Q.shaderFont();
                 ent.getComponent(ShaderRender.class).uniformCallbacks.put("color", s -> s.setUniform("color", new Vector4f(1.0f)));
                 Mesh m = new Mesh();
                 m.canBeWireframe = false;

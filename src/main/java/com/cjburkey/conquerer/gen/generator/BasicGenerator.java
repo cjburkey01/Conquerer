@@ -30,11 +30,11 @@ public class BasicGenerator implements IGenerator {
     private static Territory.Builder newTerritory(Random random, Vector2fc point) {
         Territory.Builder builder = Territory.builder();
         builder.setName(new NameBuilder()
-                .setCanFirstLetterBeDigraph(false)
-                .setShouldCapitalizeFirstCharacter(true)
-                .setMinLength(3)
-                .setMaxLength(7)
-                .build(random));
+            .setCanFirstLetterBeDigraph(false)
+            .setShouldCapitalizeFirstCharacter(true)
+            .setMinLength(3)
+            .setMaxLength(7)
+            .build(random));
         builder.setLocation(point);
         return builder;
     }

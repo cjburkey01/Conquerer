@@ -614,10 +614,10 @@ public final class Mesh {
 
                 // Add the quad (TopLeft to BottomRight) with the provided UVs from the font bitmap
                 addUvQuad(
-                        tl,
-                        br,
-                        new Vector2f(uvBounds.x(), uvBounds.y()),
-                        new Vector2f(uvBounds.z(), uvBounds.w())
+                    tl,
+                    br,
+                    new Vector2f(uvBounds.x(), uvBounds.y()),
+                    new Vector2f(uvBounds.z(), uvBounds.w())
                 );
 
                 // Increment the position
