@@ -99,11 +99,20 @@ public final class EmpireHandler {
         }
 
         @SuppressWarnings("deprecation")
-        public void unclaimTerritory(Territory territory) {
+        private void unclaimTerritory(Territory territory, boolean remove) {
             if (containsTerritory(territory)) {
                 territory.setCurrentOwner(null);
-                territories.remove(territory);
+                if (remove) territories.remove(territory);
             }
+        }
+
+        public void unclaimTerritory(Territory territory) {
+            unclaimTerritory(territory, true);
+        }
+
+        public void unclaimAllTerritories() {
+            territories.forEach(territory -> unclaimTerritory(territory, false));
+            territories.clear();
         }
 
         public int getTerritoriesCount() {

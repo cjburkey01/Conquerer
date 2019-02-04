@@ -3,6 +3,7 @@ package com.cjburkey.conquerer.world;
 import com.artemis.Entity;
 import com.cjburkey.conquerer.Conquerer;
 import com.cjburkey.conquerer.GameEngine;
+import com.cjburkey.conquerer.ecs.component.Camera;
 import com.cjburkey.conquerer.ecs.component.render.MeshRender;
 import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
 import com.cjburkey.conquerer.ecs.component.render.Textured;
@@ -12,13 +13,16 @@ import com.cjburkey.conquerer.ecs.component.transform.Scale;
 import com.cjburkey.conquerer.gen.generator.BasicGenerator;
 import com.cjburkey.conquerer.gl.FontHelper;
 import com.cjburkey.conquerer.gl.Mesh;
+import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.Util;
 import org.joml.Random;
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.math.Transformation.*;
 
 /**
  * Created by CJ Burkey on 2019/01/16
@@ -44,11 +48,23 @@ public final class WorldHandler {
 
     public void generateWorld(int seed) {
         this.seed = seed;
-        terrain.generator.setMinDistance(minTerritoryDistance).setBounds(terrainBounds);
+        terrain.generator
+                .setMinDistance(minTerritoryDistance)
+                .setBounds(terrainBounds);
         deleteTerrainGraphics();
+        for (EmpireHandler.Empire empire : empireHandler.getEmpires()) empire.unclaimAllTerritories();
         terrain.generate(this);
         worldBounds = terrain.bounds().grow(minTerritoryDistance);
         info("Generated territories: {}", terrain.getTerritoryCount());
+    }
+
+    public Territory getTerritoryUnderMouse() {
+        Entity mainCamera = GameEngine.getMainCamera();
+        Vector3f mousePos = cameraToPlane(mainCamera.getComponent(Pos.class).position,
+                mainCamera.getComponent(Camera.class),
+                Input.mousePos(),
+                Conquerer.SELF.worldPlane);
+        return terrain.getContainingTerritory(new Vector2f(mousePos.x, mousePos.y));
     }
 
     public void generateWorld(Random random) {

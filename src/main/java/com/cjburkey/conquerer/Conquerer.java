@@ -18,6 +18,8 @@ import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.math.Plane;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.Util;
+import com.cjburkey.conquerer.world.EmpireHandler;
+import com.cjburkey.conquerer.world.Territory;
 import com.cjburkey.conquerer.world.WorldHandler;
 import org.joml.Vector3f;
 
@@ -131,21 +133,40 @@ public final class Conquerer implements IGame {
     public void onUpdate() {
         Entity mainCamera = GameEngine.getMainCamera();
 
+        // Toggle wireframe
         if (Input.getKeyPressed(GLFW_KEY_C)) {
             GameEngine.toggleWireframe();
         }
+        // Shortcut to exit the game
         if (Input.getKeyPressed(GLFW_KEY_ESCAPE)) {
             GameEngine.exit();
         }
+        // Regenerate the terrain
         if (Input.getKeyPressed(GLFW_KEY_R)) {
             info("Regenerating terrain");
             worldHandler.generateWorld(GameEngine.RAND);
             worldHandler.generateTerrainGraphics();
         }
+        // Toggle debug display
         if (Input.getKeyPressed(GLFW_KEY_F1)) {
             debugDisplay.enabled.toggle();
         }
-        if ((System.nanoTime() - lastDebugTextUpdateTime) >= 1000000000.0f / 10.0f) {
+        // Click to claim territories (as test)
+        if (Input.getMouseDown(GLFW_MOUSE_BUTTON_1)) {
+            Territory territory = Conquerer.SELF.worldHandler.getTerritoryUnderMouse();
+            if (territory == null) return;
+            EmpireHandler.Empire playerEmpire = ConquererHandler.playerEmpire.get();
+            if (playerEmpire != null) playerEmpire.claimTerritory(territory);
+        }
+        // Right click to unclaim territories (as test)
+        if (Input.getMouseDown(GLFW_MOUSE_BUTTON_2)) {
+            Territory territory = Conquerer.SELF.worldHandler.getTerritoryUnderMouse();
+            if (territory == null) return;
+            EmpireHandler.Empire currentEmpire = territory.getCurrentOwner();
+            if (currentEmpire != null) currentEmpire.unclaimTerritory(territory);
+        }
+        // Update the debug ever 1/20 seconds
+        if ((System.nanoTime() - lastDebugTextUpdateTime) >= 1000000000.0f / 20.0f) {
             debugDisplay.updateDisplay();
             lastDebugTextUpdateTime = System.nanoTime();
         }

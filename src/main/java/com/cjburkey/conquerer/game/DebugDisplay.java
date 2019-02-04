@@ -1,12 +1,8 @@
 package com.cjburkey.conquerer.game;
 
-import com.artemis.Entity;
 import com.cjburkey.conquerer.Conquerer;
 import com.cjburkey.conquerer.GameEngine;
-import com.cjburkey.conquerer.ecs.component.Camera;
-import com.cjburkey.conquerer.ecs.component.transform.Pos;
 import com.cjburkey.conquerer.gl.FontHelper;
-import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.ui.UiSolidBox;
 import com.cjburkey.conquerer.ui.UiText;
 import com.cjburkey.conquerer.util.Util;
@@ -16,8 +12,6 @@ import com.cjburkey.conquerer.world.Territory;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-
-import static com.cjburkey.conquerer.math.Transformation.*;
 
 /**
  * Created by CJ Burkey on 2019/02/03
@@ -30,7 +24,7 @@ public class DebugDisplay {
     public DebugDisplay() {
         FontHelper.FontBitmap font = Conquerer.SELF.robotoAscii256();
 
-        final int count = 7;
+        final int count = 8;
         final float size = 24.0f;
 
         // Background box
@@ -60,19 +54,14 @@ public class DebugDisplay {
         text.get(i++).setText(String.format("FPS: %.2f", 1.0f / GameEngine.gameLoop().lastRenderDelta()));
         text.get(i++).setText(String.format("UPS: %.2f", 1.0f / GameEngine.gameLoop().getUpdateDelta()));
 
-        Entity mainCamera = GameEngine.getMainCamera();
-        Vector3f mousePos = cameraToPlane(mainCamera.getComponent(Pos.class).position,
-                mainCamera.getComponent(Camera.class),
-                Input.mousePos(),
-                Conquerer.SELF.worldPlane);
-
-        Territory at = Conquerer.SELF.worldHandler.terrain.getContainingTerritory(new Vector2f(mousePos.x, mousePos.y));
+        Territory at = Conquerer.SELF.worldHandler.getTerritoryUnderMouse();
         text.get(i++).setText(String.format("Territory: %s", ((at == null) ? "None" : at.name)));
         text.get(i++).setText(String.format("Biome: %s", ((at == null) ? "None" : at.getBiome().name)));
         text.get(i++).setText(String.format("Location: %s", ((at == null) ? "None" : "(" + Util.format(at.location) + ")")));
         text.get(i++).setText(String.format("Ocean: %s", ((at == null) ? "Talse" : (at.isWater ? "True" : "False"))));
         EmpireHandler.Empire empire = ConquererHandler.playerEmpire.get();
         text.get(i++).setText(String.format("Current Empire: %s", ((empire == null) ? "None" : empire.name)));
+        text.get(i++).setText(String.format("Territory Owner: %s", ((at == null || at.getCurrentOwner() == null) ? "None" : at.getCurrentOwner().name)));
     }
 
 }

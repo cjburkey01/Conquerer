@@ -73,10 +73,12 @@ public final class Territory {
     }
 
     public void updateGraphics(Mesh.Builder meshBuilder) {
+        // Display the terrain
         if (biome != null) {
             meshBuilder.addPolygon(isWater ? waterColor : biome.color, this.vertices);
         }
 
+        // Outline territory
         if (currentOwner != null) {
             float bthick = Conquerer.SELF.worldHandler.borderThickness;
             Vector2fc[] tmpVerts = Arrays.copyOf(vertices, vertices.length);
@@ -86,7 +88,7 @@ public final class Territory {
                         tmpVerts[(i + 1 + tmpVerts.length) % tmpVerts.length],
                         -bthick * 1.5f);
             }
-            meshBuilder.addLine(currentOwner.color, true, bthick, vertices);
+            meshBuilder.addLine(currentOwner.color, true, bthick, tmpVerts);
         }
     }
 

@@ -511,9 +511,9 @@ public final class Mesh {
         }
 
         public Builder addPolygon(Vector3fc color, Vector2fc... ccwVertices) {
-            Vector2f center = Util.center(ccwVertices);
+            Vector2fc center = Util.center(ccwVertices);
             short startingIndex = (short) (vertexAppender.getPos() / 3);
-            pushVertex(center.x, center.y, 0.0f);
+            pushVertex(center.x(), center.y(), 0.0f);
             for (Vector2fc vertex : ccwVertices) {
                 pushVertex(vertex.x(), vertex.y(), 0.0f);
             }
