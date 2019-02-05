@@ -5,6 +5,7 @@ import com.cjburkey.conquerer.gl.Mesh;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 /**
  * Created by CJ Burkey on 2019/01/27
@@ -31,10 +32,14 @@ public class UiText extends UiComponent {
         regenerateMesh();
     }
 
-    public UiText setColor(Vector3fc color) {
-        uiElement().colorize.set(new Vector4f(color, 1.0f));
-        // Regeneration is not needed because the color (for textured meshes) is a uniform, not a mesh attribute
+    public UiText setColor(Vector4fc color) {
+        uiElement().colorize.set(new Vector4f(color));
+        // Regeneration is not needed because the color (for textured meshes) is a uniform, not a vertex attribute
         return this;
+    }
+
+    public UiText setColor(Vector3fc color) {
+        return setColor(new Vector4f(color, 1.0f));
     }
 
     public UiText setText(CharSequence text) {
@@ -65,8 +70,8 @@ public class UiText extends UiComponent {
             return;
         }
         Mesh.builder()
-                .addText(fontBitmap, text, size, null, true)
-                .apply(mesh);
+            .addText(fontBitmap, text, size, super.size, true)
+            .apply(mesh);
     }
 
 }

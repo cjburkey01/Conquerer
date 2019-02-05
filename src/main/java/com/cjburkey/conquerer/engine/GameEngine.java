@@ -1,4 +1,4 @@
-package com.cjburkey.conquerer;
+package com.cjburkey.conquerer.engine;
 
 import com.artemis.ArchetypeBuilder;
 import com.artemis.Component;
@@ -16,7 +16,6 @@ import org.joml.Random;
 /**
  * Created by CJ Burkey on 2019/02/03
  */
-@SuppressWarnings("WeakerAccess")
 public final class GameEngine {
 
     public static final Random RAND = new Random(System.nanoTime());
@@ -66,12 +65,12 @@ public final class GameEngine {
 
     private static void initWorld() {
         world = new World(new WorldConfigurationBuilder()
-                .with(new CameraSystem())
-                .with(new RenderSystem())
-                .with(INSTANCE().getInitialSystems())
-                .with(new UiElementSystem())
-                .register(gameLoop)
-                .build());
+            .with(new CameraSystem())
+            .with(new RenderSystem())
+            .with(INSTANCE().getInitialSystems())
+            .with(new UiElementSystem())
+            .register(gameLoop)
+            .build());
     }
 
     private static void startGameLoop() {

@@ -20,7 +20,7 @@ import org.joml.Vector4f;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryStack;
 
-import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.util.Log.*;
 import static java.nio.charset.StandardCharsets.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
@@ -147,20 +147,20 @@ public final class Util {
 
     public static Vector2f lerp(Vector2fc start, Vector2fc goal, float progress) {
         return new Vector2f(lerp(start.x(), goal.x(), progress),
-                lerp(start.y(), goal.y(), progress));
+            lerp(start.y(), goal.y(), progress));
     }
 
     public static Vector3f lerp(Vector3fc start, Vector3fc goal, float progress) {
         return new Vector3f(lerp(start.x(), goal.x(), progress),
-                lerp(start.y(), goal.y(), progress),
-                lerp(start.z(), goal.z(), progress));
+            lerp(start.y(), goal.y(), progress),
+            lerp(start.z(), goal.z(), progress));
     }
 
     public static Vector4f lerp(Vector4fc start, Vector4fc goal, float progress) {
         return new Vector4f(lerp(start.x(), goal.x(), progress),
-                lerp(start.y(), goal.y(), progress),
-                lerp(start.z(), goal.z(), progress),
-                lerp(start.w(), goal.w(), progress));
+            lerp(start.y(), goal.y(), progress),
+            lerp(start.z(), goal.z(), progress),
+            lerp(start.w(), goal.w(), progress));
     }
 
     // -- SMOOTH DAMPING -- //
@@ -423,8 +423,8 @@ public final class Util {
 
     public static Vector3f randomColor(Random random, float minBrightness, float maxBrightness) {
         return new Vector3f(nextFloat(random, minBrightness, maxBrightness),
-                nextFloat(random, minBrightness, maxBrightness),
-                nextFloat(random, minBrightness, maxBrightness));
+            nextFloat(random, minBrightness, maxBrightness),
+            nextFloat(random, minBrightness, maxBrightness));
     }
 
     public static Vector3f randomGray(Random random, float minBrightness, float maxBrightness) {

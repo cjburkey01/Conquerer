@@ -1,4 +1,4 @@
-package com.cjburkey.conquerer.ecs.component.render;
+package com.cjburkey.conquerer.ecs.component.engine.render;
 
 import com.artemis.Component;
 import com.artemis.annotations.PooledWeaver;

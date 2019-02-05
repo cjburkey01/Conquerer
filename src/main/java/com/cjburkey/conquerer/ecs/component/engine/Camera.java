@@ -1,4 +1,4 @@
-package com.cjburkey.conquerer.ecs.component;
+package com.cjburkey.conquerer.ecs.component.engine;
 
 import com.artemis.Component;
 import org.joml.Matrix4f;

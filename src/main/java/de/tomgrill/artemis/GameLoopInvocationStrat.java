@@ -19,7 +19,7 @@ package de.tomgrill.artemis;
 import com.artemis.BaseSystem;
 import com.artemis.SystemInvocationStrategy;
 import com.artemis.utils.BitVector;
-import com.cjburkey.conquerer.GameEngine;
+import com.cjburkey.conquerer.engine.GameEngine;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.concurrent.TimeUnit;
 

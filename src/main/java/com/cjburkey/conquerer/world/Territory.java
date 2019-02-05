@@ -1,8 +1,8 @@
 package com.cjburkey.conquerer.world;
 
 import com.cjburkey.conquerer.Conquerer;
-import com.cjburkey.conquerer.GameEngine;
-import com.cjburkey.conquerer.ecs.component.render.MeshRender;
+import com.cjburkey.conquerer.ecs.component.engine.render.MeshRender;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.math.CounterClockwiseVec2;
 import com.cjburkey.conquerer.util.Util;

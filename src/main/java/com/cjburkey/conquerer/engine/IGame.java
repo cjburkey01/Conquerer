@@ -1,4 +1,4 @@
-package com.cjburkey.conquerer;
+package com.cjburkey.conquerer.engine;
 
 import com.artemis.BaseSystem;
 

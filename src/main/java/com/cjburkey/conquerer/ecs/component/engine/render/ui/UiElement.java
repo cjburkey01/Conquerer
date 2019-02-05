@@ -1,4 +1,4 @@
-package com.cjburkey.conquerer.ecs.component.render.ui;
+package com.cjburkey.conquerer.ecs.component.engine.render.ui;
 
 import com.artemis.Component;
 import com.cjburkey.conquerer.gl.Texture;

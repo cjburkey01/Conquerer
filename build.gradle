@@ -12,8 +12,8 @@ project.ext.commonsIoVersion = '2.6'
 project.ext.log4jVersion = '2.11.1'
 project.ext.fastUtilVersion = '8.2.2'
 project.ext.artemisVersion = '2.2.0'
-project.ext.lwjglVersion = "3.2.2-SNAPSHOT"
-project.ext.jomlVersion = "1.9.12"
+project.ext.lwjglVersion = '3.2.2-SNAPSHOT'
+project.ext.jomlVersion = '1.9.12'
 
 switch (OperatingSystem.current()) {
     case OperatingSystem.WINDOWS:
@@ -54,13 +54,13 @@ dependencies {
 compileJava {
     options.warnings = true
     options.deprecation = true
-    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing', '-proc:none']
+    options.compilerArgs += ['-Xlint:all', '-proc:none']
 }
 
 compileTestJava {
     options.warnings = true
     options.deprecation = true
-    options.compilerArgs += ['-Xlint:all', '-Xlint:-processing', '-proc:none']
+    options.compilerArgs += ['-Xlint:all', '-proc:none']
 }
 
 task runConquerer(type: JavaExec) {

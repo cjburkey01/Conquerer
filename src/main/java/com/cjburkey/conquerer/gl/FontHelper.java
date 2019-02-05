@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
-import com.cjburkey.conquerer.GameEngine;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.Util;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
@@ -13,7 +13,7 @@ import org.joml.Vector4fc;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.system.MemoryStack;
 
-import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.util.Log.*;
 import static com.cjburkey.conquerer.util.Util.*;
 import static org.joml.Math.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -90,6 +90,8 @@ public final class FontHelper {
         }
 
         public FontBitmap generateBitmap(CharSequence input, int bitmapSizePower, int lineHeight) {
+            final int spacing = 4;
+
             // Get a unique array of characters (no repeats to make texture small. Use uvs instead of raw image)
             final char[] characters = unique(input);
 
@@ -116,7 +118,7 @@ public final class FontHelper {
                 // Verify this character will fit into the bitmap without going out of bounds at all
                 if ((x + w) >= bitmapSize) {
                     x = 0;
-                    y = nextY + 2;
+                    y = nextY + spacing;
                 }
                 if ((y + h) >= bitmapSize) {
                     exception(new IllegalStateException("Character bitmap of size " + bitmapSize + " not large enough to hold " + characters.length + " characters"));
@@ -146,7 +148,7 @@ public final class FontHelper {
                 // Increment the position for the next character
                 // This is checked to be a valid position on the next loop around
                 // Even if this is out of bounds, it could be the last character required
-                x += w + 2;
+                x += w + spacing;
             }
 
             texture.generateMipmaps();

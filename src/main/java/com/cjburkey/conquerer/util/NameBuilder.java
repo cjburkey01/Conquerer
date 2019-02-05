@@ -49,28 +49,28 @@ public final class NameBuilder {
 
     public NameBuilder() {
         this(new String[] {
-                // Monographs
-                "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z",
+            // Monographs
+            "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "q", "r", "s", "t", "v", "w", "x", "y", "z",
 
-                // Digraphs
-                "st", "rt", "pt", "ck", "sm", "sc", "sk", "sl",
-                "ws", "rs", "ts", "ys", "ps", "ss", "ds", "fs", "gs", "ks", "ls", "zs", "xs", "cs", "vs", "bs", "ns", "ms",
+            // Digraphs
+            "st", "rt", "pt", "ck", "sm", "sc", "sk", "sl", "ll",
+            "ws", "rs", "ts", "ys", "ps", "ss", "ds", "fs", "gs", "ks", "ls", "zs", "xs", "cs", "vs", "bs", "ns", "ms",
 
-                // Trigraphs
-                "sch", "sck",
+            // Trigraphs
+            "sch", "sck",
         }, new String[] {
-                // Monographs
-                "a", "e", "i", "o", "u",
+            // Monographs
+            "a", "e", "i", "o", "u",
 
-                // Digraphs
-                "aa", "ee", "ii", "oo", "uu",
+            // Digraphs
+            "aa", "ee", "ii", "oo", "uu",
 
-                // Diphthongs
-                "ae", "ai", "ao", "au",
-                "ea", "ei", "eo", "eu",
-                "ia", "ie", "io", "iu",
-                "oa", "oe", "oi", "ou",
-                "ua", "ue", "ui", "uo",
+            // Diphthongs
+            "ae", "ai", "ao", "au",
+            "ea", "ei", "eo", "eu",
+            "ia", "ie", "io", "iu",
+            "oa", "oe", "oi", "ou",
+            "ua", "ue", "ui", "uo",
         });
     }
 
@@ -141,9 +141,9 @@ public final class NameBuilder {
 
                 // If this is the first character and "canFirstLetterBeDigraph" is true, make sure that the first "letter" is a single character
                 String character = from[random.nextInt(
-                        (canFirstLetterBeDigraph || (builder.length() > 0))
-                                ? from.length
-                                : (vowel ? firstVowelDigraph : firstConsDigraph))];
+                    (canFirstLetterBeDigraph || (builder.length() > 0))
+                        ? from.length
+                        : (vowel ? firstVowelDigraph : firstConsDigraph))];
                 builder.append(character);
 
                 // Make next character/digraph/etc the opposite type of the current type
@@ -176,36 +176,36 @@ public final class NameBuilder {
     // You may refer to this as the repository of things I don't want to see in the game
     private NameFilter generateDefaultBadWordsFilter() {
         return new BasicNameFilter()
-                .addCensor(
-                        "fuck",
-                        "fucking",
-                        "fucked",
-                        "fucker",
-                        "motherfucker",
-                        "motherfucking",
-                        "bitch",
-                        "shit",
-                        "shitter",
-                        "piss",
-                        "pisser",
-                        "cock",
-                        "dick",
-                        "pussy",
-                        "penis",
-                        "vagina",
-                        "damn",
-                        "damned",
-                        "dammit",
-                        "ass",
-                        "cuck",
+            .addCensor(
+                "fuck",
+                "fucking",
+                "fucked",
+                "fucker",
+                "motherfucker",
+                "motherfucking",
+                "bitch",
+                "shit",
+                "shitter",
+                "piss",
+                "pisser",
+                "cock",
+                "dick",
+                "pussy",
+                "penis",
+                "vagina",
+                "damn",
+                "damned",
+                "dammit",
+                "ass",
+                "cuck",
 
-                        // It gets racist, I'm sorry again D: D:
-                        "nigger",
-                        "kike",
-                        "jew",
-                        "fag",
-                        "faggot"
-                );
+                // It gets racist, I'm sorry again D: D:
+                "nigger",
+                "kike",
+                "jew",
+                "fag",
+                "faggot"
+            );
     }
 
     @FunctionalInterface

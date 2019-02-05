@@ -4,40 +4,35 @@ import com.cjburkey.conquerer.gl.Mesh;
 import org.joml.Vector2f;
 import org.joml.Vector2fc;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.joml.Vector4f;
+import org.joml.Vector4fc;
 
 /**
  * Created by CJ Burkey on 2019/01/27
  */
 @SuppressWarnings("UnusedReturnValue")
-public class UiSolidBox extends UiComponent {
+public class UiSolidBox extends UiBox {
 
-    private final Vector3f color = new Vector3f(1.0f);
-    private final Vector2f size = new Vector2f();
-
-    public UiSolidBox() {
+    public UiSolidBox setColor(Vector4fc color) {
+        uiElement().colorize.set(new Vector4f(color));
+        return this;
     }
 
-    public UiSolidBox(Vector2fc size) {
-        setSize(size);
+    public UiSolidBox setColor(Vector3fc color) {
+        return setColor(new Vector4f(color, 1.0f));
     }
 
+    @Override
     public UiSolidBox setSize(Vector2fc size) {
-        this.size.set(size);
-        regenerateMesh();
-        return this;
-    }
-
-    public UiSolidBox setColor(Vector3f color) {
-        this.color.set(color);
-        regenerateMesh();
-        return this;
+        return (UiSolidBox) super.setSize(size);
     }
 
     @Override
     protected void generateMesh(Mesh mesh) {
         Mesh.builder()
-                .addColorQuad(new Vector2f(), size, color)
-                .apply(mesh);
+            .addColorQuad(new Vector2f(), size, new Vector3f(1.0f))
+            .apply(mesh);
     }
 
 }

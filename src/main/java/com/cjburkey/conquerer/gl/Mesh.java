@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
-import com.cjburkey.conquerer.GameEngine;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.IAppender;
 import com.cjburkey.conquerer.util.Util;
@@ -17,7 +17,7 @@ import org.joml.Vector3fc;
 import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryStack;
 
-import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.util.Log.*;
 import static org.joml.Math.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryStack.*;

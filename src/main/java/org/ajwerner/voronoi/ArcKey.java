@@ -17,8 +17,8 @@ public abstract class ArcKey implements Comparable<ArcKey> {
 
         // If one arc contains the query then we'll say that they're the same
         if (((that.getClass() == ArcQuery.class) || (this.getClass() == ArcQuery.class)) &&
-                ((myLeft.x() <= yourLeft.x() && myRight.x() >= yourRight.x()) ||
-                        (yourLeft.x() <= myLeft.x() && yourRight.x() >= myRight.x()))) {
+            ((myLeft.x() <= yourLeft.x() && myRight.x() >= yourRight.x()) ||
+                (yourLeft.x() <= myLeft.x() && yourRight.x() >= myRight.x()))) {
             return 0;
         }
 

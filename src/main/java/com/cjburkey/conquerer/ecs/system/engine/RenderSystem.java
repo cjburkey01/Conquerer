@@ -3,19 +3,17 @@ package com.cjburkey.conquerer.ecs.system.engine;
 import com.artemis.Aspect;
 import com.artemis.BaseEntitySystem;
 import com.artemis.ComponentMapper;
-import com.cjburkey.conquerer.GameEngine;
-import com.cjburkey.conquerer.ecs.component.Camera;
-import com.cjburkey.conquerer.ecs.component.render.MeshRender;
-import com.cjburkey.conquerer.ecs.component.render.ShaderRender;
-import com.cjburkey.conquerer.ecs.component.render.Textured;
-import com.cjburkey.conquerer.ecs.component.transform.Pos;
-import com.cjburkey.conquerer.ecs.component.transform.Rot;
-import com.cjburkey.conquerer.ecs.component.transform.Scale;
+import com.cjburkey.conquerer.ecs.component.engine.Camera;
+import com.cjburkey.conquerer.ecs.component.engine.Transform;
+import com.cjburkey.conquerer.ecs.component.engine.render.MeshRender;
+import com.cjburkey.conquerer.ecs.component.engine.render.ShaderRender;
+import com.cjburkey.conquerer.ecs.component.engine.render.Textured;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.math.Transformation;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.joml.Matrix4fc;
 
-import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.util.Log.*;
 
 /**
  * Created by CJ Burkey on 2019/01/12
@@ -26,9 +24,7 @@ public final class RenderSystem extends BaseEntitySystem {
     // Keep sorted map of objects by their z-values to draw furthest away first
     private final IntArrayList entities = new IntArrayList();
 
-    private ComponentMapper<Pos> mPos;
-    private ComponentMapper<Rot> mRot;
-    private ComponentMapper<Scale> mScale;
+    private ComponentMapper<Transform> mTransform;
     private ComponentMapper<ShaderRender> mShaderRender;
     private ComponentMapper<MeshRender> mMeshRender;
     private ComponentMapper<Textured> mTextured;
@@ -66,13 +62,11 @@ public final class RenderSystem extends BaseEntitySystem {
         // Components
         ShaderRender shaderRender = mShaderRender.get(entityId);
         MeshRender meshRender = mMeshRender.get(entityId);
-        Pos pos = mPos.has(entityId) ? mPos.get(entityId) : null;
-        Rot rot = mRot.has(entityId) ? mRot.get(entityId) : null;
-        Scale scale = mScale.has(entityId) ? mScale.get(entityId) : null;
+        Transform transform = mTransform.has(entityId) ? mTransform.get(entityId) : null;
 
         // Check if mesh cannot be rendered
         if (shaderRender.shader == null || meshRender.mesh == null) return;
-        if (shaderRender.shader.getTransformsModel() && (pos == null || rot == null || scale == null)) return;
+        if (shaderRender.shader.getTransformsModel() && transform == null) return;
 
         // Get the main camera for which to render the mesh
         Camera camera = null;
@@ -82,8 +76,8 @@ public final class RenderSystem extends BaseEntitySystem {
         }
 
         Matrix4fc modelMatrix = null;
-        if (shaderRender.shader.getTransformsModel() && pos != null && rot != null && scale != null) {
-            modelMatrix = Transformation.getModelMatrix(pos.position, rot.rotation, scale.scale);
+        if (shaderRender.shader.getTransformsModel() && transform != null) {
+            modelMatrix = Transformation.getModelMatrix(transform);
         }
 
         // Check if texture needs to be bound
@@ -107,8 +101,8 @@ public final class RenderSystem extends BaseEntitySystem {
     // Sort the entities according to z-value
     public void forceSort() {
         entities.sort((o1, o2) -> {
-            float o1Z = (mPos.has(o1) ? mPos.get(o1).position.z : 0.0f);
-            float o2Z = (mPos.has(o2) ? mPos.get(o2).position.z : 0.0f);
+            float o1Z = (mTransform.has(o1) ? mTransform.get(o1).position.z : 0.0f);
+            float o2Z = (mTransform.has(o2) ? mTransform.get(o2).position.z : 0.0f);
             return (int) Math.signum(o1Z - o2Z);
         });
     }

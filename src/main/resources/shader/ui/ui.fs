@@ -19,6 +19,6 @@ void main() {
         }
         fragColor = colorize * texCol;
     } else {
-        fragColor = vec4(vertColor, 1.0);
+        fragColor = colorize * vec4(vertColor, 1.0);
     }
 }

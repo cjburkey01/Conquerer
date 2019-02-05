@@ -4,11 +4,11 @@ import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
 import com.cjburkey.conquerer.Conquerer;
-import com.cjburkey.conquerer.GameEngine;
-import com.cjburkey.conquerer.ecs.component.Camera;
+import com.cjburkey.conquerer.ecs.component.engine.Camera;
+import com.cjburkey.conquerer.ecs.component.engine.Transform;
 import com.cjburkey.conquerer.ecs.component.input.CameraMovement;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
-import com.cjburkey.conquerer.ecs.component.transform.Pos;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.math.Plane;
 import org.joml.Vector2f;
@@ -25,20 +25,20 @@ import static org.lwjgl.glfw.GLFW.*;
 @SuppressWarnings("unused")
 public final class CameraMovementSystem extends IteratingSystem {
 
-    private ComponentMapper<Pos> mPos;
+    private ComponentMapper<Transform> mTransform;
     private ComponentMapper<Camera> mCamera;
     private ComponentMapper<CameraMovement> mCameraMovement;
     private ComponentMapper<SmoothMovement> mSmoothMovement;
 
     public CameraMovementSystem() {
-        super(Aspect.all(Pos.class, Camera.class, CameraMovement.class));
+        super(Aspect.all(Transform.class, Camera.class, CameraMovement.class));
     }
 
     protected void process(int entityId) {
         float delta = world.getDelta();
 
         // Components
-        Pos pos = mPos.get(entityId);
+        Transform transform = mTransform.get(entityId);
         Camera camera = mCamera.get(entityId);
         CameraMovement cameraMovement = mCameraMovement.get(entityId);
         SmoothMovement smoothMovement = mSmoothMovement.has(entityId) ? mSmoothMovement.get(entityId) : null;
@@ -57,7 +57,7 @@ public final class CameraMovementSystem extends IteratingSystem {
         // Mouse move
         final Plane worldPlane = Conquerer.Q.worldPlane;
         Vector2fc currMousePos = Input.mousePos();
-        Vector3f mouseWorldPos = cameraToPlane(pos.position, camera, currMousePos, worldPlane);
+        Vector3f mouseWorldPos = cameraToPlane(transform.position, camera, currMousePos, worldPlane);
 
         // Change cursor for dragging
         if (Input.getAnyMousePressed(cameraMovement.activatingMouseForDrag)) {
@@ -73,7 +73,7 @@ public final class CameraMovementSystem extends IteratingSystem {
 
         // Camera dragging
         if (Input.getAnyMouseDown(cameraMovement.activatingMouseForDrag)) {
-            Vector3f prevWorldPos = cameraToPlane(pos.position, camera, cameraMovement.previousMousePos, worldPlane);
+            Vector3f prevWorldPos = cameraToPlane(transform.position, camera, cameraMovement.previousMousePos, worldPlane);
             Vector3f deltaMouse = mouseWorldPos.sub(prevWorldPos, new Vector3f());
             deltaPosition.sub(deltaMouse.x, deltaMouse.y);
         }
@@ -97,7 +97,7 @@ public final class CameraMovementSystem extends IteratingSystem {
                 delta);
         } else {
             // Move the camera without the smooth movement
-            pos.position.add(deltaPosition.x, deltaPosition.y, 0.0f);
+            transform.position.add(deltaPosition.x, deltaPosition.y, 0.0f);
             camera.orthographicSize = zoom;
         }
     }

@@ -2,14 +2,15 @@ package com.cjburkey.conquerer;
 
 import com.artemis.BaseSystem;
 import com.artemis.Entity;
-import com.cjburkey.conquerer.ecs.component.Camera;
+import com.cjburkey.conquerer.ecs.component.engine.Camera;
+import com.cjburkey.conquerer.ecs.component.engine.Transform;
 import com.cjburkey.conquerer.ecs.component.input.CameraMovement;
 import com.cjburkey.conquerer.ecs.component.input.SmoothMovement;
-import com.cjburkey.conquerer.ecs.component.transform.Pos;
-import com.cjburkey.conquerer.ecs.component.transform.Rot;
 import com.cjburkey.conquerer.ecs.system.CameraMovementSystem;
 import com.cjburkey.conquerer.ecs.system.SmoothMovementSystem;
 import com.cjburkey.conquerer.ecs.system.engine.UiElementSystem;
+import com.cjburkey.conquerer.engine.GameEngine;
+import com.cjburkey.conquerer.engine.IGame;
 import com.cjburkey.conquerer.game.ConquererHandler;
 import com.cjburkey.conquerer.game.DebugDisplay;
 import com.cjburkey.conquerer.gl.FontHelper;
@@ -23,7 +24,7 @@ import com.cjburkey.conquerer.world.Territory;
 import com.cjburkey.conquerer.world.WorldHandler;
 import org.joml.Vector3f;
 
-import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.util.Log.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -69,8 +70,8 @@ public final class Conquerer implements IGame {
 
     public BaseSystem[] getInitialSystems() {
         return new BaseSystem[] {
-                new SmoothMovementSystem(),
-                new CameraMovementSystem(),
+            new SmoothMovementSystem(),
+            new CameraMovementSystem(),
         };
     }
 
@@ -107,10 +108,10 @@ public final class Conquerer implements IGame {
 
     private void initMainCamera() {
         // Create starting main camera
-        GameEngine.mainCamera = GameEngine.instantiate(Pos.class, Rot.class, SmoothMovement.class, Camera.class, CameraMovement.class);
+        GameEngine.mainCamera = GameEngine.instantiate(Transform.class, SmoothMovement.class, Camera.class, CameraMovement.class);
         Entity mainCameraEntity = GameEngine.getMainCamera();
         mainCameraEntity.getComponent(CameraMovement.class).bounds = worldHandler.terrainBounds;
-        mainCameraEntity.getComponent(Pos.class).position.z = 3.0f;
+        mainCameraEntity.getComponent(Transform.class).position.z = 3.0f;
         mainCameraEntity.getComponent(SmoothMovement.class).goalPosition.set(0.0f, 0.0f, 3.0f);
     }
 
@@ -152,14 +153,14 @@ public final class Conquerer implements IGame {
             debugDisplay.enabled.toggle();
         }
         // Click to claim territories (as test)
-        if (Input.getMouseDown(GLFW_MOUSE_BUTTON_1)) {
+        if (Input.getMousePressed(GLFW_MOUSE_BUTTON_1)) {
             Territory territory = Conquerer.Q.worldHandler.getTerritoryUnderMouse();
             if (territory == null) return;
             EmpireHandler.Empire playerEmpire = ConquererHandler.playerEmpire.get();
             if (playerEmpire != null) playerEmpire.claimTerritory(territory);
         }
         // Right click to unclaim territories (as test)
-        if (Input.getMouseDown(GLFW_MOUSE_BUTTON_2)) {
+        if (Input.getMousePressed(GLFW_MOUSE_BUTTON_2)) {
             Territory territory = Conquerer.Q.worldHandler.getTerritoryUnderMouse();
             if (territory == null) return;
             EmpireHandler.Empire currentEmpire = territory.getCurrentOwner();

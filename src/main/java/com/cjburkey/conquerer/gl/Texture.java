@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gl;
 
-import com.cjburkey.conquerer.GameEngine;
+import com.cjburkey.conquerer.engine.GameEngine;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL30.*;

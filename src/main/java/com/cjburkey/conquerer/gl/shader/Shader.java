@@ -1,6 +1,6 @@
 package com.cjburkey.conquerer.gl.shader;
 
-import com.cjburkey.conquerer.GameEngine;
+import com.cjburkey.conquerer.engine.GameEngine;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.nio.FloatBuffer;
@@ -14,7 +14,7 @@ import org.joml.Vector4fc;
 import org.joml.Vector4ic;
 import org.lwjgl.system.MemoryStack;
 
-import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.util.Log.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.system.MemoryStack.*;
 

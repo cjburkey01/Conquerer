@@ -1,7 +1,8 @@
 package com.cjburkey.conquerer.math;
 
-import com.cjburkey.conquerer.GameEngine;
-import com.cjburkey.conquerer.ecs.component.Camera;
+import com.cjburkey.conquerer.ecs.component.engine.Camera;
+import com.cjburkey.conquerer.ecs.component.engine.Transform;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.glfw.Window;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
@@ -54,6 +55,30 @@ public final class Transformation {
             .translate(cameraPosition.mul(-1.0f, new Vector3f()));
     }
 
+    public static Matrix4fc getModelMatrix(Vector3fc parentPosition, Quaternionfc parentRotation, Vector3fc parentScale,
+                                           Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale) {
+        return modelMatrix
+            .identity()
+            .translate(parentPosition.x(), parentPosition.y(), parentPosition.z())
+            .rotate(parentRotation)
+            .scale(parentScale)
+            .translate(modelPosition.x(), modelPosition.y(), modelPosition.z())
+            .rotate(modelRotation)
+            .scale(modelScale);
+    }
+
+    public static Matrix4fc getModelMatrix(Vector3fc parentPosition, Quaternionfc parentRotation, Vector3fc parentScale,
+                                           Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale, float overrideZ) {
+        return modelMatrix
+            .identity()
+            .translate(parentPosition.x(), parentPosition.y(), overrideZ)
+            .rotate(parentRotation)
+            .scale(parentScale)
+            .translate(modelPosition.x(), modelPosition.y(), overrideZ)
+            .rotate(modelRotation)
+            .scale(modelScale);
+    }
+
     public static Matrix4fc getModelMatrix(Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale) {
         return modelMatrix
             .identity()
@@ -62,16 +87,28 @@ public final class Transformation {
             .scale(modelScale);
     }
 
+    public static Matrix4fc getModelMatrix(Transform transform) {
+        if (transform.parent == null) {
+            return getModelMatrix(transform.position, transform.rotation, transform.scale);
+        }
+        return getModelMatrix(transform.parent.position, transform.parent.rotation, transform.parent.scale,
+            transform.position, transform.rotation, transform.scale);
+    }
+
+    public static Matrix4fc getModelMatrix(Transform transform, float overrideZ) {
+        if (transform.parent == null) {
+            return getModelMatrix(transform.position, transform.rotation, transform.scale, overrideZ);
+        }
+        return getModelMatrix(transform.parent.position, transform.parent.rotation, transform.parent.scale,
+            transform.position, transform.rotation, transform.scale, overrideZ);
+    }
+
     public static Matrix4fc getModelMatrix(Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale, float overrideZ) {
         return modelMatrix
             .identity()
             .translate(modelPosition.x(), modelPosition.y(), overrideZ)
             .rotate(modelRotation)
             .scale(modelScale);
-    }
-
-    public static Matrix4fc getCompleteMatrix(Matrix4fc projectionViewMatrix, Matrix4fc modelMatrix) {
-        return projectionViewMatrix.mul(modelMatrix, finalMatrix);
     }
 
     public static Vector3fc transformPoint(Quaternionfc rotation, Vector3fc point) {

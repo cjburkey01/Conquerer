@@ -3,13 +3,11 @@ package com.cjburkey.conquerer.ecs.system.engine;
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
 import com.artemis.systems.IteratingSystem;
-import com.cjburkey.conquerer.GameEngine;
-import com.cjburkey.conquerer.ecs.component.Camera;
-import com.cjburkey.conquerer.ecs.component.render.MeshRender;
-import com.cjburkey.conquerer.ecs.component.render.ui.UiElement;
-import com.cjburkey.conquerer.ecs.component.transform.Pos;
-import com.cjburkey.conquerer.ecs.component.transform.Rot;
-import com.cjburkey.conquerer.ecs.component.transform.Scale;
+import com.cjburkey.conquerer.ecs.component.engine.Camera;
+import com.cjburkey.conquerer.ecs.component.engine.Transform;
+import com.cjburkey.conquerer.ecs.component.engine.render.MeshRender;
+import com.cjburkey.conquerer.ecs.component.engine.render.ui.UiElement;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.gl.shader.Shader;
 import org.joml.Matrix4fc;
 
@@ -23,14 +21,12 @@ public final class UiElementSystem extends IteratingSystem {
 
     private static Shader shader;
 
-    private ComponentMapper<Pos> mPos;
-    private ComponentMapper<Rot> mRot;
-    private ComponentMapper<Scale> mScale;
+    private ComponentMapper<Transform> mTransform;
     private ComponentMapper<MeshRender> mMeshRender;
     private ComponentMapper<UiElement> mUiElement;
 
     public UiElementSystem() {
-        super(Aspect.all(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class));
+        super(Aspect.all(Transform.class, MeshRender.class, UiElement.class));
     }
 
     public static void initShader(Shader newShader) {
@@ -53,7 +49,8 @@ public final class UiElementSystem extends IteratingSystem {
 
         // Locate the main camera and build a model matrix for the position of the element
         Camera mainCamera = GameEngine.getMainCamera().getComponent(Camera.class);
-        Matrix4fc modelMatrix = getModelMatrix(mPos.get(entityId).position, mRot.get(entityId).rotation, mScale.get(entityId).scale, -1.0f);
+        Transform transform = mTransform.get(entityId);
+        Matrix4fc modelMatrix = getModelMatrix(transform, -1.0f);
 
         // Render the mesh
         boolean textured = (uiElement.texture != null);

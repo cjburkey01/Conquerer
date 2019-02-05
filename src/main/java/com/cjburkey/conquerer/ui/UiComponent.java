@@ -1,16 +1,17 @@
 package com.cjburkey.conquerer.ui;
 
 import com.artemis.Entity;
-import com.cjburkey.conquerer.GameEngine;
-import com.cjburkey.conquerer.ecs.component.render.MeshRender;
-import com.cjburkey.conquerer.ecs.component.render.ui.UiElement;
-import com.cjburkey.conquerer.ecs.component.transform.Pos;
-import com.cjburkey.conquerer.ecs.component.transform.Rot;
-import com.cjburkey.conquerer.ecs.component.transform.Scale;
+import com.cjburkey.conquerer.ecs.component.engine.Transform;
+import com.cjburkey.conquerer.ecs.component.engine.render.MeshRender;
+import com.cjburkey.conquerer.ecs.component.engine.render.ui.UiElement;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.gl.Texture;
 import com.cjburkey.conquerer.util.property.BoolProperty;
+import java.util.Objects;
+import java.util.UUID;
 import org.joml.Quaternionf;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 /**
@@ -20,21 +21,19 @@ import org.joml.Vector3f;
 public abstract class UiComponent {
 
     public final BoolProperty visible = new BoolProperty(true);
+    protected final Vector2f size = new Vector2f();
+    private final UUID uuid = UUID.randomUUID();
     protected Texture texture = null;
     protected boolean isFont = false;
     private Entity entity;
-    private Pos pos;
-    private Rot rot;
-    private Scale scale;
+    private Transform transform;
     private MeshRender meshRender;
     private UiElement uiElement;
     private Mesh mesh = new Mesh();
 
     public UiComponent() {
-        entity = GameEngine.instantiateEntity(Pos.class, Rot.class, Scale.class, MeshRender.class, UiElement.class);
-        pos = entity.getComponent(Pos.class);
-        rot = entity.getComponent(Rot.class);
-        scale = entity.getComponent(Scale.class);
+        entity = GameEngine.instantiateEntity(Transform.class, MeshRender.class, UiElement.class);
+        transform = entity.getComponent(Transform.class);
         meshRender = entity.getComponent(MeshRender.class);
         uiElement = entity.getComponent(UiElement.class);
 
@@ -73,9 +72,7 @@ public abstract class UiComponent {
         GameEngine.delete(entity);
 
         entity = null;
-        pos = null;
-        rot = null;
-        scale = null;
+        transform = null;
         meshRender = null;
         uiElement = null;
         mesh = null;
@@ -88,15 +85,19 @@ public abstract class UiComponent {
     }
 
     public final Vector3f position() {
-        return pos.position;
+        return transform.position;
     }
 
     public final Quaternionf rotation() {
-        return rot.rotation;
+        return transform.rotation;
     }
 
     public final Vector3f scale() {
-        return scale.scale;
+        return transform.scale;
+    }
+
+    public final Vector2f size() {
+        return size;
     }
 
     protected UiElement uiElement() {
@@ -112,5 +113,16 @@ public abstract class UiComponent {
     }
 
     protected abstract void generateMesh(Mesh mesh);
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UiComponent that = (UiComponent) o;
+        return uuid.equals(that.uuid);
+    }
+
+    public int hashCode() {
+        return Objects.hash(uuid);
+    }
 
 }

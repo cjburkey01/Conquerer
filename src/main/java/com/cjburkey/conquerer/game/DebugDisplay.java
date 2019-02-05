@@ -1,7 +1,7 @@
 package com.cjburkey.conquerer.game;
 
 import com.cjburkey.conquerer.Conquerer;
-import com.cjburkey.conquerer.GameEngine;
+import com.cjburkey.conquerer.engine.GameEngine;
 import com.cjburkey.conquerer.gl.FontHelper;
 import com.cjburkey.conquerer.ui.UiSolidBox;
 import com.cjburkey.conquerer.ui.UiText;
@@ -12,6 +12,7 @@ import com.cjburkey.conquerer.world.Territory;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 /**
  * Created by CJ Burkey on 2019/02/03
@@ -28,14 +29,17 @@ public class DebugDisplay {
         final float size = 24.0f;
 
         // Background box
-        UiSolidBox background = new UiSolidBox().setColor(new Vector3f(0.0f));
+        UiSolidBox background = new UiSolidBox().setColor(new Vector4f(0.0f, 0.0f, 0.0f, 0.75f));
         for (int i = 0; i < count; ) {
-            text.add(new UiText(null, font)
+            UiText text = new UiText(null, font)
                 .setColor(new Vector3f(1.0f, 1.0f, 1.0f))
-                .setSize(size));
-            text.get(i).position().set(20.0f, i++ * size + 6.0f, 0.0f);
+                .setSize(size);
+            text.position().set(20.0f, i++ * size + 6.0f, 0.0f);
+            background.add(text);
+            this.text.add(text);
         }
         background.setSize(new Vector2f(375.0f, count * size + 12.0f));
+        background.position().add(10.0f, 10.0f, 0.0f);
 
         // Toggle
         enabled.listen((o, n) -> {

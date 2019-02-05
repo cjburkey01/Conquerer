@@ -15,7 +15,7 @@ import org.ajwerner.voronoi.VoronoiEdge;
 import org.joml.Random;
 import org.joml.Vector2fc;
 
-import static com.cjburkey.conquerer.Log.*;
+import static com.cjburkey.conquerer.util.Log.*;
 import static com.cjburkey.conquerer.util.Util.*;
 
 /**
