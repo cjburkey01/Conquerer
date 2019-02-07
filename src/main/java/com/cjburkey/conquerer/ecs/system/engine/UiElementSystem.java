@@ -2,6 +2,7 @@ package com.cjburkey.conquerer.ecs.system.engine;
 
 import com.artemis.Aspect;
 import com.artemis.ComponentMapper;
+import com.artemis.Entity;
 import com.artemis.systems.IteratingSystem;
 import com.cjburkey.conquerer.ecs.component.engine.Camera;
 import com.cjburkey.conquerer.ecs.component.engine.Transform;
@@ -48,9 +49,13 @@ public final class UiElementSystem extends IteratingSystem {
         UiElement uiElement = mUiElement.get(entityId);
 
         // Locate the main camera and build a model matrix for the position of the element
-        Camera mainCamera = GameEngine.getMainCamera().getComponent(Camera.class);
+        Entity mainCameraEnt = GameEngine.getMainCamera();
+        Camera mainCamera = mainCameraEnt.getComponent(Camera.class);
         Transform transform = mTransform.get(entityId);
         Matrix4fc modelMatrix = getModelMatrix(transform, -1.0f);
+
+        // Update the component if necessary
+        uiElement.uiComponent.onEntityUpdate();
 
         // Render the mesh
         boolean textured = (uiElement.texture != null);

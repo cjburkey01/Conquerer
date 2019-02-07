@@ -55,6 +55,10 @@ public final class Transformation {
             .translate(cameraPosition.mul(-1.0f, new Vector3f()));
     }
 
+    public static Matrix4fc getViewMatrix(Transform cameraTransform) {
+        return getViewMatrix(cameraTransform.position, cameraTransform.rotation);
+    }
+
     public static Matrix4fc getModelMatrix(Vector3fc parentPosition, Quaternionfc parentRotation, Vector3fc parentScale,
                                            Vector3fc modelPosition, Quaternionfc modelRotation, Vector3fc modelScale) {
         return modelMatrix

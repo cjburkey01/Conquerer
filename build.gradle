@@ -1,13 +1,30 @@
+/*
+    Groovy really sucks in IDEs sometimes because it's such a strangely-typed language.
+    I don't get it, really, so I try to ignore all the warnings and signs of the world dying around me.
+ */
+
 import org.gradle.internal.os.OperatingSystem
 
 plugins {
     id 'java'
+    id 'org.beryx.jlink' version '2.5.0'
 }
 
 group 'com.cjburkey'
 version '0.0.1'
-sourceCompatibility = 1.11
 
+sourceCompatibility = 11
+targetCompatibility = 11
+
+// Display module dependency spam when executing
+project.ext.showModuleDebug = false
+
+// Just some module variables for ease-of-use
+project.ext.moduleTitle = "conquerer"
+project.ext.moduleName = 'com.cjburkey.conquerer'
+project.ext.mainClass = "${moduleName}.Conquerer"
+
+// Versions
 project.ext.commonsIoVersion = '2.6'
 project.ext.log4jVersion = '2.11.1'
 project.ext.fastUtilVersion = '8.2.2'
@@ -15,6 +32,14 @@ project.ext.artemisVersion = '2.2.0'
 project.ext.lwjglVersion = '3.2.2-SNAPSHOT'
 project.ext.jomlVersion = '1.9.12'
 
+mainClassName = "$moduleName/$mainClass"
+jar {
+    manifest {
+        attributes 'Implementation-Title': moduleTitle, 'Main-Class': mainClass
+    }
+}
+
+// Use correct natives on the given operating systems (for LWJGL3)
 switch (OperatingSystem.current()) {
     case OperatingSystem.WINDOWS:
         project.ext.lwjglNatives = "natives-windows"
@@ -43,21 +68,37 @@ dependencies {
     implementation "org.lwjgl:lwjgl-openal:$lwjglVersion"
     implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion"
     implementation "org.lwjgl:lwjgl-stb:$lwjglVersion"
-    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-glfw:$lwjglVersion:$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-openal:$lwjglVersion:$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
-    runtimeOnly "org.lwjgl:lwjgl-stb:$lwjglVersion:$lwjglNatives"
+    implementation "org.lwjgl:lwjgl:$lwjglVersion:$lwjglNatives"
+    implementation "org.lwjgl:lwjgl-glfw:$lwjglVersion:$lwjglNatives"
+    implementation "org.lwjgl:lwjgl-openal:$lwjglVersion:$lwjglNatives"
+    implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion:$lwjglNatives"
+    implementation "org.lwjgl:lwjgl-stb:$lwjglVersion:$lwjglNatives"
     implementation "org.joml:joml:${jomlVersion}"
 }
 
 compileJava {
+    // Make Gradle work with Java 9+ modules
+    inputs.property('moduleName', moduleName)
+    doFirst {
+        options.compilerArgs = [ '--module-path', classpath.asPath ]
+        classpath = files()
+    }
+    
+    // Show important compilation warnings
     options.warnings = true
     options.deprecation = true
     options.compilerArgs += ['-Xlint:all', '-proc:none']
 }
 
 compileTestJava {
+    // Make Gradle work with Java 9+ modules
+    inputs.property('moduleName', moduleName)
+    doFirst {
+        options.compilerArgs = [ '--module-path', classpath.asPath ]
+        classpath = files()
+    }
+    
+    // Show important compilation warnings
     options.warnings = true
     options.deprecation = true
     options.compilerArgs += ['-Xlint:all', '-proc:none']
@@ -65,5 +106,29 @@ compileTestJava {
 
 task runConquerer(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    main = 'com.cjburkey.conquerer.Conquerer'
+    main = mainClass
+    if (showModuleDebug) {
+        jvmArgs += '--show-module-resolution'
+    }
+}
+
+// Building to self-contained executables with JLink
+jlink {
+    options = ['--compress', '2', '--no-header-files', '--no-man-pages']
+    
+    mergedModule {
+        additive = true
+        requires 'org.apache.logging.log4j'
+    }
+    launcher {
+        name = moduleTitle
+    }
+}
+
+// Copy resources into output
+tasks.jlink.doLast {
+    copy {
+        from('src/main/resources')
+        into("$buildDir/image/bin")
+    }
 }

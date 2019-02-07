@@ -100,7 +100,7 @@ public abstract class UiComponent {
         return size;
     }
 
-    protected UiElement uiElement() {
+    public UiElement uiElement() {
         return uiElement;
     }
 
@@ -110,6 +110,10 @@ public abstract class UiComponent {
 
     // Override if necessary
     protected void onEntityDestroy() {
+    }
+
+    // Override if necessary
+    public void onEntityUpdate() {
     }
 
     protected abstract void generateMesh(Mesh mesh);

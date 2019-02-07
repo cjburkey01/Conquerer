@@ -38,6 +38,7 @@ public final class Conquerer implements IGame {
     /*
         This is my main area for to-do items:
         
+        TODO: TURN TERRITORY NAMES INTO UI COMPONENTS
         TODO: ADD ENTITY TRANSFORM PARENTS
         TODO: HIDE LINES BETWEEN TERRITORIES OWNED BY THE SAME EMPIRE
      */
