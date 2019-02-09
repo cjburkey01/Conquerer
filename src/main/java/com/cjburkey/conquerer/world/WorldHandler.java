@@ -14,13 +14,20 @@ import com.cjburkey.conquerer.gl.Mesh;
 import com.cjburkey.conquerer.glfw.Input;
 import com.cjburkey.conquerer.math.Rectf;
 import com.cjburkey.conquerer.util.Util;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import java.util.List;
 import org.joml.Random;
 import org.joml.Vector2f;
+import org.joml.Vector2fc;
+import org.joml.Vector2i;
+import org.joml.Vector2ic;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import static com.cjburkey.conquerer.gen.Poisson.*;
 import static com.cjburkey.conquerer.math.Transformation.*;
 import static com.cjburkey.conquerer.util.Log.*;
+import static com.cjburkey.conquerer.util.Util.*;
 
 /**
  * Created by CJ Burkey on 2019/01/16
@@ -56,13 +63,44 @@ public final class WorldHandler {
         info("Generated territories: {}", terrain.getTerritoryCount());
     }
 
+    private List<Territory> getContainingTerritoryRadius(Vector2ic center, int r) {
+        ObjectArrayList<Territory> output = new ObjectArrayList<>();
+        for (int x = -r; x <= r; x++) {
+            Vector2i top = center.add(x, r, new Vector2i());
+            if (terrain.getTerritories().containsKey(top)) output.add(terrain.getTerritories().get(top));
+            Vector2i bottom = center.add(x, -r, new Vector2i());
+            if (terrain.getTerritories().containsKey(bottom)) output.add(terrain.getTerritories().get(bottom));
+        }
+        for (int y = -r + 1; y <= r - 1; y++) {
+            Vector2i left = center.add(r, y, new Vector2i());
+            if (terrain.getTerritories().containsKey(left)) output.add(terrain.getTerritories().get(left));
+            Vector2i right = center.add(-r, y, new Vector2i());
+            if (terrain.getTerritories().containsKey(right)) output.add(terrain.getTerritories().get(right));
+        }
+        return output;
+    }
+
+    public Territory getContainingTerritory(Vector2fc point) {
+        Vector2ic center = getCell(point, terrain.generator.getMinDistance());
+        int ringSize = 0;
+        do {
+            List<Territory> inRing = getContainingTerritoryRadius(center, ringSize++);  // Ringsize is postcremented
+            if (inRing.size() > 0) {
+                for (Territory territory : inRing) {
+                    if (containsPoint(point, territory.vertices)) return territory;
+                }
+            }
+        } while (ringSize < 10);
+        return null;
+    }
+
     public Territory getTerritoryUnderMouse() {
         Entity mainCamera = GameEngine.getMainCamera();
         Vector3f mousePos = cameraToPlane(mainCamera.getComponent(Transform.class).position,
             mainCamera.getComponent(Camera.class),
             Input.mousePos(),
             Conquerer.Q.worldPlane);
-        return terrain.getContainingTerritory(new Vector2f(mousePos.x, mousePos.y));
+        return getContainingTerritory(new Vector2f(mousePos.x, mousePos.y));
     }
 
     public void generateWorld(Random random) {

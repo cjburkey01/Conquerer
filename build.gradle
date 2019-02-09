@@ -80,10 +80,10 @@ compileJava {
     // Make Gradle work with Java 9+ modules
     inputs.property('moduleName', moduleName)
     doFirst {
-        options.compilerArgs = [ '--module-path', classpath.asPath ]
+        options.compilerArgs = ['--module-path', classpath.asPath]
         classpath = files()
     }
-    
+
     // Show important compilation warnings
     options.warnings = true
     options.deprecation = true
@@ -94,10 +94,10 @@ compileTestJava {
     // Make Gradle work with Java 9+ modules
     inputs.property('moduleName', moduleName)
     doFirst {
-        options.compilerArgs = [ '--module-path', classpath.asPath ]
+        options.compilerArgs = ['--module-path', classpath.asPath]
         classpath = files()
     }
-    
+
     // Show important compilation warnings
     options.warnings = true
     options.deprecation = true
@@ -115,7 +115,7 @@ task runConquerer(type: JavaExec) {
 // Building to self-contained executables with JLink
 jlink {
     options = ['--compress', '2', '--no-header-files', '--no-man-pages']
-    
+
     mergedModule {
         additive = true
         requires 'org.apache.logging.log4j'
